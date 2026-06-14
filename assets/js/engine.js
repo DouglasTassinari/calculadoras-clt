@@ -6,15 +6,16 @@
 const r2 = (x) => Math.round((x + 1e-9) * 100) / 100;
 const nz = (x) => (isFinite(x) && !isNaN(x) ? x : 0);
 
-const SALARIO_MINIMO = 1518.00;
-const INSS_TETO = 8157.41;
-const MEI_DAS = 80.90;
+// Constantes 2026 — Portaria Interministerial MPS/MF nº 13/2026 e Decreto nº 12.797/2025
+const SALARIO_MINIMO = 1621.00;
+const INSS_TETO = 8475.55;
+const MEI_DAS = 81.05; // 5% do salário mínimo 2026
 
 const INSS_TAB = [
-  { ate: 1518.00, aliq: 0.075, deduz: 0 },
-  { ate: 2793.88, aliq: 0.09,  deduz: 22.77 },
-  { ate: 4190.83, aliq: 0.12,  deduz: 106.59 },
-  { ate: 8157.41, aliq: 0.14,  deduz: 190.39 },
+  { ate: 1621.00, aliq: 0.075, deduz: 0 },
+  { ate: 2902.84, aliq: 0.09,  deduz: 24.32 },
+  { ate: 4354.27, aliq: 0.12,  deduz: 111.40 },
+  { ate: 8475.55, aliq: 0.14,  deduz: 198.49 },
 ];
 const IRRF_TAB = [
   { ate: 2428.80,  aliq: 0,     deduz: 0 },
@@ -25,22 +26,24 @@ const IRRF_TAB = [
 ];
 const IRRF_DEPENDENTE = 189.59;
 const IRRF_SIMPLIFICADO = 607.20;
-const IRRF_TETO_REDUTOR = 5000.00;
+// 2026: isenção efetiva até R$ 5.000; redutor gradual de R$ 5.000 a R$ 7.350
+const IRRF_ISENTAO = 5000.00;
+const IRRF_TETO_REDUTOR = 7350.00;
 
 // Tabela anual IR (declaração 2027, ano-calendário 2026)
 const IRRF_ANUAL_TAB = [
-  { ate: 29145.60,  aliq: 0,     deduz: 0 },
-  { ate: 33919.80,  aliq: 0.075, deduz: 2185.92 },
-  { ate: 45012.60,  aliq: 0.15,  deduz: 4729.92 },
-  { ate: 55976.16,  aliq: 0.225, deduz: 8105.88 },
-  { ate: Infinity,  aliq: 0.275, deduz: 10904.76 },
+  { ate: 28467.20,  aliq: 0,     deduz: 0 },
+  { ate: 33919.80,  aliq: 0.075, deduz: 2135.04 },
+  { ate: 45012.60,  aliq: 0.15,  deduz: 4679.03 },
+  { ate: 55976.16,  aliq: 0.225, deduz: 8054.97 },
+  { ate: Infinity,  aliq: 0.275, deduz: 10853.78 },
 ];
-const IRRF_DEP_ANUAL = 2375.08;
+const IRRF_DEP_ANUAL = 2275.08;
 const IRRF_SIMPL_PCT = 0.20;
-const IRRF_SIMPL_TETO = 16754.34;
+const IRRF_SIMPL_TETO = 17640.00;
 
 // Salário-família
-const SF_TETO = 1518.00;
+const SF_TETO = 1621.00;
 const SF_VALOR = 67.54;
 
 function calcINSS(base){
@@ -59,12 +62,11 @@ function irrfTabela(base){
 }
 
 function calcRedutor(rend, imp){
-  if (rend <= 2428.80) return imp;
-  if (rend >= 5000.00) return 0;
-  const t = irrfTabela(2428.80);
-  const redutorMax = r2(Math.max(2428.80 * t.aliq - (IRRF_TAB.find(f=> 2428.80 <= f.ate)?.deduz||0), 0));
-  const proporcao = (5000 - rend) / (5000 - 2428.80);
-  return r2(Math.min(redutorMax * proporcao, imp));
+  // 2026: até R$ 5.000 isento; R$ 5.000,01–R$ 7.350 redução gradual (fórmula Lei 14.848/2024)
+  if (rend <= IRRF_ISENTAO) return imp; // isenção total
+  if (rend >= IRRF_TETO_REDUTOR) return 0; // sem redutor acima de R$ 7.350
+  const redutor = r2(Math.max(978.62 - 0.133145 * rend, 0));
+  return r2(Math.min(redutor, imp));
 }
 
 function calcIRRF(rend, inss, deps=0, pensao=0){
