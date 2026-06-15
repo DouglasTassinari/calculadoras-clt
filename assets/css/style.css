@@ -26,7 +26,7 @@
   --radius-sm: 10px;
   --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 8px 24px -12px rgba(0,0,0,0.10);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-  --container: 1200px;
+  --container: 1320px;
   --font: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
@@ -50,7 +50,7 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
-  background: var(--bg);
+  background: #FFFFFF;
   color: var(--text);
   font-family: var(--font);
   font-size: 16px;
@@ -576,9 +576,16 @@ details.memoria[open] summary .chev { transform: rotate(180deg); }
 .breadcrumb-sep { color: var(--border); }
 
 /* ---- Hero ---- */
-.hero { padding: 64px 0 56px; text-align: center; background: #FFFFFF; }
+.hero { padding: 80px 0 72px; text-align: center; background: #FFFFFF; width: 100%; }
 .hero h1 { font-size: clamp(2rem, 5vw, 2.75rem); font-weight: 700; color: var(--text); margin-bottom: 16px; }
 .hero-sub { font-size: 1.1rem; color: var(--text-2); max-width: 56ch; margin: 0 auto 32px; line-height: 1.6; }
+
+/* ---- Section band (fundo cinza p/ seções alternadas) ---- */
+.section-band {
+  background: var(--bg);
+  width: 100%;
+  padding: 48px 0;
+}
 
 /* ---- Calc cards grid (home) ---- */
 .calc-cards-grid {
