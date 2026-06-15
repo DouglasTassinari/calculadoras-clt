@@ -110,9 +110,14 @@ ul, ol { padding-left: 1.5em; }
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
   text-decoration: none;
   flex-shrink: 0;
+}
+.brand-img { height: 44px; width: auto; display: block; }
+.brand-img-mark { display: none; }
+@media (max-width: 560px) {
+  .brand-img-full { display: none; }
+  .brand-img-mark { display: block; height: 40px; }
 }
 .brand-logo {
   height: 40px;
