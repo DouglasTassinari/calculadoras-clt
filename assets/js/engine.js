@@ -540,8 +540,8 @@ const CALCS = {
     desc:'Férias + 1/3 constitucional, com opção de vender até 10 dias (abono).',
     campos:[
       {id:'bruto', tipo:'moeda', rot:'Salário bruto mensal', def:''},
-      {id:'dias', tipo:'numero', rot:'Dias de férias', def:'30', min:1, max:30, meia:true},
-      {id:'venderDias', tipo:'numero', rot:'Dias vendidos (abono)', def:'0', min:0, max:10, meia:true, dica:'até 10'},
+      {id:'dias', tipo:'numero', rot:'Total de dias de férias', def:'30', min:1, max:30, meia:true, dica:'normalmente 30'},
+      {id:'venderDias', tipo:'numero', rot:'Dias que vai vender', def:'0', min:0, max:10, meia:true, dica:'venda de até 10 dias (abono)'},
       {id:'deps', tipo:'numero', rot:'Dependentes', def:'0', min:0, max:20, dica:'p/ IR'},
     ],
     calcular(v){
@@ -550,13 +550,13 @@ const CALCS = {
       const proventos=[];
       if(r.valorGozo>0) proventos.push({nome:`Férias (${r.diasGozo} dias de gozo)`, valor:r.valorGozo});
       if(r.tercoGozo>0) proventos.push({nome:'1/3 constitucional', valor:r.tercoGozo});
-      if(r.abono>0) proventos.push({nome:`Abono pecuniário (${r.venderDias} dias vendidos)`, valor:r.abono});
-      if(r.tercoAbono>0) proventos.push({nome:'1/3 sobre o abono', valor:r.tercoAbono});
+      if(r.abono>0) proventos.push({nome:`Venda de ${r.venderDias} dia${r.venderDias>1?'s':''} de férias (abono pecuniário)`, valor:r.abono});
+      if(r.tercoAbono>0) proventos.push({nome:'1/3 sobre os dias vendidos', valor:r.tercoAbono});
       const descontos=[];
       if(r.inss.valor>0) descontos.push({nome:`INSS (${PCT(r.inss.aliqEfetiva)} efetivo)`, valor:r.inss.valor});
       if(r.irrf.valor>0) descontos.push({nome:`IRRF (${PCT(r.irrf.aliq*100)})`, valor:r.irrf.valor});
       const avisos=[];
-      if(r.abono>0) avisos.push({tipo:'info', txt:'O abono pecuniário (dias vendidos) e seu 1/3 são isentos de INSS e IRRF.'});
+      avisos.push({tipo:'info', txt:'Abono pecuniário = venda de até 10 dias das férias. Você descansa menos dias e recebe esses dias em dinheiro. O valor da venda e seu 1/3 são isentos de INSS e IRRF.'});
       const memoria=[
         `Base do dia: ${BRL(r.bruto)} ÷ 30 = ${BRL(r.bruto/30)}.`,
         `Tributação incide só sobre férias gozadas + 1/3: base de ${BRL(r.baseTributavel)}.`,
