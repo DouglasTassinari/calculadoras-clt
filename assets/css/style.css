@@ -638,6 +638,46 @@ details.memoria[open] summary .chev { transform: rotate(180deg); }
 .calc-card h3 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0; }
 .calc-card p { font-size: .85rem; color: var(--text-2); margin: 0; flex: 1; line-height: 1.5; }
 .calc-card-cta { font-size: .82rem; font-weight: 600; color: var(--primary); margin-top: auto; }
+.calc-card--featured {
+  border-color: var(--primary);
+  border-width: 2px;
+  background: var(--primary-bg);
+  grid-column: span 2;
+}
+.calc-card--featured h3 { font-size: 1.1rem; }
+@media (max-width: 600px) { .calc-card--featured { grid-column: span 1; } }
+
+/* ---- Hero CTAs ---- */
+.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+.btn-hero-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--primary); color: #fff;
+  padding: 14px 28px; border-radius: 10px;
+  font-weight: 700; font-size: 1rem; text-decoration: none;
+  transition: background .15s;
+}
+.btn-hero-primary:hover { background: var(--primary-dark); color: #fff; }
+.btn-hero-secondary {
+  display: inline-flex; align-items: center;
+  background: transparent; color: var(--primary);
+  padding: 14px 28px; border-radius: 10px;
+  font-weight: 600; font-size: 1rem; text-decoration: none;
+  border: 2px solid var(--primary);
+  transition: background .15s;
+}
+.btn-hero-secondary:hover { background: var(--primary-bg); color: var(--primary); }
+
+/* ---- Category heading ---- */
+.category-heading {
+  font-size: .75rem; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text-3);
+  margin: 32px 0 12px;
+}
+.category-placeholder {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 32px; text-align: center; color: var(--text-3);
+  font-size: .9rem;
+}
 
 /* ---- Cookie banner ---- */
 .cookie-banner {
