@@ -3,4 +3,4 @@ Allow: /
 Disallow: /404.html
 Disallow: /desenvolvimento/
 
-Sitemap: https://douglastassinari.github.io/calculadoras-clt/sitemap.xml
+Sitemap: https://jornadabrasil.com.br/sitemap.xml
