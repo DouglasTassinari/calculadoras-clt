@@ -3,236 +3,238 @@
 
   <!-- Home -->
   <url>
-    <loc>https://reguaclt.com.br/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
+  <!-- Catálogo -->
+  <url>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/calculadoras/</loc>
+    <lastmod>2026-06-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- Calculadoras -->
   <url>
-    <loc>https://reguaclt.com.br/salario-liquido/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/pj-vs-clt/</loc>
+    <lastmod>2026-06-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/salario-liquido/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/rescisao/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/rescisao/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/ferias/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/ferias/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/decimo-terceiro/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/decimo-terceiro/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/horas-extras/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/horas-extras/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/adicional-noturno/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/adicional-noturno/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/seguro-desemprego/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/seguro-desemprego/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/pj-vs-clt/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/auxilio-doenca/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/auxilio-doenca/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/salario-maternidade/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/salario-maternidade/</loc>
-    <lastmod>2026-06-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://reguaclt.com.br/imposto-de-renda/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/imposto-de-renda/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <!-- Blog -->
   <url>
-    <loc>https://reguaclt.com.br/blog/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/inss-progressivo-2026/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/clt-vs-pj/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/lei-15270-2025-isencao-ir/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/inss-tabela-2026/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/aviso-previo-proporcional-lei-12506/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/irrf-tabela-2026/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/pj-ou-clt-2026/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/como-calcular-rescisao/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/abono-pecuniario-ferias/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/como-funciona-aviso-previo/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/seguro-desemprego-2026-tabela-codefat/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/como-calcular-ferias/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/declaracao-ir-2027-simplificada-ou-completa/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/como-calcular-horas-extras/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/adicional-noturno-hora-reduzida/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/como-funciona-fgts/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/licenca-maternidade-empresa-cidada/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/direitos-do-trabalhador-clt/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/dsr-horas-extras/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/jornada-de-trabalho/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/auxilio-doenca-b31-inss/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/contrato-de-experiencia/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/decimo-terceiro-2026-datas-e-calculo/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/banco-de-horas/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/insalubridade-e-periculosidade-2026/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/decimo-terceiro-salario/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/fgts-o-que-e-e-como-funciona/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/licenca-maternidade/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/salario-familia-2026/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/auxilio-doenca-inss/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/acordo-demissao-lei-13467/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/seguro-desemprego-como-funciona/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/pensao-alimenticia-desconto-ir/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/insalubridade/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/vale-transporte-desconto-6-porcento/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/periculosidade/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/blog/mei-2026-das-e-limites/</loc>
-    <lastmod>2026-06-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://reguaclt.com.br/blog/contribuicao-inss-autonomo/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/blog/trabalho-noturno/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <!-- Institucionais -->
   <url>
-    <loc>https://reguaclt.com.br/sobre/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/sobre/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/contato/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/contato/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/privacidade/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/privacidade/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/termos/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/termos/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://reguaclt.com.br/cookies/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://douglastassinari.github.io/calculadoras-clt/cookies/</loc>
+    <lastmod>2026-06-15</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>

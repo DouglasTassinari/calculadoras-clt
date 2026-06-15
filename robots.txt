@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /404.html
+Disallow: /desenvolvimento/
 
-Sitemap: https://reguaclt.com.br/sitemap.xml
+Sitemap: https://douglastassinari.github.io/calculadoras-clt/sitemap.xml
