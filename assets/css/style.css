@@ -115,17 +115,23 @@ ul, ol { padding-left: 1.5em; }
   flex-shrink: 0;
 }
 .brand-logo {
-  width: 40px;
   height: 40px;
-  border-radius: 10px;
-  background: linear-gradient(150deg, var(--primary), var(--primary-dark));
-  display: grid;
-  place-items: center;
-  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+}
+.brand-logo svg { height: 36px; width: auto; display: block; }
+.brand-logo .lt-j { fill: #15275A; }
+.brand-logo .lt-b { fill: var(--primary); }
+@media (prefers-color-scheme: dark) {
+  .brand-logo .lt-j { fill: #E6EDF3; }
 }
 .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
-.brand-name { font-size: 1.2rem; font-weight: 700; color: var(--text); }
-.brand-tagline { font-size: .7rem; color: var(--text-2); font-weight: 500; }
+.brand-name { font-size: 1.25rem; font-weight: 700; color: #15275A; letter-spacing: -.02em; }
+.brand-name .brand-name-2 { color: var(--primary); }
+@media (prefers-color-scheme: dark) {
+  .brand-name { color: var(--text); }
+}
+.brand-tagline { font-size: .68rem; color: var(--text-2); font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
 .main-nav {
   display: flex;
   gap: 4px;
