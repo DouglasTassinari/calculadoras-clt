@@ -26,7 +26,7 @@
   --radius-sm: 10px;
   --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 8px 24px -12px rgba(0,0,0,0.10);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-  --container: 1320px;
+  --container: 1600px;
   --font: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
@@ -70,7 +70,7 @@ ul, ol { padding-left: 1.5em; }
 .container {
   max-width: var(--container);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 clamp(20px, 4vw, 56px);
 }
 .site-wrapper {
   min-height: 100vh;
@@ -727,10 +727,11 @@ details.memoria[open] summary .chev { transform: rotate(180deg); }
 /* ---- About / Trust section ---- */
 .about-section {
   display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 32px;
+  grid-template-columns: 1fr 380px;
+  gap: 48px;
   align-items: start;
 }
+.about-section > div:first-child { max-width: 760px; }
 @media (max-width: 768px) { .about-section { grid-template-columns: 1fr; } }
 .trust-card {
   background: #FFFFFF;
