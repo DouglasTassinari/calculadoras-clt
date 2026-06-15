@@ -1,7 +1,7 @@
 {
   "id": "/",
   "name": "Jornada Brasil",
-  "short_name": "Jornada Brasil",
+  "short_name": "Jornada",
   "description": "Calculadoras trabalhistas: salário líquido, rescisão, férias, CLT vs PJ e muito mais.",
   "start_url": "/?source=pwa",
   "scope": "/",
