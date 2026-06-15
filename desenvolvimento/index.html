@@ -292,7 +292,7 @@ document.getElementById('inp-user').addEventListener('keydown', e => { if (e.key
 
 function doLogin() {
   const u = document.getElementById('inp-user').value.trim();
-  const p = document.getElementById('inp-pass').value;
+  const p = document.getElementById('inp-pass').value.trim();
   if (u === CREDS.user && p === CREDS.pass) {
     sessionStorage.setItem('jb_dev', '1');
     showDashboard();
