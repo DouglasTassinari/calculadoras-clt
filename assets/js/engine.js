@@ -187,9 +187,9 @@ function rescisao({ bruto, admissao, desligamento, motivo, aviso='indenizado', t
   }[motivo];
   let avisoValor=0, avisoDesconto=0;
   const avisoBase=r2((bruto/30)*diasAviso);
-  if(devido.aviso==='indenizado') avisoValor=avisoBase;
-  else if(devido.aviso==='metade') avisoValor=r2(avisoBase/2);
-  else if(devido.aviso==='desconto'){ if(aviso==='nao_cumprido') avisoDesconto=r2((bruto/30)*30); }
+  if(motivo==='acordo') avisoValor=r2(avisoBase/2);
+  else if(aviso==='nao_cumprido') avisoDesconto=r2((bruto/30)*30);
+  else if(motivo==='sem_justa_causa' && aviso==='indenizado') avisoValor=avisoBase;
   const d13Bruto=devido.d13?r2((bruto/12)*avos13):0;
   const inss13=calcINSS(d13Bruto);
   const irrf13=d13Bruto>0?calcIRRF(d13Bruto,inss13.valor,deps):{valor:0,base:0,aliq:0,impostoApurado:0,redutor:0,usouSimplificado:false,deducaoUsada:0};
@@ -492,8 +492,7 @@ const CALCS = {
           {v:'trabalhado', t:'Trabalhado / cumprido'},
           {v:'nao_cumprido', t:'Não cumprido (gera desconto)'},
         ]},
-      {id:'deps', tipo:'numero', rot:'Dependentes', def:'0', min:0, max:20, meia:true, dica:'p/ IR'},
-      {id:'saldoFGTS', tipo:'moeda', rot:'Saldo de FGTS', def:'', meia:true, dica:'opcional — estima se vazio'},
+      {id:'saldoFGTS', tipo:'moeda', rot:'Saldo de FGTS', def:'', dica:'opcional — estima se vazio'},
       {id:'temFeriasVencidas', tipo:'check', rot:'Possui férias vencidas (período completo não gozado)'},
       {id:'diasFeriasVencidas', tipo:'numero', rot:'Dias de férias vencidas', def:'30', min:1, max:30,
         showIf:(v)=> v.temFeriasVencidas},
@@ -503,7 +502,7 @@ const CALCS = {
       const r = rescisao({
         bruto:v.bruto, admissao:v.admissao, desligamento:v.desligamento, motivo:v.motivo,
         aviso:v.aviso, temFeriasVencidas:v.temFeriasVencidas, diasFeriasVencidas:v.diasFeriasVencidas,
-        saldoFGTS: v.saldoFGTS>0 ? v.saldoFGTS : null, deps:v.deps,
+        saldoFGTS: v.saldoFGTS>0 ? v.saldoFGTS : null,
       });
       if(r.erro) return {erro:r.erro};
       const blocos=[];
@@ -518,6 +517,7 @@ const CALCS = {
       if(r.seguroDesemprego) avisos.push({tipo:'info', txt:'Pode haver direito ao seguro-desemprego, conforme tempo de vínculo e parcelas já recebidas.'});
       if(r.fgts.estimado && r.fgts.base>0) avisos.push({tipo:'warn', txt:`Saldo de FGTS estimado em ${BRL(r.fgts.base)} (8% × salário × ${r.totalMeses} meses). Informe o saldo real para mais precisão.`});
       if(v.motivo==='justa_causa') avisos.push({tipo:'warn', txt:'Na justa causa não há aviso, 13º proporcional, férias proporcionais, saque ou multa do FGTS.'});
+      avisos.push({tipo:'info', txt:'IR e INSS incidem apenas sobre o saldo de salário e o 13º proporcional. Aviso indenizado, férias + 1/3 e multa do FGTS são isentos. Pela isenção de 2026 (até R$ 5.000), parcelas menores costumam ficar sem IR.'});
       const memoria=[
         `Tempo de casa: ${r.anos} ano(s) completo(s) · ${r.totalMeses} meses de vínculo.`,
         `Aviso prévio: 30 + 3 × ${r.anos} = ${r.diasAviso} dias (Lei 12.506/2011, limite de 90).`,
