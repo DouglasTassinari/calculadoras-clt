@@ -294,34 +294,81 @@ function seguroDesemprego({ s1, s2, s3, formalTempo }){
   return { media, parcela, nParcelas, total:r2(parcela*nParcelas) };
 }
 
-function pjVsClt({ salarioCLT, remuneracaoPJ, regimePJ='simples6', inssAutoVoluntario=true }){
+function pjVsClt({
+  salarioCLT, remuneracaoPJ, deps=0, regimePJ='simples6', inssAutoVoluntario=true,
+  valeTransporte=0, valeRefeicao=0, valeAlimentacao=0, planoSaude=0, seguroVida=0,
+  plrAnual=0, bonusMensal=0, incluirMulta=false, incluirRescisao=false, afastamentoPct=0,
+  custoContabilidade=0, custoCertificadoAnual=0, custoBanco=0, custoSoftware=0, custoOutros=0,
+  reservaMeses=6,
+}){
   salarioCLT = nz(salarioCLT); remuneracaoPJ = nz(remuneracaoPJ);
-  const clt = folhaCompleta({ bruto:salarioCLT });
+
+  // ---- CLT: salário líquido (o que cai na conta) ----
+  const folha = folhaCompleta({ bruto:salarioCLT, deps:nz(deps) });
+  const cltLiquido = folha.liquido;
+  const inssEmpregado = folha.inss.valor;
+  const inssPatronal = r2(salarioCLT * 0.20); // custo da empresa, não recebido pelo trabalhador
+
+  // ---- CLT: provisões mensais dos benefícios ----
   const fgts = r2(salarioCLT * 0.08);
-  const ferias13 = r2((salarioCLT * 4) / 36);
-  const totalCLT = r2(clt.liquido + fgts + ferias13);
-  const aliqMap = { simples6:0.06, simples15:0.15, lucro_presumido:0.135, mei:MEI_DAS/remuneracaoPJ };
-  let impostosPJ;
-  if(regimePJ === 'mei'){
-    impostosPJ = MEI_DAS;
-  } else {
-    const aliqPJ = aliqMap[regimePJ] || 0.06;
-    impostosPJ = r2(remuneracaoPJ * aliqPJ);
+  const multa = incluirMulta ? r2(fgts * 0.40) : 0;
+  const decimo = r2(salarioCLT / 12);
+  const feriasProv = r2(salarioCLT / 12);
+  const terco = r2(salarioCLT / 36);
+  const vtDescMax = r2(salarioCLT * 0.06);
+  const vt = nz(valeTransporte) > 0 ? r2(Math.max(0, nz(valeTransporte) - vtDescMax)) : 0;
+  const vr = r2(nz(valeRefeicao));
+  const va = r2(nz(valeAlimentacao));
+  const plano = r2(nz(planoSaude));
+  const segVida = r2(nz(seguroVida));
+  const plr = r2(nz(plrAnual) / 12);
+  const bonus = r2(nz(bonusMensal));
+  const aviso = incluirRescisao ? r2(salarioCLT / 12) : 0;
+  let seguroDes = 0;
+  if(incluirRescisao){
+    const sd = seguroDesemprego({ s1:salarioCLT, s2:salarioCLT, s3:salarioCLT, formalTempo:24 });
+    seguroDes = r2(sd.total / 12);
   }
-  const aliqPJ = regimePJ === 'mei' ? MEI_DAS/remuneracaoPJ : (aliqMap[regimePJ] || 0.06);
-  const liquidoPJBruto = r2(remuneracaoPJ - impostosPJ);
-  const inssAuto = inssAutoVoluntario ? r2(Math.min(remuneracaoPJ * 0.11, SALARIO_MINIMO * 0.11)) : 0;
-  const liquidoPJ = r2(liquidoPJBruto - inssAuto);
-  const diferenca = r2(liquidoPJ - totalCLT);
-  const pjVantagem = diferenca > 0;
-  let brutoEq = liquidoPJ;
-  for(let i=0;i<20;i++){
-    const tentativa = folhaCompleta({ bruto:brutoEq });
-    const err = tentativa.liquido - liquidoPJ;
-    if(Math.abs(err)<0.5) break;
-    brutoEq = r2(brutoEq - err * 0.7);
-  }
-  return { clt:{ ...clt, fgts, ferias13, totalCLT }, pj:{ remuneracaoPJ, impostosPJ, liquidoPJBruto, inssAuto, liquidoPJ, aliqPJ }, diferenca, pjVantagem, brutoEquivalenteCLT:r2(brutoEq) };
+  const beneficios = { fgts, multa, decimo, ferias:feriasProv, terco, vt, vr, va, plano, segVida, plr, bonus, aviso, seguroDes };
+  const totalBeneficios = r2(Object.keys(beneficios).reduce((s,k)=>s+beneficios[k],0));
+  const cltEconomico = r2(cltLiquido + totalBeneficios);
+  const fgts5anos = r2(fgts * 60);
+  const multa5anos = r2(fgts5anos * 0.40);
+
+  // ---- PJ: impostos, custos, líquido ----
+  const aliqMap = { simples6:0.06, simples15:0.15, lucro_presumido:0.135 };
+  let impostoPJ, aliqPJ;
+  if(regimePJ === 'mei'){ impostoPJ = MEI_DAS; aliqPJ = remuneracaoPJ > 0 ? MEI_DAS / remuneracaoPJ : 0; }
+  else { aliqPJ = aliqMap[regimePJ] || 0.06; impostoPJ = r2(remuneracaoPJ * aliqPJ); }
+  const custoCertMensal = r2(nz(custoCertificadoAnual) / 12);
+  const custosPJ = r2(nz(custoContabilidade) + custoCertMensal + nz(custoBanco) + nz(custoSoftware) + nz(custoOutros));
+  const inssAuto = inssAutoVoluntario ? r2(SALARIO_MINIMO * 0.11) : 0;
+  const afastLoss = r2(remuneracaoPJ * nz(afastamentoPct) / 100);
+  const pjLiquido = r2(remuneracaoPJ - impostoPJ - custosPJ - inssAuto - afastLoss);
+
+  // ---- Reserva de segurança ----
+  const meses = nz(reservaMeses) || 6;
+  const reservaAlvo = r2(remuneracaoPJ * meses);
+  const reservaMensal = r2(reservaAlvo / 12);
+
+  // ---- Comparação ----
+  const diferenca = r2(pjLiquido - cltEconomico);
+  const margem = cltEconomico > 0 ? diferenca / cltEconomico : 0;
+  const veredito = margem > 0.05 ? 'pj' : (margem < -0.05 ? 'clt' : 'eq');
+
+  // Remuneração PJ necessária para igualar o valor econômico total da CLT
+  const afastFator = 1 - nz(afastamentoPct) / 100;
+  const denom = regimePJ === 'mei' ? afastFator : (afastFator - aliqPJ);
+  const fixos = (regimePJ === 'mei' ? MEI_DAS : 0) + custosPJ + inssAuto;
+  const pjNecessario = denom > 0 ? r2((cltEconomico + fixos) / denom) : 0;
+
+  return {
+    salarioCLT:r2(salarioCLT), folha, cltLiquido, inssEmpregado, inssPatronal,
+    beneficios, totalBeneficios, cltEconomico, fgts5anos, multa5anos, vtDescMax,
+    remuneracaoPJ:r2(remuneracaoPJ), regimePJ, impostoPJ, aliqPJ, custosPJ, custoCertMensal,
+    inssAuto, afastLoss, pjLiquido, reservaMeses:meses, reservaAlvo, reservaMensal,
+    diferenca, veredito, pjNecessario,
+  };
 }
 
 function auxilioDoenca({ salarioBruto, mesesContrib=12, afastamento=16 }){
@@ -695,56 +742,155 @@ const CALCS = {
   pj:{
     nome:'PJ vs CLT', icone:ic.pj,
     titulo:'Vale mais como PJ ou CLT?', demoTit:'Comparativo PJ × CLT',
-    desc:'Simule a proposta PJ comparada ao salário CLT, considerando impostos, FGTS, férias e 13º.',
+    desc:'Compara o pacote completo da CLT (salário + todos os benefícios e provisões) com a renda real como PJ e mostra qual remuneração PJ compensa integralmente os direitos trabalhistas.',
     campos:[
+      {id:'_s1', tipo:'secao', rot:'Dados principais'},
       {id:'salarioCLT', tipo:'moeda', rot:'Salário bruto CLT atual', def:''},
-      {id:'remuneracaoPJ', tipo:'moeda', rot:'Remuneração PJ oferecida', def:''},
-      {id:'regimePJ', tipo:'select', rot:'Regime tributário da PJ', def:'simples6', opcoes:[
-        {v:'simples6', t:'Simples Nacional — 6% (serviços nível 1)'},
-        {v:'simples15', t:'Simples Nacional — 15% (serviços nível 3)'},
-        {v:'lucro_presumido', t:'Lucro Presumido — ~13,5%'},
-        {v:'mei', t:'MEI — valor fixo (DAS ≈ R$ 80,90/mês)'},
+      {id:'remuneracaoPJ', tipo:'moeda', rot:'Remuneração PJ oferecida (mensal)', def:''},
+      {id:'deps', tipo:'numero', rot:'Dependentes p/ IR', def:'0', min:0, max:20, meia:true},
+      {id:'regimePJ', tipo:'select', rot:'Regime tributário da PJ', def:'simples6', meia:true, opcoes:[
+        {v:'simples6', t:'Simples — 6% (Anexo III)'},
+        {v:'simples15', t:'Simples — 15% (Anexo V)'},
+        {v:'lucro_presumido', t:'Lucro Presumido ~13,5%'},
+        {v:'mei', t:'MEI — DAS fixo'},
       ]},
-      {id:'inssAutoVoluntario', tipo:'check', rot:'Incluir INSS autônomo (11% sobre o SM — garante benefícios)'},
+      {id:'_s2', tipo:'secao', rot:'Benefícios do pacote CLT'},
+      {id:'valeTransporte', tipo:'moeda', rot:'Vale-transporte (custo mensal)', def:'', meia:true, dica:'empresa subsidia o que passar de 6% do salário'},
+      {id:'valeRefeicao', tipo:'moeda', rot:'Vale-refeição (mensal)', def:'', meia:true},
+      {id:'valeAlimentacao', tipo:'moeda', rot:'Vale-alimentação (mensal)', def:'', meia:true},
+      {id:'planoSaude', tipo:'moeda', rot:'Plano de saúde (mensal)', def:'', meia:true, dica:'valor custeado pela empresa'},
+      {id:'seguroVida', tipo:'moeda', rot:'Seguro de vida (mensal)', def:'', meia:true},
+      {id:'bonusMensal', tipo:'moeda', rot:'Bônus / comissões (média mensal)', def:'', meia:true},
+      {id:'plrAnual', tipo:'moeda', rot:'PLR (valor anual)', def:'', dica:'convertido para mensal (÷ 12)'},
+      {id:'incluirMulta', tipo:'check', rot:'Incluir provisão da multa de 40% do FGTS (recebida só em dispensa sem justa causa)'},
+      {id:'incluirRescisao', tipo:'check', rot:'Incluir proteções de demissão (aviso prévio + seguro-desemprego)'},
+      {id:'_s3', tipo:'secao', rot:'Dados e custos da PJ'},
+      {id:'inssAutoVoluntario', tipo:'check', rot:'Contribuir ao INSS como autônomo (11% do salário mínimo)'},
+      {id:'afastamentoPct', tipo:'numero', rot:'Afastamento médico estimado (% da renda/ano)', def:'0', min:0, max:100, meia:true, dica:'PJ não tem licença remunerada'},
+      {id:'custoContabilidade', tipo:'moeda', rot:'Contabilidade (mensal)', def:'', meia:true, dica:'honorários do contador'},
+      {id:'custoCertificadoAnual', tipo:'moeda', rot:'Certificado digital (anual)', def:'', meia:true, dica:'convertido p/ mensal'},
+      {id:'custoBanco', tipo:'moeda', rot:'Conta PJ / tarifas (mensal)', def:'', meia:true},
+      {id:'custoSoftware', tipo:'moeda', rot:'Softwares / ferramentas (mensal)', def:'', meia:true},
+      {id:'custoOutros', tipo:'moeda', rot:'Outros custos PJ (mensal)', def:'', meia:true},
+      {id:'_s4', tipo:'secao', rot:'Reserva de segurança PJ'},
+      {id:'reservaMeses', tipo:'select', rot:'Meses de reserva desejados', def:'6', dica:'fundo para imprevistos, já que não há FGTS nem seguro-desemprego', opcoes:[
+        {v:'3', t:'3 meses'},
+        {v:'6', t:'6 meses'},
+        {v:'12', t:'12 meses'},
+      ]},
     ],
     calcular(v){
       if(v.salarioCLT<=0 || v.remuneracaoPJ<=0) return {vazio:true};
-      const r = pjVsClt({ salarioCLT:v.salarioCLT, remuneracaoPJ:v.remuneracaoPJ, regimePJ:v.regimePJ, inssAutoVoluntario:v.inssAutoVoluntario });
+      const r = pjVsClt({
+        salarioCLT:v.salarioCLT, remuneracaoPJ:v.remuneracaoPJ, deps:v.deps, regimePJ:v.regimePJ,
+        inssAutoVoluntario:v.inssAutoVoluntario,
+        valeTransporte:v.valeTransporte, valeRefeicao:v.valeRefeicao, valeAlimentacao:v.valeAlimentacao,
+        planoSaude:v.planoSaude, seguroVida:v.seguroVida, plrAnual:v.plrAnual, bonusMensal:v.bonusMensal,
+        incluirMulta:v.incluirMulta, incluirRescisao:v.incluirRescisao, afastamentoPct:v.afastamentoPct,
+        custoContabilidade:v.custoContabilidade, custoCertificadoAnual:v.custoCertificadoAnual,
+        custoBanco:v.custoBanco, custoSoftware:v.custoSoftware, custoOutros:v.custoOutros,
+        reservaMeses:Number(v.reservaMeses)||6,
+      });
       const aliqNome = {simples6:'Simples 6%',simples15:'Simples 15%',lucro_presumido:'Lucro Presumido ~13,5%',mei:'MEI (DAS fixo)'}[v.regimePJ]||v.regimePJ;
-      const blocos=[
-        {titulo:'Análise CLT', linhas:[
-          {nome:'Salário líquido (no mês)', valor:r.clt.liquido, pos:false},
-          {nome:'FGTS equivalente (8%)', valor:r.clt.fgts, pos:true},
-          {nome:'Férias + 13º mensalizados', valor:r.clt.ferias13, pos:true},
-          {nome:'Total CLT equivalente mensal', valor:r.clt.totalCLT, pos:false},
-        ]},
-        {titulo:`Análise PJ (${aliqNome})`, linhas:[
-          {nome:'Remuneração bruta', valor:r.pj.remuneracaoPJ, pos:false},
-          {nome:'Impostos estimados', valor:r.pj.impostosPJ, pos:false},
-          {nome:'Líquido antes do INSS', valor:r.pj.liquidoPJBruto, pos:false},
-          ...(r.pj.inssAuto>0?[{nome:'INSS autônomo (11% do SM)', valor:r.pj.inssAuto, pos:false}]:[]),
-          {nome:'Líquido PJ final', valor:r.pj.liquidoPJ, pos:false},
-        ]},
-        {titulo:'Resultado', linhas:[
-          {nome:r.pjVantagem?'PJ rende a mais por mês':'CLT rende a mais por mês', valor:Math.abs(r.diferenca), pos:r.pjVantagem},
-          {nome:'Salário CLT que equivale ao PJ (bruto)', valor:r.brutoEquivalenteCLT, pos:false},
-        ]},
+      const b = r.beneficios;
+
+      // A) Salário líquido CLT
+      const blocoA = {titulo:'A) Salário líquido CLT', linhas:[
+        {nome:'Salário bruto', valor:r.salarioCLT, pos:false},
+        {nome:`INSS empregado (${PCT(r.folha.inss.aliqEfetiva)} efetivo)`, valor:r.inssEmpregado, pos:false},
+        ...(r.folha.irrf.valor>0?[{nome:`IRRF (${PCT(r.folha.irrf.aliq*100)})`, valor:r.folha.irrf.valor, pos:false}]:[]),
+        {nome:'Líquido mensal na conta', valor:r.cltLiquido, pos:true},
+        {nome:'INSS patronal 20% (custo da empresa — não entra no seu bolso)', valor:r.inssPatronal, pos:false},
+      ]};
+
+      // B) Benefícios CLT detalhados (provisões mensais)
+      const linhasB=[];
+      const addB=(nome,val)=>{ if(val>0) linhasB.push({nome, valor:val, pos:true}); };
+      addB('FGTS (8% mensal)', b.fgts);
+      addB('Multa 40% do FGTS (provisão mensal)', b.multa);
+      addB('13º salário (provisão mensal)', b.decimo);
+      addB('Férias (provisão mensal)', b.ferias);
+      addB('1/3 constitucional de férias', b.terco);
+      addB('Vale-transporte (subsídio da empresa)', b.vt);
+      addB('Vale-refeição', b.vr);
+      addB('Vale-alimentação', b.va);
+      addB('Plano de saúde', b.plano);
+      addB('Seguro de vida', b.segVida);
+      addB('PLR (mensalizada)', b.plr);
+      addB('Bônus / comissões', b.bonus);
+      addB('Aviso prévio (provisão)', b.aviso);
+      addB('Seguro-desemprego (provisão)', b.seguroDes);
+      linhasB.push({nome:'Total de benefícios CLT / mês', valor:r.totalBeneficios, pos:true});
+      const blocoB = {titulo:'B) Benefícios CLT (provisões mensais)', linhas:linhasB};
+
+      // FGTS — projeção de longo prazo (informativo, não soma ao total mensal)
+      const linhasFGTS=[
+        {nome:'Mensal (8% do salário bruto)', valor:b.fgts, pos:true},
+        {nome:'Anual (× 12 meses)', valor:r2(b.fgts*12), pos:true},
+        {nome:'Acumulado em 5 anos', valor:r.fgts5anos, pos:true},
+        {nome:'Multa de 40% sobre saldo projetado (5 anos)', valor:r.multa5anos, pos:true},
       ];
-      const avisos=[
-        {tipo:'info', txt:`Sem o FGTS (que você perde como PJ), precisaria acumular ${BRL(r.clt.fgts)} por mês de forma autônoma para ter reserva equivalente.`},
-        {tipo:'warn', txt:'Como PJ, não há seguro-desemprego, aviso prévio, 13º garantido ou proteção da CLT. Inclua isso na negociação.'},
-      ];
-      if(v.regimePJ==='mei') avisos.push({tipo:'warn', txt:'MEI paga valor fixo mensal (DAS-MEI ≈ R$ 80,90 em 2026). O cálculo acima usa esse valor fixo independente do faturamento. Acima de R$ 6.750/mês, o MEI não se aplica (teto anual de R$ 81.000).'});
-      if(!v.inssAutoVoluntario) avisos.push({tipo:'warn', txt:'Sem contribuir para o INSS, você perde direito a auxílio-doença, aposentadoria e outros benefícios previdenciários.'});
+      const blocoFGTS = {titulo:'FGTS — projeção de longo prazo (informativo)', linhas:linhasFGTS};
+
+      // C) Impostos e custos PJ — detalhado por categoria
+      const linhasC=[{nome:`Impostos PJ (${aliqNome})`, valor:r.impostoPJ, pos:false}];
+      if(nz(v.custoContabilidade)>0)  linhasC.push({nome:'Contabilidade', valor:nz(v.custoContabilidade), pos:false});
+      if(r.custoCertMensal>0)         linhasC.push({nome:'Certificado digital (mensal)', valor:r.custoCertMensal, pos:false});
+      if(nz(v.custoBanco)>0)          linhasC.push({nome:'Conta PJ / tarifas', valor:nz(v.custoBanco), pos:false});
+      if(nz(v.custoSoftware)>0)       linhasC.push({nome:'Softwares / ferramentas', valor:nz(v.custoSoftware), pos:false});
+      if(nz(v.custoOutros)>0)         linhasC.push({nome:'Outros custos', valor:nz(v.custoOutros), pos:false});
+      if(r.inssAuto>0)                linhasC.push({nome:'INSS autônomo (11% do SM)', valor:r.inssAuto, pos:false});
+      if(r.afastLoss>0)               linhasC.push({nome:'Perda estimada por afastamento médico', valor:r.afastLoss, pos:false});
+      linhasC.push({nome:'PJ líquido mensal', valor:r.pjLiquido, pos:true});
+      const blocoC = {titulo:'C) Impostos e custos da PJ', linhas:linhasC};
+
+      // D) Reserva de segurança PJ
+      const blocoD = {titulo:'D) Reserva de segurança PJ', linhas:[
+        {nome:`Reserva-alvo (${r.reservaMeses} meses de faturamento)`, valor:r.reservaAlvo, pos:false},
+        {nome:'Quanto separar por mês (ao longo de 12 meses)', valor:r.reservaMensal, pos:false},
+      ]};
+
+      // E) Comparação final — todos os componentes explícitos
+      const blocoE = {titulo:'E) Comparação final', linhas:[
+        {nome:'CLT líquido mensal', valor:r.cltLiquido, pos:true},
+        {nome:'Benefícios CLT / mês', valor:r.totalBeneficios, pos:true},
+        {nome:'Valor econômico total da CLT (líquido + benefícios)', valor:r.cltEconomico, pos:true},
+        {nome:'PJ líquido final', valor:r.pjLiquido, pos:false},
+        {nome:r.diferenca>=0?'PJ rende a mais por mês':'CLT rende a mais por mês', valor:Math.abs(r.diferenca), pos:r.diferenca>=0},
+        {nome:'Remuneração PJ necessária p/ compensar integralmente a CLT', valor:r.pjNecessario, pos:false},
+      ]};
+
+      const blocos=[blocoA, blocoB, blocoFGTS, blocoC, blocoD, blocoE];
+
+      // Indicadores visuais + explicações
+      const avisos=[];
+      if(r.veredito==='pj')       avisos.push({tipo:'success', txt:`PJ vantajoso: a renda PJ líquida (${BRL(r.pjLiquido)}) supera o pacote CLT completo (${BRL(r.cltEconomico)}) em ${BRL(r.diferenca)}/mês.`});
+      else if(r.veredito==='clt') avisos.push({tipo:'warn',    txt:`CLT vantajosa: o pacote CLT (${BRL(r.cltEconomico)}) vale ${BRL(Math.abs(r.diferenca))}/mês a mais que a PJ líquida (${BRL(r.pjLiquido)}).`});
+      else                        avisos.push({tipo:'info',    txt:`Equilíbrio: a diferença é pequena (${BRL(Math.abs(r.diferenca))}/mês) — PJ e CLT se equivalem economicamente.`});
+      avisos.push({tipo:'info', txt:`INSS — diferença importante: como CLT você desconta ${BRL(r.inssEmpregado)}/mês e a empresa recolhe ${BRL(r.inssPatronal)} (20% patronal) por fora. Como PJ, só há contribuição se você optar (e sobre base menor).`});
+      if(r.beneficios.aviso>0 || r.beneficios.multa>0) avisos.push({tipo:'warn', txt:'Multa do FGTS, aviso prévio e seguro-desemprego são contingências: só viram dinheiro em caso de dispensa sem justa causa.'});
+      if(!v.inssAutoVoluntario) avisos.push({tipo:'warn', txt:'Sem contribuir ao INSS como PJ, você perde aposentadoria, auxílio-doença e salário-maternidade.'});
+      if(v.regimePJ==='mei' && (r.remuneracaoPJ>6750 || r.pjNecessario>6750)) avisos.push({tipo:'warn', txt:'MEI tem teto de R$ 81.000/ano (~R$ 6.750/mês). Acima disso, o MEI não se aplica e o imposto fixo do DAS deixa de valer.'});
+
+      // Transparência dos cálculos
       const memoria=[
-        `CLT — INSS: ${BRL(r.clt.inss.valor)}, IRRF: ${BRL(r.clt.irrf.valor)}, líquido: ${BRL(r.clt.liquido)}.`,
-        `CLT — Benefícios: FGTS ${BRL(r.clt.fgts)} + férias/13º ${BRL(r.clt.ferias13)} = ${BRL(r.clt.fgts+r.clt.ferias13)} por mês.`,
-        `PJ — Impostos (${PCT(r.pj.aliqPJ*100)}): ${BRL(r.pj.impostosPJ)} → líquido: ${BRL(r.pj.liquidoPJBruto)}.`,
-        r.pj.inssAuto>0?`PJ — INSS autônomo: 11% × SM (${BRL(SALARIO_MINIMO)}) = ${BRL(r.pj.inssAuto)}.`:'',
-        `Diferença: ${BRL(Math.abs(r.diferenca))} a favor do ${r.pjVantagem?'PJ':'CLT'} por mês.`,
-        `Para "zerar" o PJ, o CLT equivalente seria de ${BRL(r.brutoEquivalenteCLT)} bruto.`,
+        `CLT líquido: ${BRL(r.salarioCLT)} − INSS ${BRL(r.inssEmpregado)}${r.folha.irrf.valor>0?` − IRRF ${BRL(r.folha.irrf.valor)}`:''} = ${BRL(r.cltLiquido)}.`,
+        `FGTS: 8% × ${BRL(r.salarioCLT)} = ${BRL(b.fgts)}/mês · ${BRL(r2(b.fgts*12))}/ano · ${BRL(r.fgts5anos)} em 5 anos · multa 40% projetada em 5 anos: ${BRL(r.multa5anos)}.`,
+        `13º: ${BRL(r.salarioCLT)} ÷ 12 = ${BRL(b.decimo)}. Férias: ÷ 12 = ${BRL(b.ferias)}. 1/3: ÷ 36 = ${BRL(b.terco)}.`,
+        b.vt>0?`Vale-transporte: desconto máx. 6% = ${BRL(r.vtDescMax)}; subsídio da empresa = ${BRL(b.vt)}.`:'',
+        `Benefícios CLT somam ${BRL(r.totalBeneficios)}/mês. Valor econômico total CLT = ${BRL(r.cltLiquido)} + ${BRL(r.totalBeneficios)} = ${BRL(r.cltEconomico)}.`,
+        `PJ: ${BRL(r.remuneracaoPJ)} − impostos ${BRL(r.impostoPJ)}${r.custosPJ>0?` − custos ${BRL(r.custosPJ)}`:''}${r.inssAuto>0?` − INSS ${BRL(r.inssAuto)}`:''}${r.afastLoss>0?` − afastamento ${BRL(r.afastLoss)}`:''} = ${BRL(r.pjLiquido)}.`,
+        `INSS patronal (20% = ${BRL(r.inssPatronal)}) é custo da empresa; não entra no seu bolso, mas custeia seus benefícios previdenciários.`,
+        `PJ necessário: (valor econômico CLT ${BRL(r.cltEconomico)} + custos fixos PJ) ÷ (1 − alíquota ${PCT(r.aliqPJ*100)}) = ${BRL(r.pjNecessario)}.`,
+        `Reserva sugerida: ${r.reservaMeses} × ${BRL(r.remuneracaoPJ)} = ${BRL(r.reservaAlvo)} (≈ ${BRL(r.reservaMensal)}/mês ao longo de 12 meses).`,
       ].filter(Boolean);
-      return { proventos:[], descontos:[], blocos, destaque:{label:r.pjVantagem?'PJ vantagem':'CLT vantagem', sub:`${BRL(Math.abs(r.diferenca))}/mês`, valor:r.pj.liquidoPJ}, memoria, avisos };
+
+      const vereditoLabel = r.veredito==='pj'?'PJ vantajoso' : (r.veredito==='clt'?'CLT vantajosa' : 'Equilíbrio');
+      return {
+        proventos:[], descontos:[], blocos,
+        destaque:{ label:'Remuneração PJ necessária p/ compensar a CLT', sub:`${vereditoLabel} · PJ líquido atual: ${BRL(r.pjLiquido)}`, valor:r.pjNecessario },
+        memoria, avisos,
+      };
     }
   },
 

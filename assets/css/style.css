@@ -467,6 +467,8 @@ select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary
 .aviso svg { width: 15px; height: 15px; flex: none; margin-top: 1px; color: var(--amber); }
 .aviso.info { color: var(--primary-dark); background: var(--primary-bg); border-color: var(--primary-border); }
 .aviso.info svg { color: var(--primary); }
+.aviso.success { color: #14593a; background: var(--green-bg); border-color: #bfe3cf; }
+.aviso.success svg { color: var(--green); }
 
 details.memoria { margin: 0 -20px; border-top: 1px solid var(--border); }
 details.memoria summary {
