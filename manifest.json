@@ -1,0 +1,122 @@
+{
+  "id": "/",
+  "name": "Jornada Brasil",
+  "short_name": "Jornada Brasil",
+  "description": "Calculadoras trabalhistas: salário líquido, rescisão, férias, CLT vs PJ e muito mais.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#15275A",
+  "theme_color": "#1E3A8A",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["finance", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/assets/img/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-167x167.png",
+      "sizes": "167x167",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-180x180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/img/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Salário Líquido",
+      "short_name": "Salário",
+      "description": "Calcule seu salário líquido CLT",
+      "url": "/salario-liquido/",
+      "icons": [{ "src": "/assets/img/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "CLT vs PJ",
+      "short_name": "CLT vs PJ",
+      "description": "Compare CLT e PJ",
+      "url": "/pj-vs-clt/",
+      "icons": [{ "src": "/assets/img/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Rescisão",
+      "short_name": "Rescisão",
+      "description": "Calcule sua rescisão",
+      "url": "/rescisao/",
+      "icons": [{ "src": "/assets/img/icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/assets/img/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Jornada Brasil — Calculadoras Trabalhistas"
+    },
+    {
+      "src": "/assets/img/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Jornada Brasil — Calculadoras Trabalhistas no celular"
+    }
+  ]
+}
