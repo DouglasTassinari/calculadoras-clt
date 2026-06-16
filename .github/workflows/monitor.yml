@@ -14,7 +14,7 @@ jobs:
       - name: Verificar todas as páginas
         id: check
         run: |
-          BASE="https://douglastassinari.github.io/calculadoras-clt"
+          BASE="https://jornadabrasil.com.br"
           FAILED=""
           PASSED=0
           TOTAL=0
@@ -105,7 +105,7 @@ jobs:
 
       - name: Enviar e-mail de alerta
         if: steps.check.outputs.failed == 'true'
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@v4
         with:
           server_address: smtp.gmail.com
           server_port: 465
@@ -131,7 +131,7 @@ jobs:
             Horário: ${{ github.event.repository.updated_at }}
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-            Acesse o site: https://douglastassinari.github.io/calculadoras-clt/
+            Acesse o site: https://jornadabrasil.com.br
             Ver log completo: https://github.com/${{ github.repository }}/actions
 
             — Monitor automático Jornada Brasil
