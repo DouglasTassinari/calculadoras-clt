@@ -1,40 +1,75 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-MK3XD5ZVE0"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-MK3XD5ZVE0');
-</script>
-<script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "x7ir0zxu39");
-</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!--
+    =====================================================================
+    CONSENT MODE v2 + DEFERRED ANALYTICS
+    Deve rodar ANTES de qualquer script de analytics.
+    GTM e Clarity só carregam após idle ou primeira interação do usuário.
+    =====================================================================
+  -->
+  <script>
+  window.dataLayer=window.dataLayer||[];
+  function gtag(){dataLayer.push(arguments);}
+  // Default: tudo negado até consentimento explícito (LGPD / Consent Mode v2)
+  gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','wait_for_update':500});
+
+  // Loader diferido — carrega GA4 + Clarity apenas após idle ou interação
+  function _jbLoadAnalytics(){
+    if(window._jbALoaded)return;
+    window._jbALoaded=1;
+    var s=document.createElement('script');
+    s.async=1;s.src='https://www.googletagmanager.com/gtag/js?id=G-MK3XD5ZVE0';
+    document.head.appendChild(s);
+    gtag('js',new Date());
+    gtag('config','G-MK3XD5ZVE0');
+    // Microsoft Clarity
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window,document,'clarity','script','x7ir0zxu39');
+  }
+  window._jbLoadAnalytics=_jbLoadAnalytics;
+
+  // Carrega após primeira interação real do usuário
+  ['click','touchstart','keydown','scroll'].forEach(function(e){
+    document.addEventListener(e,function h(){_jbLoadAnalytics();document.removeEventListener(e,h);},{once:true,passive:true});
+  });
+  // Ou após 3s idle
+  'requestIdleCallback'in window
+    ?requestIdleCallback(function(){setTimeout(_jbLoadAnalytics,1);},{timeout:3000})
+    :setTimeout(_jbLoadAnalytics,3000);
+  </script>
+
   <title>Ferramentas para decisões de trabalho, carreira e renda — Jornada Brasil</title>
   <meta name="description" content="Compare CLT e PJ, calcule salário líquido, rescisão, férias e outros direitos trabalhistas. Portal gratuito com tabelas oficiais 2026.">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://jornadabrasil.com.br/">
+
+  <!-- Open Graph -->
   <meta property="og:title" content="Ferramentas para decisões de trabalho, carreira e renda — Jornada Brasil">
-<meta property="og:image" content="https://jornadabrasil.com.br/assets/img/og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
   <meta property="og:description" content="Compare CLT e PJ, calcule salário líquido, rescisão, férias e outros direitos trabalhistas. Gratuito e atualizado.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://jornadabrasil.com.br/">
   <meta property="og:locale" content="pt_BR">
   <meta property="og:site_name" content="Jornada Brasil">
+  <meta property="og:image" content="https://jornadabrasil.com.br/assets/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ferramentas para decisões de trabalho, carreira e renda — Jornada Brasil">
   <meta name="twitter:description" content="Compare CLT e PJ, calcule salário líquido, rescisão, férias e outros direitos trabalhistas. Gratuito e atualizado.">
+  <meta name="twitter:image" content="https://jornadabrasil.com.br/assets/img/og-image.png">
+
   <meta name="theme-color" content="#1E3A8A">
+
+  <!-- Favicons e manifest -->
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/assets/img/icons/apple-touch-icon.png">
@@ -47,11 +82,82 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="msapplication-TileImage" content="/assets/img/icons/icon-144x144.png">
   <meta name="msapplication-TileColor" content="#15275A">
+
+  <!-- Preconnect para Google Fonts (reduz latência) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Preload logo WebP (LCP candidate) -->
+  <link rel="preload" as="image" href="/assets/img/logo.webp" type="image/webp">
+
+  <!-- Fontes: preload do CSS de fontes, carregamento não-bloqueante -->
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
-  <link rel="stylesheet" href="/assets/css/style.css">
+
+  <!--
+    =====================================================================
+    CSS CRÍTICO INLINE — acima da dobra (above the fold)
+    Cobre: variáveis, reset, header, hero, cookie banner, botões, badges.
+    Elimina bloqueio de renderização para o conteúdo visível no carregamento.
+    O restante do CSS carrega de forma assíncrona abaixo.
+    =====================================================================
+  -->
+  <style>
+  :root{--primary:#F97316;--primary-dark:#EA580C;--primary-bg:#FFEDD5;--primary-border:#FED7AA;--secondary:#1E3A8A;--text:#1F2937;--text-2:#4B5563;--text-3:#5B6370;--surface:#FFFFFF;--bg:#F9FAFB;--border:#E5E7EB;--border-2:#F3F4F6;--green:#157A4C;--green-bg:#EAF5EF;--red:#BB3B2A;--red-bg:#FAEDEB;--amber:#BC8A2D;--amber-bg:#FBF3E2;--amber-border:#E9D3A3;--radius:16px;--radius-sm:10px;--shadow:0 1px 3px rgba(0,0,0,.05),0 8px 24px -12px rgba(0,0,0,.10);--shadow-sm:0 1px 3px rgba(0,0,0,.05);--container:1600px;--font:"Inter",system-ui,-apple-system,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,monospace}
+  @media(prefers-color-scheme:dark){:root{--text:#F9FAFB;--text-2:#9CA3AF;--text-3:#6B7280;--surface:#111827;--bg:#0F172A;--border:#1F2937;--border-2:#1A2332;--primary-bg:#431407;--primary-border:#7C2D12}}
+  *,*::before,*::after{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:#fff;color:var(--text);font-family:var(--font);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4,h5{font-family:var(--font);letter-spacing:-.01em;margin:0}
+  img,svg{max-width:100%}
+  a{color:var(--primary)}
+  ul,ol{padding-left:1.5em}
+  .container{max-width:var(--container);margin:0 auto;padding:0 clamp(20px,4vw,56px)}
+  .skip-link{position:absolute;top:-100%;left:16px;background:var(--primary);color:#fff;padding:8px 16px;border-radius:0 0 8px 8px;text-decoration:none;font-weight:600;z-index:10000}
+  .skip-link:focus{top:0}
+  .site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border)}
+  .site-header .container{display:flex;align-items:center;height:72px;gap:24px}
+  .brand{display:flex;align-items:center;text-decoration:none;flex-shrink:0}
+  .brand-img{height:44px;width:auto;display:block}
+  .brand-img-mark{display:none}
+  @media(max-width:560px){.brand-img-full{display:none}.brand-img-mark{display:block;height:40px}}
+  .main-nav{display:flex;gap:4px;margin-left:auto}
+  .nav-link{padding:8px 14px;border-radius:8px;color:#4B5563;text-decoration:none;font-size:.9rem;font-weight:500;transition:.15s}
+  .nav-link:hover{background:var(--bg);color:var(--text)}
+  .nav-link.active{color:var(--primary);background:var(--primary-bg)}
+  .nav-link:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+  .hero{padding:80px 0 72px;text-align:center;background:#fff;width:100%}
+  .hero h1{font-size:clamp(2rem,5vw,2.75rem);font-weight:700;color:var(--text);margin-bottom:16px}
+  .hero-sub{font-size:1.1rem;color:#4B5563;max-width:56ch;margin:0 auto 32px;line-height:1.6}
+  .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;justify-content:center}
+  .btn-hero-primary{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fff;padding:14px 28px;border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none;transition:background .15s}
+  .btn-hero-primary:hover{background:var(--primary-dark);color:#fff}
+  .btn-hero-primary:focus-visible{outline:3px solid var(--primary-dark);outline-offset:3px}
+  .btn-hero-secondary{display:inline-flex;align-items:center;background:transparent;color:var(--primary);padding:14px 28px;border-radius:10px;font-weight:600;font-size:1rem;text-decoration:none;border:2px solid var(--primary);transition:background .15s}
+  .btn-hero-secondary:hover{background:var(--primary-bg);color:var(--primary)}
+  .btn-hero-secondary:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:var(--primary-bg);border:1px solid var(--primary-border);border-radius:999px;font-size:.78rem;font-weight:600;color:#7C2D12}
+  .hero-badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:.95rem;font-weight:600;padding:14px 24px;cursor:pointer;transition:.15s;text-decoration:none}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border)}
+  .btn-outline:hover{background:var(--bg)}
+  .btn-sm{padding:7px 14px;font-size:.85rem}
+  .btn svg{width:18px;height:18px}
+  .btn:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+  .cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--border);padding:16px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.08);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .cookie-banner.hidden{display:none}
+  .cookie-banner p{flex:1;font-size:.85rem;color:var(--text);margin:0;min-width:200px}
+  .cookie-banner p a{color:var(--primary)}
+  .cookie-banner-btns{display:flex;gap:8px;flex-wrap:wrap}
+  </style>
+
+  <!-- CSS completo: não-bloqueante (preload + swap para stylesheet) -->
+  <link rel="preload" href="/assets/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/assets/css/style.css"></noscript>
+
+  <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -76,24 +182,41 @@
     ]
   }
   </script>
-<meta name="twitter:image" content="https://jornadabrasil.com.br/assets/img/og-image.png">
 </head>
 <body>
   <a href="#main-content" class="skip-link">Ir para o conteúdo principal</a>
 
-  <div id="cookie-banner" class="cookie-banner hidden" role="region" aria-label="Aviso de cookies">
+  <div id="cookie-banner" class="cookie-banner hidden" role="region" aria-label="Aviso de cookies" aria-live="polite">
     <p>Usamos cookies para melhorar sua experiência, analisar o tráfego e personalizar anúncios. Veja nossa <a href="/cookies/">Política de Cookies</a>.</p>
     <div class="cookie-banner-btns">
-      <button class="btn btn-sm btn-outline" onclick="RC.acceptEssential()">Apenas essenciais</button>
-      <button class="btn btn-sm btn-primary" onclick="RC.acceptAll()">Aceitar todos</button>
+      <button class="btn btn-sm btn-outline" onclick="RC.acceptEssential()" aria-label="Aceitar apenas cookies essenciais">Apenas essenciais</button>
+      <button class="btn btn-sm btn-primary" onclick="RC.acceptAll()" aria-label="Aceitar todos os cookies">Aceitar todos</button>
     </div>
   </div>
 
   <header class="site-header" role="banner">
     <div class="container">
-      <a href="/" class="brand" aria-label="Jornada Brasil — Calculadoras trabalhistas"><img src="/assets/img/logo.png" alt="Jornada Brasil — Calculadoras trabalhistas gratuitas" class="brand-img brand-img-full"><img src="/assets/img/logo-mark.png" alt="Jornada Brasil" class="brand-img brand-img-mark"></a>
+      <a href="/" class="brand" aria-label="Jornada Brasil — Página inicial">
+        <picture>
+          <source srcset="/assets/img/logo.webp" type="image/webp">
+          <img src="/assets/img/logo.png"
+               alt="Jornada Brasil — Calculadoras trabalhistas gratuitas"
+               class="brand-img brand-img-full"
+               width="929" height="160"
+               fetchpriority="high"
+               decoding="async">
+        </picture>
+        <picture>
+          <source srcset="/assets/img/logo-mark.webp" type="image/webp">
+          <img src="/assets/img/logo-mark.png"
+               alt="Jornada Brasil"
+               class="brand-img brand-img-mark"
+               width="198" height="160"
+               decoding="async">
+        </picture>
+      </a>
       <nav class="main-nav" role="navigation" aria-label="Navegação principal">
-        <a href="/" class="nav-link active">Início</a>
+        <a href="/" class="nav-link active" aria-current="page">Início</a>
         <a href="/calculadoras/" class="nav-link">Calculadoras</a>
         <a href="/blog/" class="nav-link">Blog</a>
         <a href="/sobre/" class="nav-link">Sobre</a>
@@ -102,15 +225,15 @@
   </header>
 
   <main id="main-content">
-    <section class="hero">
+    <section class="hero" aria-labelledby="hero-heading">
       <div class="container">
-        <h1>Ferramentas para decisões de trabalho, carreira e renda</h1>
+        <h1 id="hero-heading">Ferramentas para decisões de trabalho, carreira e renda</h1>
         <p class="hero-sub">Compare CLT e PJ, calcule salário líquido, rescisão, férias e outros direitos trabalhistas.</p>
         <div class="hero-ctas">
           <a href="/pj-vs-clt/" class="btn-hero-primary">Comparar PJ vs CLT →</a>
           <a href="/calculadoras/" class="btn-hero-secondary">Ver todas as calculadoras</a>
         </div>
-        <div class="hero-badges" style="margin-top: 20px;">
+        <div class="hero-badges" style="margin-top: 20px;" aria-label="Destaques do portal">
           <span class="badge">✓ Tabelas 2026</span>
           <span class="badge">✓ Receita Federal + INSS</span>
           <span class="badge">✓ Gratuito</span>
@@ -122,37 +245,37 @@
       <div class="ad-slot ad-slot-leaderboard" aria-hidden="true"></div>
     </div>
 
-    <section class="section-band">
+    <section class="section-band" aria-labelledby="calc-heading">
       <div class="container">
-      <h2 class="section-h2">Calculadoras em destaque</h2>
+      <h2 class="section-h2" id="calc-heading">Calculadoras em destaque</h2>
       <p class="section-sub">As ferramentas mais usadas para decisões de trabalho e carreira.</p>
       <div class="calc-cards-grid">
         <a href="/pj-vs-clt/" class="calc-card calc-card--featured">
-          <div class="calc-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="calc-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
           <h3>PJ vs CLT — Comparador</h3>
           <p>Compare uma proposta PJ com salário CLT considerando impostos, FGTS, férias e 13º. A ferramenta mais completa para tomar essa decisão.</p>
           <span class="calc-card-cta">Comparar agora →</span>
         </a>
         <a href="/salario-liquido/" class="calc-card">
-          <div class="calc-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <div class="calc-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
           <h3>Salário Líquido</h3>
           <p>Holerite completo com INSS, IRRF, horas extras, insalubridade, VT e todos os descontos.</p>
           <span class="calc-card-cta">Calcular →</span>
         </a>
         <a href="/rescisao/" class="calc-card">
-          <div class="calc-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M4 13V4a2 2 0 0 1 2-2h9l5 5v4"/><path d="M3 17l4 4M7 17l-4 4"/><path d="M11 17h10"/></svg></div>
+          <div class="calc-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M4 13V4a2 2 0 0 1 2-2h9l5 5v4"/><path d="M3 17l4 4M7 17l-4 4"/><path d="M11 17h10"/></svg></div>
           <h3>Rescisão</h3>
           <p>Verbas rescisórias: saldo de salário, aviso prévio, 13º, férias e FGTS por motivo.</p>
           <span class="calc-card-cta">Calcular →</span>
         </a>
         <a href="/ferias/" class="calc-card">
-          <div class="calc-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h20"/><path d="M5 18l1.5-5"/><path d="M19 18l-7-12a3 3 0 0 0-5 1"/><circle cx="17" cy="5" r="2"/></svg></div>
+          <div class="calc-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18h20"/><path d="M5 18l1.5-5"/><path d="M19 18l-7-12a3 3 0 0 0-5 1"/><circle cx="17" cy="5" r="2"/></svg></div>
           <h3>Férias</h3>
           <p>Férias com 1/3 constitucional e abono pecuniário (venda de até 10 dias).</p>
           <span class="calc-card-cta">Calcular →</span>
         </a>
         <a href="/decimo-terceiro/" class="calc-card">
-          <div class="calc-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8V5a2 2 0 0 1 2-2c1.5 0 2 1 2 2M12 8V5a2 2 0 0 0-2-2C8.5 3 8 4 8 5"/><path d="M12 8v13"/></svg></div>
+          <div class="calc-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8V5a2 2 0 0 1 2-2c1.5 0 2 1 2 2M12 8V5a2 2 0 0 0-2-2C8.5 3 8 4 8 5"/><path d="M12 8v13"/></svg></div>
           <h3>13º Salário</h3>
           <p>13º proporcional com INSS e IRRF, parcelas de novembro e dezembro.</p>
           <span class="calc-card-cta">Calcular →</span>
@@ -161,26 +284,26 @@
       <a href="/calculadoras/" class="btn btn-outline" style="margin-top: 8px;">Ver todas as calculadoras →</a>
     </section>
 
-    <section class="container" style="margin: 40px 0">
+    <section class="container" style="margin: 40px 0" aria-labelledby="about-heading">
       <div class="about-section">
         <div>
-          <h2>Por que usar o Jornada Brasil?</h2>
+          <h2 id="about-heading">Por que usar o Jornada Brasil?</h2>
           <p>O Jornada Brasil é um portal de calculadoras e informações trabalhistas criado para ajudar trabalhadores, profissionais de RH e contadores a entenderem seus direitos e obrigações com mais clareza.</p>
           <ul style="margin: 16px 0; display: flex; flex-direction: column; gap: 10px; padding: 0; list-style: none;">
             <li style="display: flex; gap: 10px; align-items: flex-start;">
-              <span style="color: var(--green); font-weight: 700; flex-shrink: 0;">✓</span>
+              <span style="color: var(--green); font-weight: 700; flex-shrink: 0;" aria-hidden="true">✓</span>
               <span><strong>Tabelas oficiais 2026:</strong> INSS (Portaria Interministerial MPS/MF), IRRF (Receita Federal), CODEFAT e salário mínimo atualizados.</span>
             </li>
             <li style="display: flex; gap: 10px; align-items: flex-start;">
-              <span style="color: var(--green); font-weight: 700; flex-shrink: 0;">✓</span>
+              <span style="color: var(--green); font-weight: 700; flex-shrink: 0;" aria-hidden="true">✓</span>
               <span><strong>Cálculo progressivo do INSS:</strong> alíquota efetiva pela tabela de faixas, conforme a legislação vigente.</span>
             </li>
             <li style="display: flex; gap: 10px; align-items: flex-start;">
-              <span style="color: var(--green); font-weight: 700; flex-shrink: 0;">✓</span>
+              <span style="color: var(--green); font-weight: 700; flex-shrink: 0;" aria-hidden="true">✓</span>
               <span><strong>Redutor da Lei 15.270/2025:</strong> isenção total até R$ 2.428,80 e redução progressiva até R$ 5.000.</span>
             </li>
             <li style="display: flex; gap: 10px; align-items: flex-start;">
-              <span style="color: var(--green); font-weight: 700; flex-shrink: 0;">✓</span>
+              <span style="color: var(--green); font-weight: 700; flex-shrink: 0;" aria-hidden="true">✓</span>
               <span><strong>Memória de cálculo detalhada:</strong> cada calculadora mostra o passo a passo completo para conferência.</span>
             </li>
           </ul>
@@ -202,34 +325,34 @@
       </div>
     </section>
 
-    <section class="container" style="margin-bottom: 40px">
-      <h2 class="section-h2">Últimos artigos</h2>
+    <section class="container" style="margin-bottom: 40px" aria-labelledby="blog-heading">
+      <h2 class="section-h2" id="blog-heading">Últimos artigos</h2>
       <p class="section-sub">Conteúdo sobre direitos trabalhistas, legislação e dicas financeiras.</p>
       <div class="blog-grid" style="grid-template-columns: repeat(3,1fr)">
         <div class="blog-card">
           <span class="blog-card-tag">Salário</span>
           <h3><a href="/blog/inss-tabela-2026/">Como funciona o cálculo do INSS progressivo em 2026</a></h3>
           <p class="blog-card-excerpt">Entenda como as faixas de contribuição ao INSS funcionam e por que sua alíquota efetiva é menor que a nominal.</p>
-          <span class="blog-card-date">Junho/2026</span>
+          <span class="blog-card-date"><time datetime="2026-06">Junho/2026</time></span>
         </div>
         <div class="blog-card">
           <span class="blog-card-tag">Rescisão</span>
           <h3><a href="/blog/como-funciona-aviso-previo/">Aviso prévio proporcional: como calcular com a Lei 12.506</a></h3>
           <p class="blog-card-excerpt">Saiba como calcular o aviso prévio proporcional ao tempo de serviço e o impacto na sua rescisão.</p>
-          <span class="blog-card-date">Junho/2026</span>
+          <span class="blog-card-date"><time datetime="2026-06">Junho/2026</time></span>
         </div>
         <div class="blog-card">
           <span class="blog-card-tag">PJ vs CLT</span>
           <h3><a href="/blog/clt-vs-pj/">PJ ou CLT em 2026: o que realmente vale mais?</a></h3>
           <p class="blog-card-excerpt">Análise completa considerando impostos, FGTS, férias, 13º e benefícios previdenciários.</p>
-          <span class="blog-card-date">Maio/2026</span>
+          <span class="blog-card-date"><time datetime="2026-05">Maio/2026</time></span>
         </div>
       </div>
       <a href="/blog/" class="btn btn-outline" style="margin-top: 20px">Ver todos os artigos →</a>
     </section>
 
     <div class="container" style="margin-bottom: 40px">
-      <div class="disclaimer-box">
+      <div class="disclaimer-box" role="note" aria-label="Aviso legal">
         ⚠️ As informações e calculadoras deste portal têm caráter educativo e informativo e <strong>não substituem orientação jurídica, contábil ou trabalhista profissional</strong>. Os valores são estimativas baseadas nas tabelas oficiais de 2026 e podem diferir da sua folha de pagamento por conta de convenções coletivas, adicionais específicos e arredondamentos da empresa.
       </div>
     </div>
@@ -242,7 +365,7 @@
           <p class="footer-brand-name">Jornada Brasil</p>
           <p class="footer-desc">Portal de calculadoras e informações trabalhistas com tabelas oficiais de 2026. Ferramenta educativa e informativa, gratuita.</p>
         </div>
-        <div class="footer-links">
+        <nav class="footer-links" aria-label="Links de calculadoras">
           <h4>Calculadoras</h4>
           <ul>
             <li><a href="/salario-liquido/">Salário Líquido</a></li>
@@ -252,8 +375,8 @@
             <li><a href="/horas-extras/">Horas Extras</a></li>
             <li><a href="/pj-vs-clt/">PJ vs CLT</a></li>
           </ul>
-        </div>
-        <div class="footer-links">
+        </nav>
+        <nav class="footer-links" aria-label="Links do portal">
           <h4>Portal</h4>
           <ul>
             <li><a href="/blog/">Blog Trabalhista</a></li>
@@ -263,16 +386,16 @@
             <li><a href="/termos/">Termos de Uso</a></li>
             <li><a href="/cookies/" onclick="event.preventDefault();RC.openConsentManager();">Gerenciar cookies</a></li>
           </ul>
-        </div>
-        <div class="footer-refs">
+        </nav>
+        <nav class="footer-refs" aria-label="Fontes oficiais">
           <h4>Fontes oficiais</h4>
           <ul>
-            <li><a href="https://www.gov.br/trabalho-e-emprego" target="_blank" rel="noopener">Ministério do Trabalho</a></li>
-            <li><a href="https://www.receita.fazenda.gov.br" target="_blank" rel="noopener">Receita Federal</a></li>
-            <li><a href="https://www.inss.gov.br" target="_blank" rel="noopener">INSS</a></li>
-            <li><a href="https://www.caixa.gov.br" target="_blank" rel="noopener">Caixa Econômica</a></li>
+            <li><a href="https://www.gov.br/trabalho-e-emprego" target="_blank" rel="noopener noreferrer">Ministério do Trabalho</a></li>
+            <li><a href="https://www.receita.fazenda.gov.br" target="_blank" rel="noopener noreferrer">Receita Federal</a></li>
+            <li><a href="https://www.inss.gov.br" target="_blank" rel="noopener noreferrer">INSS</a></li>
+            <li><a href="https://www.caixa.gov.br" target="_blank" rel="noopener noreferrer">Caixa Econômica</a></li>
           </ul>
-        </div>
+        </nav>
       </div>
       <div class="footer-disclaimer">
         <p>As informações e calculadoras deste portal têm <strong>caráter educativo e informativo</strong> e <strong>não substituem orientação jurídica, contábil ou trabalhista profissional</strong>. Consulte sempre um especialista para decisões importantes.</p>
@@ -281,7 +404,8 @@
     </div>
   </footer>
 
-  <script src="/assets/js/consent.js"></script>
+  <!-- Scripts não-críticos: defer para não bloquear renderização -->
+  <script src="/assets/js/consent.js" defer></script>
   <script src="/assets/js/pwa.js" defer></script>
 </body>
 </html>

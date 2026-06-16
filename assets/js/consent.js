@@ -1,15 +1,6 @@
 // consent.js — LGPD + Google Consent Mode v2
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-
-// Default: denied before consent
-gtag('consent', 'default', {
-  'ad_storage': 'denied',
-  'ad_user_data': 'denied',
-  'ad_personalization': 'denied',
-  'analytics_storage': 'denied',
-  'wait_for_update': 500
-});
+// Nota: window.dataLayer, gtag() e gtag('consent','default') já foram declarados
+// no <head> do HTML antes deste script carregar.
 
 const RC_CONSENT_KEY = 'lgpd_consent';
 
@@ -34,13 +25,15 @@ const RC = {
     if (!prefs) return;
     const analytics = prefs.analytics ? 'granted' : 'denied';
     const ads = prefs.ads ? 'granted' : 'denied';
-    gtag('consent', 'update', {
-      'ad_storage': ads,
-      'ad_user_data': ads,
-      'ad_personalization': ads,
-      'analytics_storage': analytics
-    });
-    // Load third-party scripts after consent
+    if (typeof gtag === 'function') {
+      gtag('consent', 'update', {
+        'ad_storage': ads,
+        'ad_user_data': ads,
+        'ad_personalization': ads,
+        'analytics_storage': analytics
+      });
+    }
+    // Carrega scripts de terceiros conforme consentimento
     if (prefs.analytics) RC.loadAnalytics();
     if (prefs.ads) RC.loadAds();
   },
@@ -74,6 +67,11 @@ const RC = {
     modal.querySelector('#rc-toggle-ads').checked = !!prefs.ads;
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    // Foco no primeiro elemento interativo dentro do modal (acessibilidade)
+    setTimeout(function() {
+      const first = modal.querySelector('button, input, [tabindex]');
+      if (first) first.focus();
+    }, 50);
   },
 
   hideModal: function() {
@@ -92,36 +90,39 @@ const RC = {
     modal.innerHTML = `
       <div style="background:var(--surface,#fff);border-radius:14px;padding:28px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
         <h2 style="font-size:1.2rem;font-weight:700;margin:0 0 8px">Preferências de cookies</h2>
-        <p style="font-size:.85rem;color:var(--text-2,#5C6B82);margin:0 0 20px">Escolha quais tipos de cookies deseja aceitar.</p>
+        <p style="font-size:.85rem;color:var(--text-2,#4B5563);margin:0 0 20px">Escolha quais tipos de cookies deseja aceitar.</p>
         <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px">
           <label style="display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid var(--border,#E3E8EF);border-radius:10px;cursor:default;opacity:.7">
             <div>
               <div style="font-weight:600;font-size:.9rem">Essenciais</div>
-              <div style="font-size:.78rem;color:var(--text-2,#5C6B82)">Necessários para o funcionamento do site</div>
+              <div style="font-size:.78rem;color:var(--text-2,#4B5563)">Necessários para o funcionamento do site</div>
             </div>
-            <input type="checkbox" checked disabled style="width:18px;height:18px;accent-color:#155E75">
+            <input type="checkbox" checked disabled style="width:18px;height:18px;accent-color:#155E75" aria-label="Cookies essenciais (sempre ativos)">
           </label>
           <label style="display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid var(--border,#E3E8EF);border-radius:10px;cursor:pointer">
             <div>
               <div style="font-weight:600;font-size:.9rem">Análise (Analytics)</div>
-              <div style="font-size:.78rem;color:var(--text-2,#5C6B82)">Google Analytics — nos ajuda a melhorar o portal</div>
+              <div style="font-size:.78rem;color:var(--text-2,#4B5563)">Google Analytics — nos ajuda a melhorar o portal</div>
             </div>
-            <input id="rc-toggle-analytics" type="checkbox" style="width:18px;height:18px;accent-color:#155E75">
+            <input id="rc-toggle-analytics" type="checkbox" style="width:18px;height:18px;accent-color:#155E75" aria-label="Cookies de análise">
           </label>
           <label style="display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid var(--border,#E3E8EF);border-radius:10px;cursor:pointer">
             <div>
               <div style="font-weight:600;font-size:.9rem">Publicidade</div>
-              <div style="font-size:.78rem;color:var(--text-2,#5C6B82)">Google AdSense — anúncios relevantes para você</div>
+              <div style="font-size:.78rem;color:var(--text-2,#4B5563)">Google AdSense — anúncios relevantes para você</div>
             </div>
-            <input id="rc-toggle-ads" type="checkbox" style="width:18px;height:18px;accent-color:#155E75">
+            <input id="rc-toggle-ads" type="checkbox" style="width:18px;height:18px;accent-color:#155E75" aria-label="Cookies de publicidade">
           </label>
         </div>
         <div style="display:flex;gap:10px;justify-content:flex-end">
-          <button onclick="RC.hideModal()" style="padding:10px 18px;border:1px solid var(--border,#E3E8EF);border-radius:8px;background:transparent;cursor:pointer;font-size:.9rem;font-weight:600">Cancelar</button>
+          <button onclick="RC.hideModal()" style="padding:10px 18px;border:1px solid var(--border,#E3E8EF);border-radius:8px;background:transparent;cursor:pointer;font-size:.9rem;font-weight:600;color:var(--text,#1F2937)">Cancelar</button>
           <button onclick="RC._saveModalPrefs()" style="padding:10px 18px;background:#155E75;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:600">Salvar preferências</button>
         </div>
       </div>`;
+    // Fechar ao clicar no backdrop
     modal.addEventListener('click', function(e){ if(e.target===modal) RC.hideModal(); });
+    // Fechar com Escape (acessibilidade)
+    modal.addEventListener('keydown', function(e){ if(e.key==='Escape') RC.hideModal(); });
     return modal;
   },
 
@@ -131,23 +132,17 @@ const RC = {
     RC.setConsent({ analytics, ads, essential: true });
   },
 
+  // Carrega GA4 via loader diferido declarado no <head>
   loadAnalytics: function() {
-    if (window._rcAnalyticsLoaded) return;
-    window._rcAnalyticsLoaded = true;
-    // Replace G-XXXXXXXXXX with your actual GA4 Measurement ID
-    const GA_ID = 'G-XXXXXXXXXX';
-    const s = document.createElement('script');
-    s.async = true;
-    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
-    document.head.appendChild(s);
-    gtag('js', new Date());
-    gtag('config', GA_ID);
+    if (typeof window._jbLoadAnalytics === 'function') {
+      window._jbLoadAnalytics();
+    }
   },
 
   loadAds: function() {
     if (window._rcAdsLoaded) return;
     window._rcAdsLoaded = true;
-    // Replace ca-pub-XXXXXXXXXXXXXXXX with your actual AdSense Publisher ID
+    // Substitua ca-pub-XXXXXXXXXXXXXXXX pelo seu Publisher ID real do AdSense
     const s = document.createElement('script');
     s.async = true;
     s.crossOrigin = 'anonymous';
@@ -158,7 +153,7 @@ const RC = {
 
 window.RC = RC;
 
-// Initialize on DOM ready
+// Inicializar quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', function() {
   const consent = RC.getConsent();
   if (!consent) {
