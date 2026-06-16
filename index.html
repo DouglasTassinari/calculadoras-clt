@@ -124,16 +124,16 @@
   .main-nav{display:flex;gap:4px;margin-left:auto}
   .nav-link{padding:8px 14px;border-radius:8px;color:#4B5563;text-decoration:none;font-size:.9rem;font-weight:500;transition:.15s}
   .nav-link:hover{background:var(--bg);color:var(--text)}
-  .nav-link.active{color:var(--primary);background:var(--primary-bg)}
+  .nav-link.active{color:#B45309;background:var(--primary-bg)}
   .nav-link:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
   .hero{padding:80px 0 72px;text-align:center;background:#fff;width:100%}
   .hero h1{font-size:clamp(2rem,5vw,2.75rem);font-weight:700;color:var(--text);margin-bottom:16px}
   .hero-sub{font-size:1.1rem;color:#4B5563;max-width:56ch;margin:0 auto 32px;line-height:1.6}
   .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;justify-content:center}
-  .btn-hero-primary{display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fff;padding:14px 28px;border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none;transition:background .15s}
+  .btn-hero-primary{display:inline-flex;align-items:center;gap:8px;background:#B45309;color:#fff;padding:14px 28px;border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none;transition:background .15s}
   .btn-hero-primary:hover{background:var(--primary-dark);color:#fff}
   .btn-hero-primary:focus-visible{outline:3px solid var(--primary-dark);outline-offset:3px}
-  .btn-hero-secondary{display:inline-flex;align-items:center;background:transparent;color:var(--primary);padding:14px 28px;border-radius:10px;font-weight:600;font-size:1rem;text-decoration:none;border:2px solid var(--primary);transition:background .15s}
+  .btn-hero-secondary{display:inline-flex;align-items:center;background:transparent;color:#B45309;padding:14px 28px;border-radius:10px;font-weight:600;font-size:1rem;text-decoration:none;border:2px solid #B45309;transition:background .15s}
   .btn-hero-secondary:hover{background:var(--primary-bg);color:var(--primary)}
   .btn-hero-secondary:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
   .badge{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:var(--primary-bg);border:1px solid var(--primary-border);border-radius:999px;font-size:.78rem;font-weight:600;color:#7C2D12}
@@ -149,7 +149,8 @@
   .cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--border);padding:16px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.08);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
   .cookie-banner.hidden{display:none}
   .cookie-banner p{flex:1;font-size:.85rem;color:var(--text);margin:0;min-width:200px}
-  .cookie-banner p a{color:var(--primary)}
+  .cookie-banner p a{color:#B45309}
+  .ad-slot{min-height:90px}
   .cookie-banner-btns{display:flex;gap:8px;flex-wrap:wrap}
   </style>
 
@@ -198,11 +199,11 @@
     <div class="container">
       <a href="/" class="brand" aria-label="Jornada Brasil — Página inicial">
         <picture>
-          <source srcset="/assets/img/logo.webp" type="image/webp">
+          <source srcset="/assets/img/logo-sm.webp 1x, /assets/img/logo.webp 2x" type="image/webp">
           <img src="/assets/img/logo.png"
                alt="Jornada Brasil — Calculadoras trabalhistas gratuitas"
                class="brand-img brand-img-full"
-               width="929" height="160"
+               width="510" height="88"
                fetchpriority="high"
                decoding="async">
         </picture>
