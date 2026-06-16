@@ -651,7 +651,7 @@ details.memoria[open] summary .chev { transform: rotate(180deg); }
 .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; justify-content: center; }
 .btn-hero-primary {
   display: inline-flex; align-items: center; gap: 8px;
-  background: var(--primary); color: #fff;
+  background: #B45309; color: #fff;
   padding: 14px 28px; border-radius: 10px;
   font-weight: 700; font-size: 1rem; text-decoration: none;
   transition: background .15s;
@@ -659,10 +659,10 @@ details.memoria[open] summary .chev { transform: rotate(180deg); }
 .btn-hero-primary:hover { background: var(--primary-dark); color: #fff; }
 .btn-hero-secondary {
   display: inline-flex; align-items: center;
-  background: transparent; color: var(--primary);
+  background: transparent; color: #B45309;
   padding: 14px 28px; border-radius: 10px;
   font-weight: 600; font-size: 1rem; text-decoration: none;
-  border: 2px solid var(--primary);
+  border: 2px solid #B45309;
   transition: background .15s;
 }
 .btn-hero-secondary:hover { background: var(--primary-bg); color: var(--primary); }
@@ -697,7 +697,7 @@ details.memoria[open] summary .chev { transform: rotate(180deg); }
 }
 .cookie-banner.hidden { display: none; }
 .cookie-banner p { flex: 1; font-size: .85rem; color: var(--text); margin: 0; min-width: 200px; } /* era --text-2; usa --text para garantir contraste */
-.cookie-banner p a { color: var(--primary); }
+.cookie-banner p a { color: #B45309; }
 .cookie-banner-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* ---- Blog cards ---- */
