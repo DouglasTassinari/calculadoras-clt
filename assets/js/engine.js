@@ -281,9 +281,9 @@ function folhaCompleta({ bruto, deps=0, pensao=0,
 function seguroDesemprego({ s1, s2, s3, formalTempo }){
   const media = r2((nz(s1)+nz(s2)+nz(s3))/3);
   let parcela;
-  if(media <= 2108.17)      parcela = r2(media * 0.80);
-  else if(media <= 3519.11) parcela = r2(1686.54 + (media - 2108.17) * 0.50);
-  else                      parcela = 2388.28;
+  if(media <= 2222.17)      parcela = r2(media * 0.80);
+  else if(media <= 3703.99) parcela = r2(1777.74 + (media - 2222.17) * 0.50);
+  else                      parcela = 2518.65;
   parcela = Math.max(parcela, SALARIO_MINIMO);
   parcela = r2(parcela);
   let nParcelas = 3;
@@ -727,11 +727,11 @@ const CALCS = {
       const blocos=[{titulo:`${r.nParcelas} parcelas`, linhas:Array.from({length:r.nParcelas},(_,i)=>({nome:`${i+1}ª parcela`, valor:r.parcela, pos:true}))}];
       const memoria=[
         `Média salarial: (${BRL(v.s1)} + ${BRL(v.s2||v.s1)} + ${BRL(v.s3||v.s1)}) ÷ 3 = ${BRL(r.media)}.`,
-        r.media<=2108.17
-          ? `Faixa 1 (até R$ 2.108,17): ${BRL(r.media)} × 80% = ${BRL(r.parcela)}.`
-          : r.media<=3519.11
-          ? `Faixa 2: R$ 1.686,54 + (${BRL(r.media)} − R$ 2.108,17) × 50% = ${BRL(r.parcela)}.`
-          : `Faixa 3 (acima de R$ 3.519,11): parcela máxima de ${BRL(r.parcela)}.`,
+        r.media<=2222.17
+          ? `Faixa 1 (até R$ 2.222,17): ${BRL(r.media)} × 80% = ${BRL(r.parcela)}.`
+          : r.media<=3703.99
+          ? `Faixa 2: R$ 1.777,74 + (${BRL(r.media)} − R$ 2.222,17) × 50% = ${BRL(r.parcela)}.`
+          : `Faixa 3 (acima de R$ 3.703,99): parcela máxima de ${BRL(r.parcela)}.`,
         `Número de parcelas: ${r.nParcelas} (${v.formalTempo} meses de vínculo).`,
         'O benefício não pode ser inferior ao salário mínimo.',
       ];
