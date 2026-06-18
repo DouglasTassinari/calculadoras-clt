@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1417484877629527" crossorigin="anonymous"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -104,11 +105,11 @@
     =====================================================================
   -->
   <style>
-  :root{--primary:#F97316;--primary-dark:#EA580C;--primary-bg:#FFEDD5;--primary-border:#FED7AA;--secondary:#1E3A8A;--text:#1F2937;--text-2:#4B5563;--text-3:#5B6370;--surface:#FFFFFF;--bg:#F9FAFB;--border:#E5E7EB;--border-2:#F3F4F6;--green:#157A4C;--green-bg:#EAF5EF;--red:#BB3B2A;--red-bg:#FAEDEB;--amber:#BC8A2D;--amber-bg:#FBF3E2;--amber-border:#E9D3A3;--radius:16px;--radius-sm:10px;--shadow:0 1px 3px rgba(0,0,0,.05),0 8px 24px -12px rgba(0,0,0,.10);--shadow-sm:0 1px 3px rgba(0,0,0,.05);--container:1600px;--font:"Inter",system-ui,-apple-system,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,monospace}
-  @media(prefers-color-scheme:dark){:root{--text:#F9FAFB;--text-2:#9CA3AF;--text-3:#6B7280;--surface:#111827;--bg:#0F172A;--border:#1F2937;--border-2:#1A2332;--primary-bg:#431407;--primary-border:#7C2D12}}
+  :root{color-scheme:light dark;--primary:#F97316;--primary-dark:#EA580C;--primary-bg:#FFEDD5;--primary-border:#FED7AA;--secondary:#1E3A8A;--text:#1F2937;--text-2:#4B5563;--text-3:#5B6370;--surface:#FFFFFF;--bg:#F9FAFB;--border:#E5E7EB;--border-2:#F3F4F6;--accent-text:#B45309;--badge-text:#7C2D12;--green:#157A4C;--green-bg:#EAF5EF;--red:#BB3B2A;--red-bg:#FAEDEB;--amber:#BC8A2D;--amber-bg:#FBF3E2;--amber-border:#E9D3A3;--radius:16px;--radius-sm:10px;--shadow:0 1px 3px rgba(0,0,0,.05),0 8px 24px -12px rgba(0,0,0,.10);--shadow-sm:0 1px 3px rgba(0,0,0,.05);--container:1600px;--font:"Inter",system-ui,-apple-system,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,monospace}
+  @media(prefers-color-scheme:dark){:root{--text:#F9FAFB;--text-2:#9CA3AF;--text-3:#8A93A3;--surface:#111827;--bg:#0F172A;--border:#283447;--border-2:#1A2332;--primary-bg:#431407;--primary-border:#7C2D12;--accent-text:#FB923C;--badge-text:#FDBA74}}
   *,*::before,*::after{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
-  body{margin:0;background:#fff;color:var(--text);font-family:var(--font);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  body{margin:0;background:var(--surface);color:var(--text);font-family:var(--font);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
   h1,h2,h3,h4,h5{font-family:var(--font);letter-spacing:-.01em;margin:0}
   img,svg{max-width:100%}
   a{color:var(--primary)}
@@ -116,33 +117,33 @@
   .container{max-width:var(--container);margin:0 auto;padding:0 clamp(20px,4vw,56px)}
   .skip-link{position:absolute;top:-100%;left:16px;background:var(--primary);color:#fff;padding:8px 16px;border-radius:0 0 8px 8px;text-decoration:none;font-weight:600;z-index:10000}
   .skip-link:focus{top:0}
-  .site-header{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--border)}
+  .site-header{position:sticky;top:0;z-index:100;background:var(--surface);border-bottom:1px solid var(--border)}
   .site-header .container{display:flex;align-items:center;height:72px;gap:24px}
   .brand{display:flex;align-items:center;text-decoration:none;flex-shrink:0}
   .brand-img{height:44px;width:auto;display:block}
   .brand-img-mark{display:none}
   @media(max-width:560px){.brand-img-full{display:none}.brand-img-mark{display:block;height:40px}}
   .main-nav{display:flex;gap:4px;margin-left:auto}
-  .nav-link{padding:8px 14px;border-radius:8px;color:#4B5563;text-decoration:none;font-size:.9rem;font-weight:500;transition:.15s}
+  .nav-link{padding:8px 14px;border-radius:8px;color:var(--text-2);text-decoration:none;font-size:.9rem;font-weight:500;transition:.15s}
   .nav-link:hover{background:var(--bg);color:var(--text)}
-  .nav-link.active{color:#B45309;background:var(--primary-bg)}
+  .nav-link.active{color:var(--accent-text);background:var(--primary-bg)}
   .nav-link:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
-  .hero{padding:80px 0 72px;text-align:center;background:#fff;width:100%}
+  .hero{padding:80px 0 72px;text-align:center;background:var(--surface);width:100%}
   .hero h1{font-size:clamp(2rem,5vw,2.75rem);font-weight:700;color:var(--text);margin-bottom:16px}
-  .hero-sub{font-size:1.1rem;color:#4B5563;max-width:56ch;margin:0 auto 32px;line-height:1.6}
+  .hero-sub{font-size:1.1rem;color:var(--text-2);max-width:56ch;margin:0 auto 32px;line-height:1.6}
   .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;justify-content:center}
   .btn-hero-primary{display:inline-flex;align-items:center;gap:8px;background:#B45309;color:#fff;padding:14px 28px;border-radius:10px;font-weight:700;font-size:1rem;text-decoration:none;transition:background .15s}
   .btn-hero-primary:hover{background:var(--primary-dark);color:#fff}
   .btn-hero-primary:focus-visible{outline:3px solid var(--primary-dark);outline-offset:3px}
-  .btn-hero-secondary{display:inline-flex;align-items:center;background:transparent;color:#B45309;padding:14px 28px;border-radius:10px;font-weight:600;font-size:1rem;text-decoration:none;border:2px solid #B45309;transition:background .15s}
+  .btn-hero-secondary{display:inline-flex;align-items:center;background:transparent;color:var(--accent-text);padding:14px 28px;border-radius:10px;font-weight:600;font-size:1rem;text-decoration:none;border:2px solid var(--accent-text);transition:background .15s}
   .btn-hero-secondary:hover{background:var(--primary-bg);color:var(--primary)}
   .btn-hero-secondary:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
-  .badge{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:var(--primary-bg);border:1px solid var(--primary-border);border-radius:999px;font-size:.78rem;font-weight:600;color:#7C2D12}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:var(--primary-bg);border:1px solid var(--primary-border);border-radius:999px;font-size:.78rem;font-weight:600;color:var(--badge-text)}
   .hero-badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:16px}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:.95rem;font-weight:600;padding:14px 24px;cursor:pointer;transition:.15s;text-decoration:none}
   .btn-primary{background:var(--primary);color:#fff}
   .btn-primary:hover{background:var(--primary-dark)}
-  .btn-outline{background:#fff;color:var(--text);border:1px solid var(--border)}
+  .btn-outline{background:var(--surface);color:var(--text);border:1px solid var(--border)}
   .btn-outline:hover{background:var(--bg)}
   .btn-sm{padding:7px 14px;font-size:.85rem}
   .btn svg{width:18px;height:18px}
@@ -150,13 +151,13 @@
   .cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--surface);border-top:1px solid var(--border);padding:16px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.08);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
   .cookie-banner.hidden{display:none}
   .cookie-banner p{flex:1;font-size:.85rem;color:var(--text);margin:0;min-width:200px}
-  .cookie-banner p a{color:#B45309}
+  .cookie-banner p a{color:var(--accent-text)}
   .ad-slot{min-height:90px}
   .section-band{background:var(--bg);width:100%;padding:40px 0 48px}
   .section-h2{font-size:1.5rem;font-weight:700;color:var(--text);margin-bottom:8px}
   .section-sub{font-size:1rem;color:var(--text-2);margin-bottom:32px}
   .calc-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin:32px 0}
-  .calc-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;text-decoration:none;display:flex;flex-direction:column;gap:10px}
+  .calc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;text-decoration:none;display:flex;flex-direction:column;gap:10px}
   .calc-card--featured{border-color:var(--primary);border-width:2px;background:var(--primary-bg);grid-column:span 2}
   .cookie-banner-btns{display:flex;gap:8px;flex-wrap:wrap}
   </style>
