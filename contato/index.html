@@ -73,27 +73,16 @@
         <p class="lead">O Jornada Brasil é uma ferramenta gratuita mantida por pessoas apaixonadas pelo direito trabalhista e pela educação financeira. Ficamos felizes em receber sugestões, reportar erros e responder dúvidas sobre as calculadoras.</p>
 
         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin: 24px 0">
-          <h2 style="font-size: 1.1rem; margin-bottom: 16px">Canais de atendimento</h2>
-          <div style="display: flex; flex-direction: column; gap: 16px">
-            <div style="display: flex; gap: 14px; align-items: flex-start">
-              <div style="width: 40px; height: 40px; background: var(--primary-bg); border-radius: 10px; display: grid; place-items: center; flex-shrink: 0">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-              </div>
-              <div>
-                <p style="font-weight: 600; margin: 0">Dúvidas gerais e sugestões</p>
-                <a href="mailto:contato@douglastassinarii@gmail.com" style="color: var(--primary)">contato@douglastassinarii@gmail.com</a>
-              </div>
+          <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px">
+            <div style="width: 40px; height: 40px; background: var(--primary-bg); border-radius: 10px; display: grid; place-items: center; flex-shrink: 0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </div>
-            <div style="display: flex; gap: 14px; align-items: flex-start">
-              <div style="width: 40px; height: 40px; background: var(--primary-bg); border-radius: 10px; display: grid; place-items: center; flex-shrink: 0">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <div>
-                <p style="font-weight: 600; margin: 0">Privacidade e dados pessoais</p>
-                <a href="mailto:privacidade@douglastassinarii@gmail.com" style="color: var(--primary)">privacidade@douglastassinarii@gmail.com</a>
-              </div>
+            <div>
+              <h2 style="font-size: 1.1rem; margin: 0 0 4px">Fale conosco</h2>
+              <p style="color: var(--text-2); margin: 0">Use o formulário <strong>Contato e sugestões</strong> para reportar um erro de cálculo, tirar dúvidas ou enviar sugestões. Respondemos pelo e-mail que você informar.</p>
             </div>
           </div>
+          <button type="button" class="btn btn-primary" onclick="window.JBContact&amp;&amp;JBContact.open()">Abrir formulário de contato</button>
         </div>
 
         <h2>Perguntas frequentes sobre o portal</h2>
@@ -110,7 +99,7 @@
 
         <details class="faq-item">
           <summary>Como reportar um erro de cálculo?</summary>
-          <div class="faq-answer"><p>Envie um e-mail para <a href="mailto:contato@douglastassinarii@gmail.com">contato@douglastassinarii@gmail.com</a> com: (1) qual calculadora, (2) os valores que você inseriu, (3) o resultado obtido e (4) o resultado esperado com a fonte de referência. Analisaremos com prioridade e corrigiremos caso confirmado o erro.</p></div>
+          <div class="faq-answer"><p>Use o botão <strong>Contato e sugestões</strong> (no canto inferior direito da tela), selecione o assunto <em>“Erro de cálculo”</em> e informe: (1) qual calculadora, (2) os valores que você inseriu, (3) o resultado obtido e (4) o resultado esperado com a fonte de referência. Analisaremos com prioridade e corrigiremos caso confirmado o erro.</p></div>
         </details>
 
         <details class="faq-item">
@@ -133,5 +122,6 @@
   </footer>
   <script src="/assets/js/consent.js"></script>
   <script src="/assets/js/pwa.js" defer></script>
+<script src="/assets/js/contact-widget.js" defer></script>
 </body>
 </html>

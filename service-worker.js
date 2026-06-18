@@ -1,7 +1,7 @@
 // Portal Brasil — Service Worker
 // Estratégia: Cache-First para estáticos, Network-First para HTML e JSON
 
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const STATIC_CACHE = `jornadabrasil-static-${CACHE_VERSION}`;
 const HTML_CACHE = `jornadabrasil-html-${CACHE_VERSION}`;
 
@@ -10,6 +10,7 @@ const ALL_CACHES = [STATIC_CACHE, HTML_CACHE];
 // Arquivos pré-cacheados no install (essenciais para funcionamento offline)
 const PRECACHE_ASSETS = [
   '/assets/css/style.css',
+  '/assets/js/contact-widget.js',
   '/assets/js/app.js',
   '/assets/js/engine.js',
   '/assets/js/consent.js',
