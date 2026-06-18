@@ -1,7 +1,7 @@
 // Portal Brasil — Service Worker
 // Estratégia: Cache-First para estáticos, Network-First para HTML e JSON
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const STATIC_CACHE = `jornadabrasil-static-${CACHE_VERSION}`;
 const HTML_CACHE = `jornadabrasil-html-${CACHE_VERSION}`;
 
@@ -75,18 +75,22 @@ self.addEventListener('fetch', (event) => {
     !url.pathname.endsWith('.json');
 
   if (isStaticAsset) {
-    // Cache-First: CSS, JS, imagens — raramente mudam; cache serve imediato
+    // Stale-While-Revalidate: CSS, JS e imagens são servidos do cache na hora
+    // (rápido) e revalidados na rede em segundo plano. Assim, novos deploys
+    // chegam automaticamente na visita seguinte, sem hard-reload por página e
+    // sem depender de bump manual da versão do cache.
     event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(STATIC_CACHE).then((c) => c.put(request, clone));
-          }
-          return response;
-        }).catch(() => new Response('', { status: 503 }));
-      })
+      caches.open(STATIC_CACHE).then((cache) =>
+        cache.match(request).then((cached) => {
+          const network = fetch(request)
+            .then((response) => {
+              if (response.ok) cache.put(request, response.clone());
+              return response;
+            })
+            .catch(() => cached || new Response('', { status: 503 }));
+          return cached || network;
+        })
+      )
     );
   } else if (isHTML) {
     // Network-First: HTML sempre tenta rede para garantir conteúdo atualizado
