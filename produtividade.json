@@ -1,0 +1,25 @@
+{
+  "_comentario": "Tabela de produtividade (rendimento medio por dia util). Edite estes numeros conforme sua experiencia. Para servicos por 'unidade' que levam mais de 1 dia, use fracao (ex.: 0.34 = ~3 dias por unidade).",
+  "servicos": {
+    "Pintura interna": { "unidade": "m²", "rendimentoPorDia": 40 },
+    "Pintura externa": { "unidade": "m²", "rendimentoPorDia": 30 },
+    "Grafiato": { "unidade": "m²", "rendimentoPorDia": 15 },
+    "Reboco": { "unidade": "m²", "rendimentoPorDia": 20 },
+    "Recuperação estrutural de paredes": { "unidade": "m²", "rendimentoPorDia": 8 },
+    "Reparos estruturais": { "unidade": "serviço", "rendimentoPorDia": 1 },
+    "Rodapé": { "unidade": "m", "rendimentoPorDia": 20 },
+    "Forro PVC": { "unidade": "m²", "rendimentoPorDia": 12 },
+    "Recuperação de churrasqueira": { "unidade": "unidade", "rendimentoPorDia": 0.34 },
+    "Adequação de janelas": { "unidade": "unidade", "rendimentoPorDia": 0.5 },
+    "Assentamento de piso/cerâmica": { "unidade": "m²", "rendimentoPorDia": 12 },
+    "Assentamento de azulejo": { "unidade": "m²", "rendimentoPorDia": 10 },
+    "Contrapiso": { "unidade": "m²", "rendimentoPorDia": 25 },
+    "Impermeabilização": { "unidade": "m²", "rendimentoPorDia": 18 },
+    "Massa corrida": { "unidade": "m²", "rendimentoPorDia": 35 }
+  },
+  "fatorComplexidade": {
+    "Baixa": 1.15,
+    "Média": 1.0,
+    "Alta": 0.8
+  }
+}
