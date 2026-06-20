@@ -179,10 +179,13 @@
         const precoRecomendado = baseCusto + reservaRisco;
         const precoPremium = precoRecomendado * 1.15;
 
-        // Rateia o preço recomendado entre os serviços, proporcional aos dias de cada um.
-        // Assim cada serviço ganha um preço total e um preço por unidade (m²/m/un).
+        // Orçamento do cliente: deslocamento e ajudante viram linhas próprias.
+        // O "bolo dos serviços" = mão de obra + margem (margem embutida, nunca exibida ao cliente).
+        // Esse bolo é diluído entre os serviços na proporção dos dias, e o preço por unidade
+        // (m²/m/un) sai dividindo pela quantidade — ou seja, seu valor/dia diluído na quantidade.
+        const poolServicos = maoDeObra + reservaRisco;
         const itensOrcados = itens.map((it) => {
-          const precoServico = diasBrutos > 0 ? precoRecomendado * (it.dias / diasBrutos) : 0;
+          const precoServico = diasBrutos > 0 ? poolServicos * (it.dias / diasBrutos) : 0;
           const qtd = toNum(it.quantidade);
           const precoUnit = qtd > 0 ? precoServico / qtd : 0;
           return { ...it, precoServico, precoUnit };
@@ -195,7 +198,7 @@
         const ganhoRealPorDia = (P) => totalDias > 0 ? (P - custosOperacionais) / totalDias : 0;
 
         return {
-          itens: itensOrcados, diasBrutos, totalDias, semanas,
+          itens: itensOrcados, poolServicos, diasBrutos, totalDias, semanas,
           maoDeObra, deslocamento, ajudante, custosOperacionais, baseCusto, reservaRisco,
           precoMinimo, precoRecomendado, precoPremium,
           ganhoDia, margem, ganhoRealPorDia,
@@ -245,7 +248,7 @@
         <div className="max-w-2xl mx-auto px-4 pb-24 pt-6">
 
           {/* Cabeçalho */}
-          <header className="mb-5">
+          <header className="no-print mb-5">
             <div className="flex items-center gap-2">
               <div className="h-9 w-9 rounded-xl bg-indigo-600 text-white grid place-items-center font-bold">OJ</div>
               <div>
@@ -253,7 +256,6 @@
                 <p className="text-xs text-slate-500">Quanto cobrar pra não trabalhar meses e ganhar menos do que imaginava.</p>
               </div>
             </div>
-            <p className="print-only text-sm text-slate-500 mt-2">Orçamento gerado em {hoje}</p>
           </header>
 
           {/* ---------- PASSO 1 ---------- */}
@@ -354,6 +356,11 @@
                         <div className="font-semibold text-slate-700">{dec(info.dias, 1)} dias</div>
                       </div>
                     </div>
+                    {toNum(s.quantidade) > 0 && toNum(s.rendimento) <= 0 && (
+                      <p className="text-xs text-amber-600 mt-2">
+                        Informe "rende por dia" para calcular o preço deste serviço.
+                      </p>
+                    )}
                   </div>
                 );
               })}
@@ -365,9 +372,11 @@
             </button>
           </section>
 
-          {/* ---------- PASSO 4 · RESULTADO ---------- */}
-          <section className="bg-white rounded-2xl shadow-sm p-5 mb-4 print-area">
-            <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-1">Resultado do orçamento</h2>
+          {/* ---------- ANÁLISE PRO TRABALHADOR (só na tela) ---------- */}
+          <section className="no-print bg-white rounded-2xl shadow-sm p-5 mb-4">
+            <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-1">
+              Sua análise <span className="text-slate-400 normal-case font-normal">(só você vê)</span>
+            </h2>
             <p className="text-xs text-slate-400 mb-4">
               {calc.totalDias} dias úteis (≈ {dec(calc.semanas, 1)} semanas a {dec(toNum(prof.diasSemana),0)} dias/semana)
             </p>
@@ -385,33 +394,6 @@
               <div className="rounded-xl bg-slate-50 p-3 text-center">
                 <div className="text-[11px] uppercase text-slate-400 font-semibold">Premium</div>
                 <div className="font-bold text-slate-700 mt-1 leading-tight">{brl(calc.precoPremium)}</div>
-              </div>
-            </div>
-
-            {/* Itens do orçamento: descrição, quantidade, preço por unidade e total */}
-            <div className="mb-4">
-              <h3 className="text-sm font-semibold text-slate-600 mb-2">Serviços orçados</h3>
-              <div className="rounded-xl border border-slate-100 overflow-hidden">
-                {calc.itens.filter((it) => toNum(it.quantidade) > 0).map((it) => (
-                  <div key={it.id} className="flex items-baseline justify-between gap-3 px-3 py-2 border-b border-slate-100 last:border-0">
-                    <div className="min-w-0">
-                      <div className="font-medium text-slate-700 truncate">{it.nome || "Serviço sem nome"}</div>
-                      <div className="text-xs text-slate-400">
-                        {dec(toNum(it.quantidade), 2)} {it.unidade} × {brl(it.precoUnit)}/{it.unidade}
-                      </div>
-                    </div>
-                    <div className="tabular-nums font-semibold text-slate-700 shrink-0">{brl(it.precoServico)}</div>
-                  </div>
-                ))}
-                {calc.itens.filter((it) => toNum(it.quantidade) > 0).length === 0 && (
-                  <div className="px-3 py-3 text-sm text-slate-400 text-center">
-                    Preencha serviços com quantidade para ver o detalhamento.
-                  </div>
-                )}
-              </div>
-              <div className="flex items-baseline justify-between gap-3 px-3 pt-2">
-                <span className="font-semibold text-slate-600">Total dos serviços</span>
-                <span className="tabular-nums font-bold text-slate-800">{brl(calc.precoRecomendado)}</span>
               </div>
             </div>
 
@@ -462,6 +444,44 @@
             </div>
           </section>
 
+          {/* ---------- ORÇAMENTO DO CLIENTE (é o que vai impresso) ---------- */}
+          <section className="bg-white rounded-2xl shadow-sm p-5 mb-4 print-area">
+            <div className="flex items-baseline justify-between mb-1">
+              <h2 className="text-base font-bold text-slate-800">Orçamento</h2>
+              <span className="text-xs text-slate-400">{hoje}</span>
+            </div>
+            <p className="no-print text-xs text-slate-400 mb-3">
+              Prévia do que o cliente recebe — sem margem e sem seus ganhos. É esta parte que sai na impressão.
+            </p>
+
+            <div className="rounded-xl border border-slate-100 overflow-hidden">
+              {calc.itens.filter((it) => toNum(it.quantidade) > 0).map((it) => (
+                <div key={it.id} className="flex items-baseline justify-between gap-3 px-3 py-2 border-b border-slate-100 last:border-0">
+                  <div className="min-w-0">
+                    <div className="font-medium text-slate-700">{it.nome || "Serviço"}</div>
+                    <div className="text-xs text-slate-400">
+                      {dec(toNum(it.quantidade), 2)} {it.unidade} × {brl(it.precoUnit)}/{it.unidade}
+                    </div>
+                  </div>
+                  <div className="tabular-nums font-semibold text-slate-700 shrink-0">{brl(it.precoServico)}</div>
+                </div>
+              ))}
+              {calc.itens.filter((it) => toNum(it.quantidade) > 0).length === 0 && (
+                <div className="px-3 py-3 text-sm text-slate-400 text-center">
+                  Adicione serviços com quantidade e rendimento para montar o orçamento.
+                </div>
+              )}
+            </div>
+
+            <div className="mt-2">
+              {calc.deslocamento > 0 && <LinhaResumo titulo="Deslocamento" valor={brl(calc.deslocamento)} />}
+              {prof.possuiAjudante && calc.ajudante > 0 && <LinhaResumo titulo="Ajudante" valor={brl(calc.ajudante)} />}
+              <div className="border-t-2 border-slate-200 mt-1 pt-1">
+                <LinhaResumo titulo="Total do orçamento" valor={brl(calc.precoRecomendado)} destaque />
+              </div>
+            </div>
+          </section>
+
           {/* Toggle: a seção de aditivos só aparece quando marcada (igual ao ajudante) */}
           <label className="no-print flex items-center gap-2 select-none bg-white rounded-2xl shadow-sm p-5 mb-4 cursor-pointer">
             <input type="checkbox" checked={mostrarAditivos}
@@ -477,10 +497,12 @@
           <section className="bg-white rounded-2xl shadow-sm p-5 mb-4 print-area">
             <h2 className="text-sm font-bold text-purple-600 uppercase tracking-wide mb-3">Aditivos da obra</h2>
 
-            <Campo label="Valor do contrato original" hint="vazio = usa o preço recomendado acima">
-              <NumInput value={contratoOriginal} placeholder={String(Math.round(calc.precoRecomendado))}
-                onChange={setContratoOriginal} prefix="R$" />
-            </Campo>
+            <div className="no-print">
+              <Campo label="Valor do contrato original" hint="vazio = usa o preço recomendado acima">
+                <NumInput value={contratoOriginal} placeholder={String(Math.round(calc.precoRecomendado))}
+                  onChange={setContratoOriginal} prefix="R$" />
+              </Campo>
+            </div>
 
             {aditivos.length > 0 && (
               <div className="space-y-3 mt-4 no-print">
@@ -547,7 +569,7 @@
           <div className="no-print flex gap-2">
             <button onClick={() => window.print()}
               className="flex-1 rounded-xl bg-indigo-600 text-white font-semibold py-3 hover:bg-indigo-700 shadow-sm">
-              Salvar / imprimir PDF
+              Imprimir orçamento do cliente
             </button>
             <button onClick={resetTudo}
               className="rounded-xl bg-white border border-slate-300 text-slate-500 font-medium px-4 hover:bg-slate-50">
