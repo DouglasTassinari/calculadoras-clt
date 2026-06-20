@@ -126,14 +126,12 @@
     /* ===================== APP ===================== */
     const ESTADO_INICIAL = {
       prof: {
-        ganhoDia: "400", diasSemana: "5", possuiAjudante: false,
-        custoAjudanteDia: "150", deslocamentoDia: "25", margem: "15", cidadeEstado: "",
+        ganhoDia: "", diasSemana: "", possuiAjudante: false,
+        custoAjudanteDia: "", deslocamentoDia: "", margem: "", cidadeEstado: "",
       },
       servicos: [
-        { id: uid(), nome: "Pintura interna", unidade: "m²", quantidade: "220", rendimento: "", complexidade: "Média" },
-        { id: uid(), nome: "Grafiato", unidade: "m²", quantidade: "45", rendimento: "", complexidade: "Média" },
-        { id: uid(), nome: "Rodapé", unidade: "m", quantidade: "40", rendimento: "", complexidade: "Média" },
-        { id: uid(), nome: "Recuperação de churrasqueira", unidade: "unidade", quantidade: "1", rendimento: "", complexidade: "Alta" },
+        // Começa com uma linha vazia pronta pra preencher
+        { id: uid(), nome: "", unidade: "m²", quantidade: "", rendimento: "", complexidade: "Média" },
       ],
       aditivos: [],
       contratoOriginal: "",
@@ -160,7 +158,7 @@
       /* Persistência local (sem banco de dados) */
       useEffect(() => {
         try {
-          const s = localStorage.getItem("orcajusto_v1");
+          const s = localStorage.getItem("orcajusto_v2");
           if (s) {
             const d = JSON.parse(s);
             if (d.prof) setProf(d.prof);
@@ -174,7 +172,7 @@
       useEffect(() => {
         if (!carregado) return;
         try {
-          localStorage.setItem("orcajusto_v1", JSON.stringify({ prof, servicos, aditivos, contratoOriginal }));
+          localStorage.setItem("orcajusto_v2", JSON.stringify({ prof, servicos, aditivos, contratoOriginal }));
         } catch (e) {}
       }, [prof, servicos, aditivos, contratoOriginal, carregado]);
 
@@ -265,7 +263,7 @@
 
       const resetTudo = () => {
         if (confirm("Limpar tudo e recomeçar?")) {
-          localStorage.removeItem("orcajusto_v1");
+          localStorage.removeItem("orcajusto_v2");
           setProf(ESTADO_INICIAL.prof);
           setServicos(ESTADO_INICIAL.servicos.map((s) => ({ ...s, id: uid() })));
           setAditivos([]); setContratoOriginal(""); setSimuladorPreco("");
@@ -295,16 +293,16 @@
             <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-wide mb-3">1 · Seus dados</h2>
             <div className="grid grid-cols-2 gap-3">
               <Campo label="Quanto quer ganhar por dia?">
-                <NumInput value={prof.ganhoDia} onChange={(v) => setP("ganhoDia", v)} prefix="R$" />
+                <NumInput value={prof.ganhoDia} onChange={(v) => setP("ganhoDia", v)} prefix="R$" placeholder="400" />
               </Campo>
               <Campo label="Dias por semana">
-                <NumInput value={prof.diasSemana} onChange={(v) => setP("diasSemana", v)} suffix="dias" />
+                <NumInput value={prof.diasSemana} onChange={(v) => setP("diasSemana", v)} suffix="dias" placeholder="5" />
               </Campo>
               <Campo label="Deslocamento por dia">
-                <NumInput value={prof.deslocamentoDia} onChange={(v) => setP("deslocamentoDia", v)} prefix="R$" />
+                <NumInput value={prof.deslocamentoDia} onChange={(v) => setP("deslocamentoDia", v)} prefix="R$" placeholder="25" />
               </Campo>
               <Campo label="Margem / reserva">
-                <NumInput value={prof.margem} onChange={(v) => setP("margem", v)} suffix="%" />
+                <NumInput value={prof.margem} onChange={(v) => setP("margem", v)} suffix="%" placeholder="15" />
               </Campo>
               <div className="col-span-2">
                 <label className="flex items-center gap-2 select-none">
@@ -316,7 +314,7 @@
               </div>
               {prof.possuiAjudante && (
                 <Campo label="Custo do ajudante por dia">
-                  <NumInput value={prof.custoAjudanteDia} onChange={(v) => setP("custoAjudanteDia", v)} prefix="R$" />
+                  <NumInput value={prof.custoAjudanteDia} onChange={(v) => setP("custoAjudanteDia", v)} prefix="R$" placeholder="150" />
                 </Campo>
               )}
               <Campo label="Cidade / Estado">
