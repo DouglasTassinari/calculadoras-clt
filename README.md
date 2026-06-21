@@ -18,7 +18,13 @@ Funciona em celular, tablet e computador. Para usar no celular, hospede o arquiv
 3. **Resultado** — preço mínimo / recomendado / premium + a explicação de como chegou no valor.
 4. **Diferencial** — mostra *quanto você realmente ganha por dia* com aquele preço, e um **simulador reverso**: digite qualquer valor de obra e veja sua remuneração diária subir ou cair.
 5. **Aditivos** — registre serviços extras ou não executados durante a obra e gere o valor atualizado para apresentar ao cliente.
-6. **PDF** — botão "Salvar / imprimir PDF" (imprime só o orçamento + relatório de aditivos).
+6. **PDF** — botão "Imprimir orçamento do cliente" (imprime só o orçamento do cliente + relatório de aditivos).
+7. **Configurar Meu Negócio** (opcional) — tela separada onde você cadastra seus custos fixos mensais e sua capacidade (dias/mês, horas/dia). A ferramenta calcula sua **diária mínima** e sua **hora mínima** — quanto você precisa cobrar pra não trabalhar no prejuízo. Marcando "Usar custo real do meu negócio" no orçamento, a mão de obra passa a usar esse valor automaticamente.
+
+## Persistência
+
+- O **orçamento** NÃO é salvo: cada F5 começa em branco.
+- A **configuração do negócio** é salva em LocalStorage (chave `orcajusto_negocio_v1`), preenchida uma vez só, neste aparelho.
 
 ## Arquivos
 
@@ -35,6 +41,12 @@ Funciona em celular, tablet e computador. Para usar no celular, hospede o arquiv
 - `preço recomendado = preço mínimo × (1 + margem%)`
 - `preço premium = recomendado × 1,15`
 - **Ganho real por dia** `= (preço − custos operacionais) / dias`
+
+### Configurar Meu Negócio
+- `total de custos mensais = soma dos custos fixos`
+- `diária mínima = total de custos mensais ÷ dias trabalhados por mês`
+- `hora mínima = diária mínima ÷ horas por dia`
+- Com "Usar custo real" ligado, `meta/dia` passa a ser a **diária mínima**.
 
 ## Publicar para testar no celular (grátis, 1 minuto)
 

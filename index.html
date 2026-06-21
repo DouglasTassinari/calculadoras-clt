@@ -37,7 +37,7 @@
   <!-- O JSX abaixo NÃO é executado direto pelo navegador: é transformado pelo
        bootstrap no final do body, usando o runtime clássico (React.createElement). -->
   <script type="text/plain" id="app-src">
-    const { useState, useMemo } = React;
+    const { useState, useMemo, useEffect } = React;
 
     /* Multiplicadores de complexidade aplicados ao rendimento que o usuário informa.
        Baixa rende mais (menos dias) · Média sem ajuste · Alta rende menos (mais dias). */
@@ -116,6 +116,20 @@
       simuladorPreco: "",
     };
 
+    /* Configuração do negócio — PERSISTIDA (separada do orçamento, que não é salvo). */
+    const NEGOCIO_KEY = "orcajusto_negocio_v1";
+    const NEGOCIO_INICIAL = {
+      aluguel: "", internet: "", telefone: "", energia: "", combustivel: "", ferramentas: "",
+      manutencao: "", contador: "", funcionarios: "", prolabore: "", outros: "",
+      diasMes: "22", horasDia: "8",
+    };
+    const CUSTOS_NEGOCIO = [
+      ["aluguel", "Aluguel"], ["internet", "Internet"], ["telefone", "Telefone"],
+      ["energia", "Energia"], ["combustivel", "Combustível"], ["ferramentas", "Ferramentas"],
+      ["manutencao", "Manutenção"], ["contador", "Contador"], ["funcionarios", "Funcionários"],
+      ["prolabore", "Pró-labore"], ["outros", "Outros custos"],
+    ];
+
     function App() {
       const [prof, setProf] = useState(ESTADO_INICIAL.prof);
       const [servicos, setServicos] = useState(ESTADO_INICIAL.servicos);
@@ -124,7 +138,38 @@
       const [simuladorPreco, setSimuladorPreco] = useState(ESTADO_INICIAL.simuladorPreco);
       const [mostrarAditivos, setMostrarAditivos] = useState(false);
 
-      // Sem persistência: nada é salvo. A cada F5/recarregar, os campos voltam em branco.
+      // Orçamento NÃO é salvo (F5 limpa). Estes também são do orçamento (resetam no F5):
+      const [material, setMaterial] = useState("");
+      const [usarCustoReal, setUsarCustoReal] = useState(false);
+      const [telaNegocio, setTelaNegocio] = useState(false);
+
+      // Configuração do negócio: carrega do LocalStorage e salva a cada mudança (só ela persiste).
+      const [negocio, setNegocio] = useState(() => {
+        try {
+          const s = localStorage.getItem(NEGOCIO_KEY);
+          if (s) return { ...NEGOCIO_INICIAL, ...JSON.parse(s) };
+        } catch (e) {}
+        return NEGOCIO_INICIAL;
+      });
+      useEffect(() => {
+        try { localStorage.setItem(NEGOCIO_KEY, JSON.stringify(negocio)); } catch (e) {}
+      }, [negocio]);
+      const setNeg = (k, v) => setNegocio((n) => ({ ...n, [k]: v }));
+
+      // Diária e hora mínimas: o custo de "manter o negócio funcionando".
+      const negocioCalc = useMemo(() => {
+        const totalCustosMes = CUSTOS_NEGOCIO.reduce((s, par) => s + toNum(negocio[par[0]]), 0);
+        const diasMes = Math.max(1, toNum(negocio.diasMes) || 22);
+        const horasDia = Math.max(1, toNum(negocio.horasDia) || 8);
+        const diariaMinima = totalCustosMes > 0 ? totalCustosMes / diasMes : 0;
+        const horaMinima = diariaMinima / horasDia;
+        return { totalCustosMes, diasMes, horasDia, diariaMinima, horaMinima };
+      }, [negocio]);
+
+      // Quando "usar custo real" está ligado e há custos cadastrados, a mão de obra por dia
+      // passa a ser a diária mínima (em vez do valor digitado em "quanto quer ganhar por dia").
+      const ganhoDiaEfetivo = (usarCustoReal && negocioCalc.diariaMinima > 0)
+        ? negocioCalc.diariaMinima : toNum(prof.ganhoDia);
 
       const setP = (k, v) => setProf((p) => ({ ...p, [k]: v }));
 
@@ -144,7 +189,7 @@
         const diasBrutos = itens.reduce((a, b) => a + b.dias, 0);
         const totalDias = Math.max(0, Math.ceil(diasBrutos));
 
-        const ganhoDia = toNum(prof.ganhoDia);
+        const ganhoDia = ganhoDiaEfetivo;
         const deslocamentoDia = toNum(prof.deslocamentoDia);
         const custoAjudanteDia = prof.possuiAjudante ? toNum(prof.custoAjudanteDia) : 0;
         const margem = toNum(prof.margem);
@@ -187,12 +232,18 @@
           precoMinimo, precoRecomendado, precoPremium, precoEscolhido,
           ganhoDia, margem, ganhoRealPorDia,
         };
-      }, [servicos, prof, simuladorPreco]);
+      }, [servicos, prof, simuladorPreco, ganhoDiaEfetivo]);
+
+      // Material (custo opcional do serviço) e o resumo "para onde vai o dinheiro".
+      const materialNum = toNum(material);
+      const precoVenda = calc.precoEscolhido + materialNum;          // o que o cliente paga
+      const custosNegocioJob = calc.deslocamento + calc.ajudante;    // custos diretos do serviço
+      const lucroEstimado = precoVenda - materialNum - calc.maoDeObra - custosNegocioJob;
 
       /* ---------- Aditivos ---------- */
       const custoDiaMarginal = useMemo(() =>
-        toNum(prof.ganhoDia) + toNum(prof.deslocamentoDia) + (prof.possuiAjudante ? toNum(prof.custoAjudanteDia) : 0),
-        [prof]);
+        ganhoDiaEfetivo + toNum(prof.deslocamentoDia) + (prof.possuiAjudante ? toNum(prof.custoAjudanteDia) : 0),
+        [prof, ganhoDiaEfetivo]);
 
       function valorAditivo(a) {
         if (a.valorManual !== "" && a.valorManual != null) return toNum(a.valorManual);
@@ -206,7 +257,7 @@
       const upAditivo = (id, patch) =>
         setAditivos((a) => a.map((x) => (x.id === id ? { ...x, ...patch } : x)));
 
-      const contratoBase = contratoOriginal === "" ? calc.precoEscolhido : toNum(contratoOriginal);
+      const contratoBase = contratoOriginal === "" ? precoVenda : toNum(contratoOriginal);
       const totAdicionais = aditivos.filter((a) => a.tipo === "adicional").reduce((s, a) => s + valorAditivo(a), 0);
       const totNaoExec = aditivos.filter((a) => a.tipo === "naoExecutado").reduce((s, a) => s + valorAditivo(a), 0);
       const valorAtualizado = contratoBase + totAdicionais - totNaoExec;
@@ -221,17 +272,90 @@
           setProf(ESTADO_INICIAL.prof);
           setServicos(ESTADO_INICIAL.servicos.map((s) => ({ ...s, id: uid() })));
           setAditivos([]); setContratoOriginal(""); setSimuladorPreco(""); setMostrarAditivos(false);
+          setMaterial(""); setUsarCustoReal(false);
         }
       };
 
       const hoje = new Date().toLocaleDateString("pt-BR");
+
+      /* ===================== TELA: CONFIGURAR MEU NEGÓCIO ===================== */
+      if (telaNegocio) {
+        return (
+          <div className="max-w-2xl mx-auto px-4 pb-24 pt-6">
+            <header className="mb-4 flex items-center gap-3">
+              <button onClick={() => setTelaNegocio(false)}
+                className="rounded-lg border border-slate-300 text-slate-600 px-3 py-1.5 text-sm hover:bg-slate-50">← Voltar</button>
+              <h1 className="text-lg font-bold leading-tight">Configurar Meu Negócio</h1>
+            </header>
+
+            <p className="text-sm text-slate-500 mb-4">
+              Preencha uma vez. A gente calcula quanto você precisa cobrar por dia e por hora pra
+              <b> não trabalhar no prejuízo</b>. É tudo opcional e fica salvo só neste aparelho.
+            </p>
+
+            {/* Custos fixos mensais */}
+            <section className="bg-white rounded-2xl shadow-sm p-5 mb-4">
+              <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-wide mb-3">Custos fixos mensais</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {CUSTOS_NEGOCIO.map((par) => (
+                  <Campo key={par[0]} label={par[1]}>
+                    <NumInput value={negocio[par[0]]} onChange={(v) => setNeg(par[0], v)} prefix="R$" />
+                  </Campo>
+                ))}
+              </div>
+              <div className="border-t-2 border-slate-200 mt-3 pt-2">
+                <LinhaResumo titulo="Total de custos mensais" valor={brl(negocioCalc.totalCustosMes)} destaque />
+              </div>
+            </section>
+
+            {/* Capacidade produtiva */}
+            <section className="bg-white rounded-2xl shadow-sm p-5 mb-4">
+              <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-wide mb-3">Capacidade produtiva</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <Campo label="Dias trabalhados por mês">
+                  <NumInput value={negocio.diasMes} onChange={(v) => setNeg("diasMes", v)} suffix="dias" placeholder="22" />
+                </Campo>
+                <Campo label="Horas trabalhadas por dia">
+                  <NumInput value={negocio.horasDia} onChange={(v) => setNeg("horasDia", v)} suffix="h" placeholder="8" />
+                </Campo>
+              </div>
+            </section>
+
+            {/* Resultado: diária e hora mínimas */}
+            <section className="bg-white rounded-2xl shadow-sm p-5 mb-4">
+              <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-3">Seu custo mínimo</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-center">
+                  <div className="text-xs text-slate-500">Sua diária mínima</div>
+                  <div className="text-2xl font-bold text-emerald-700 mt-1 leading-tight">{brl(negocioCalc.diariaMinima)}</div>
+                  <div className="text-[11px] text-slate-400 mt-1">por dia trabalhado</div>
+                </div>
+                <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-center">
+                  <div className="text-xs text-slate-500">Seu valor mínimo por hora</div>
+                  <div className="text-2xl font-bold text-emerald-700 mt-1 leading-tight">{brl(negocioCalc.horaMinima)}</div>
+                  <div className="text-[11px] text-slate-400 mt-1">por hora trabalhada</div>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 mt-3">
+                É o mínimo pra cobrir seus custos. Cobrando menos que isso por dia, você trabalha no prejuízo.
+                No orçamento, marque <b>“Usar custo real do meu negócio”</b> pra usar esse valor automaticamente.
+              </p>
+            </section>
+
+            <button onClick={() => setTelaNegocio(false)}
+              className="w-full rounded-xl bg-indigo-600 text-white font-semibold py-3 hover:bg-indigo-700 shadow-sm">
+              Voltar para o orçamento
+            </button>
+          </div>
+        );
+      }
 
       /* ===================== RENDER ===================== */
       return (
         <div className="max-w-2xl mx-auto px-4 pb-24 pt-6">
 
           {/* Cabeçalho */}
-          <header className="no-print mb-5">
+          <header className="no-print mb-5 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <div className="h-9 w-9 rounded-xl bg-indigo-600 text-white grid place-items-center font-bold">OJ</div>
               <div>
@@ -239,6 +363,10 @@
                 <p className="text-xs text-slate-500">Quanto cobrar pra não trabalhar meses e ganhar menos do que imaginava.</p>
               </div>
             </div>
+            <button onClick={() => setTelaNegocio(true)}
+              className="shrink-0 rounded-lg border border-slate-300 text-slate-600 px-3 py-1.5 text-sm hover:bg-slate-50">
+              ⚙ Meu Negócio
+            </button>
           </header>
 
           {/* ---------- PASSO 1 ---------- */}
@@ -282,6 +410,24 @@
                   <NumInput value={prof.custoAjudanteDia} onChange={(v) => setP("custoAjudanteDia", v)} prefix="R$" />
                 </Campo>
               )}
+              <div className="col-span-2">
+                <Campo label="Material da obra (opcional)" hint="custo de material que entra no orçamento do cliente">
+                  <NumInput value={material} onChange={setMaterial} prefix="R$" />
+                </Campo>
+              </div>
+              <div className="col-span-2 rounded-lg bg-slate-50 border border-slate-100 p-3">
+                <label className="flex items-center gap-2 select-none">
+                  <input type="checkbox" checked={usarCustoReal}
+                    onChange={(e) => setUsarCustoReal(e.target.checked)}
+                    className="h-5 w-5 rounded border-slate-300 text-indigo-600" />
+                  <span className="text-sm font-medium text-slate-700">Usar custo real do meu negócio</span>
+                </label>
+                {usarCustoReal
+                  ? (negocioCalc.diariaMinima > 0
+                    ? <p className="text-xs text-emerald-600 mt-1">Mão de obra usando sua diária mínima de <b>{brl(negocioCalc.diariaMinima)}/dia</b> (em vez do valor acima).</p>
+                    : <p className="text-xs text-amber-600 mt-1">Sem custos cadastrados. Abra <button type="button" onClick={() => setTelaNegocio(true)} className="underline font-medium">Meu Negócio</button> e preencha.</p>)
+                  : <p className="text-xs text-slate-400 mt-1">Calcula a mão de obra pela sua diária mínima (custos fixos do negócio).</p>}
+              </div>
             </div>
           </section>
 
@@ -417,6 +563,20 @@
                 </div>
               </div>
             </details>
+
+            {/* Resultado final: para onde vai o dinheiro da venda */}
+            <div className="mt-3 rounded-xl border border-slate-100 p-3">
+              <h3 className="text-sm font-semibold text-slate-600 mb-1">Resultado final</h3>
+              <LinhaResumo titulo="Preço de venda" valor={brl(precoVenda)} />
+              <LinhaResumo titulo="Material" valor={brl(materialNum)} />
+              <LinhaResumo titulo="Mão de obra"
+                sub={usarCustoReal && negocioCalc.diariaMinima > 0 ? "inclui seu custo fixo (diária mínima)" : null}
+                valor={brl(calc.maoDeObra)} />
+              <LinhaResumo titulo="Custos do negócio" sub="deslocamento + ajudante" valor={brl(custosNegocioJob)} />
+              <div className="border-t-2 border-slate-200 mt-1 pt-1">
+                <LinhaResumo titulo="Lucro estimado" valor={brl(lucroEstimado)} destaque />
+              </div>
+            </div>
           </section>
 
           {/* ---------- SIMULADOR REVERSO ---------- */}
@@ -491,10 +651,11 @@
               {/* Somas e totais */}
               <div className="mt-2">
                 <LinhaResumo titulo="Subtotal dos serviços" valor={brl(calc.poolServicos)} />
+                {materialNum > 0 && <LinhaResumo titulo="Material" valor={brl(materialNum)} />}
                 {calc.deslocamento > 0 && <LinhaResumo titulo="Deslocamento" valor={brl(calc.deslocamento)} />}
                 {prof.possuiAjudante && calc.ajudante > 0 && <LinhaResumo titulo="Ajudante" valor={brl(calc.ajudante)} />}
                 <div className="border-t-2 border-slate-300 mt-1 pt-1">
-                  <LinhaResumo titulo="Total do orçamento" valor={brl(calc.precoEscolhido)} destaque />
+                  <LinhaResumo titulo="Total do orçamento" valor={brl(precoVenda)} destaque />
                 </div>
               </div>
 
