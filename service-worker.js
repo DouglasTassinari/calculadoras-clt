@@ -2,17 +2,23 @@
    Meu Lucro — Service Worker (PWA offline)
    ============================================================ */
 
-const CACHE = "meu-lucro-v1";
+const CACHE = "meu-lucro-v2";
 
 const ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
+  "./auth.js",
+  "./config.js",
+  "./config.example.js",
   "./manifest.json",
   "./icon.svg",
   "./icon-maskable.svg",
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js",
+  "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js",
 ];
 
 // Instala e pré-armazena os arquivos do app.
@@ -37,9 +43,16 @@ self.addEventListener("activate", (event) => {
 });
 
 // Estratégia: cache primeiro, com atualização em segundo plano (stale-while-revalidate).
+// Importante: só intercepta arquivos do próprio app e os CDNs conhecidos.
+// As chamadas do Firebase/Firestore passam direto (não são cacheadas aqui).
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
+
+  const url = new URL(request.url);
+  const sameOrigin = url.origin === self.location.origin;
+  const isKnownCDN = ASSETS.includes(request.url);
+  if (!sameOrigin && !isKnownCDN) return; // deixa Firebase/Google passarem direto
 
   event.respondWith(
     caches.match(request).then((cached) => {

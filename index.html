@@ -11,7 +11,75 @@
   <link rel="stylesheet" href="style.css" />
   <title>Meu Lucro</title>
 </head>
-<body>
+<body class="state-loading">
+
+  <!-- ====================== SPLASH (carregando) ====================== -->
+  <div id="splash" class="splash">
+    <span class="splash__logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"></circle>
+        <circle cx="12" cy="12" r="2.5"></circle>
+        <path d="M12 3v4M12 17v4M3 12h4M17 12h4"></path>
+      </svg>
+    </span>
+    <div class="spinner" aria-label="Carregando"></div>
+  </div>
+
+  <!-- ====================== TELA DE LOGIN / CADASTRO ====================== -->
+  <div id="authScreen" class="auth" hidden>
+    <div class="auth__card">
+      <div class="auth__brand">
+        <span class="auth__logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="12" cy="12" r="2.5"></circle>
+            <path d="M12 3v4M12 17v4M3 12h4M17 12h4"></path>
+          </svg>
+        </span>
+        <h1 class="auth__title">Meu Lucro</h1>
+        <p class="auth__subtitle">Seus ganhos reais, salvos na sua conta e sincronizados em qualquer aparelho.</p>
+      </div>
+
+      <div class="auth__tabs" role="tablist">
+        <button class="auth__tab is-active" data-tab="login" type="button">Entrar</button>
+        <button class="auth__tab" data-tab="signup" type="button">Criar conta</button>
+      </div>
+
+      <!-- LOGIN -->
+      <form id="loginForm" class="form auth__form" data-pane="login">
+        <div class="field">
+          <label for="loginEmail">E-mail</label>
+          <input type="email" id="loginEmail" autocomplete="email" required />
+        </div>
+        <div class="field">
+          <label for="loginPass">Senha</label>
+          <input type="password" id="loginPass" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn--primary btn--block" id="loginBtn">Entrar</button>
+        <button type="button" class="auth__link" id="forgotBtn">Esqueci minha senha</button>
+      </form>
+
+      <!-- CADASTRO -->
+      <form id="signupForm" class="form auth__form" data-pane="signup" hidden>
+        <div class="field">
+          <label for="signupName">Nome</label>
+          <input type="text" id="signupName" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label for="signupEmail">E-mail</label>
+          <input type="email" id="signupEmail" autocomplete="email" required />
+        </div>
+        <div class="field">
+          <label for="signupPass">Senha <span class="muted">(mínimo 6 caracteres)</span></label>
+          <input type="password" id="signupPass" autocomplete="new-password" minlength="6" required />
+        </div>
+        <button type="submit" class="btn btn--primary btn--block" id="signupBtn">Criar conta</button>
+      </form>
+
+      <p class="auth__msg auth__msg--error" id="authError" hidden></p>
+      <p class="auth__msg auth__msg--ok" id="authNote" hidden></p>
+    </div>
+  </div>
 
   <!-- ====================== CABEÇALHO ====================== -->
   <header class="app-header">
@@ -36,6 +104,11 @@
   </header>
 
   <main class="container">
+
+    <!-- Aviso de modo local (Firebase não configurado) -->
+    <div class="local-banner" id="localBanner" hidden>
+      <span>⚠️ Modo local: os dados ficam só neste aparelho. Configure o Firebase para sincronizar na nuvem (veja o README).</span>
+    </div>
 
     <!-- ====================== HOJE ====================== -->
     <section class="section">
@@ -212,7 +285,7 @@
     </section>
 
     <footer class="app-footer">
-      <span>Meu Lucro · seus dados ficam só neste aparelho</span>
+      <span id="footerNote">Meu Lucro</span>
     </footer>
   </main>
 
@@ -225,6 +298,15 @@
         <button class="icon-btn" data-close aria-label="Fechar">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
+      </div>
+
+      <!-- Conta (visível quando logado) -->
+      <div class="account" id="accountBox" hidden>
+        <div class="account__info">
+          <span class="account__label">Conectado como</span>
+          <strong id="accountEmail"></strong>
+        </div>
+        <button type="button" class="btn btn--ghost btn--sm" id="logoutBtn">Sair</button>
       </div>
 
       <form id="settingsForm" class="modal__body form">
@@ -322,7 +404,18 @@
   <!-- ====================== TOAST ====================== -->
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
-  <script src="script.js" defer></script>
+  <!-- ====================== SCRIPTS ====================== -->
+  <!-- Firebase (SDK compat) -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Suas chaves do Firebase (copie config.example.js para config.js e preencha) -->
+  <script defer src="config.js" onerror="window.__noFirebaseConfig=true"></script>
+  <!-- Inicialização do Firebase + ações de autenticação -->
+  <script defer src="auth.js"></script>
+  <!-- Geração de PDF -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- App -->
+  <script defer src="script.js"></script>
 </body>
 </html>

@@ -1,6 +1,12 @@
 /* ============================================================
    Meu Lucro — lógica do app
-   Dados 100% locais (LocalStorage). Sem backend.
+
+   Persistência em dois modos:
+   - NUVEM  (Firebase Auth + Firestore) quando config.js está
+     preenchido e o usuário está logado. Dados por usuário (UID),
+     sincronizados em tempo real entre dispositivos.
+   - LOCAL  (LocalStorage) como fallback quando o Firebase não
+     está configurado. Permite usar/testar o app sem conta.
    ============================================================ */
 
 const APP_NAME = "Meu Lucro"; // nome temporário — fácil de trocar
@@ -11,27 +17,44 @@ const STORAGE = {
 const DEFAULT_COST_KM = 0.25;
 
 /* ---------------- Estado ---------------- */
-let config = loadConfig();
-let records = loadRecords();
+let config = null;          // { model, year, dailyGoal, monthlyGoal, costKm }
+let records = [];           // [{ id, date, revenue, km, fuel, other }]
+let currentUser = null;     // usuário do Firebase quando logado
+let unsubUser = null;       // listener do doc do usuário
+let unsubRecords = null;    // listener da coleção de registros
+let onboardingShown = false;
+let migrationTried = false;
 
 /* ---------------- Atalhos DOM ---------------- */
 const $ = (id) => document.getElementById(id);
 
 /* ============================================================
-   Persistência
+   Modo de operação (nuvem x local)
    ============================================================ */
-function loadConfig() {
+function cloudEnabled() {
+  return !!(window.FB && window.FB.enabled);
+}
+function cloudActive() {
+  return !!(cloudEnabled() && currentUser && window.FB.uid);
+}
+function userDoc() {
+  return window.FB.db.collection("users").doc(window.FB.uid);
+}
+function recordsCol() {
+  return userDoc().collection("records");
+}
+
+/* ============================================================
+   Persistência LOCAL (LocalStorage)
+   ============================================================ */
+function loadLocalConfig() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE.config)) || null;
   } catch {
     return null;
   }
 }
-function saveConfig(c) {
-  config = c;
-  localStorage.setItem(STORAGE.config, JSON.stringify(c));
-}
-function loadRecords() {
+function loadLocalRecords() {
   try {
     const list = JSON.parse(localStorage.getItem(STORAGE.records)) || [];
     return Array.isArray(list) ? list : [];
@@ -39,7 +62,10 @@ function loadRecords() {
     return [];
   }
 }
-function saveRecords() {
+function saveLocalConfig(c) {
+  localStorage.setItem(STORAGE.config, JSON.stringify(c));
+}
+function saveLocalRecords() {
   localStorage.setItem(STORAGE.records, JSON.stringify(records));
 }
 
@@ -55,7 +81,6 @@ function parseNum(value) {
   if (!value) return 0;
   let s = String(value).trim().replace(/[^\d.,-]/g, "");
   if (s.includes(",")) {
-    // formato brasileiro: ponto = milhar, vírgula = decimal
     s = s.replace(/\./g, "").replace(",", ".");
   }
   const n = parseFloat(s);
@@ -67,7 +92,6 @@ function todayISO() {
   const off = d.getTimezoneOffset();
   return new Date(d.getTime() - off * 60000).toISOString().slice(0, 10);
 }
-
 function formatDateBR(iso) {
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y}`;
@@ -76,11 +100,9 @@ function formatDateShort(iso) {
   const [, m, d] = iso.split("-");
   return `${d}/${m}`;
 }
-
 function monthKey(iso) {
   return iso.slice(0, 7); // YYYY-MM
 }
-
 const MONTHS = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
   "julho", "agosto", "setembro", "outubro", "novembro", "dezembro",
@@ -89,6 +111,10 @@ function monthLabel(iso) {
   const [y, m] = iso.split("-");
   return `${MONTHS[parseInt(m, 10) - 1]} ${y}`;
 }
+function cryptoId() {
+  if (window.crypto?.randomUUID) return crypto.randomUUID();
+  return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+}
 
 /* ============================================================
    Cálculos
@@ -96,14 +122,11 @@ function monthLabel(iso) {
 function costKm() {
   return config && isFinite(config.costKm) ? config.costKm : DEFAULT_COST_KM;
 }
-
-// Enriquece um registro bruto com desgaste e lucro calculados.
 function computed(r) {
   const wear = (r.km || 0) * costKm();
   const profit = (r.revenue || 0) - (r.fuel || 0) - (r.other || 0) - wear;
   return { ...r, wear, profit };
 }
-
 function aggregate(list) {
   return list.reduce(
     (a, raw) => {
@@ -134,8 +157,7 @@ function render() {
 function renderToday() {
   const iso = todayISO();
   $("todayLabel").textContent = formatDateBR(iso);
-  const todays = records.filter((r) => r.date === iso);
-  const a = aggregate(todays);
+  const a = aggregate(records.filter((r) => r.date === iso));
 
   $("todayRevenue").textContent = money(a.revenue);
   $("todayFuel").textContent = money(a.fuel);
@@ -154,8 +176,7 @@ function renderToday() {
 function renderMonth() {
   const mk = monthKey(todayISO());
   $("monthLabel").textContent = monthLabel(todayISO());
-  const monthRecords = records.filter((r) => monthKey(r.date) === mk);
-  const a = aggregate(monthRecords);
+  const a = aggregate(records.filter((r) => monthKey(r.date) === mk));
 
   $("monthRevenue").textContent = money(a.revenue);
   $("monthFuel").textContent = money(a.fuel);
@@ -172,13 +193,11 @@ function renderMonth() {
 
   const remaining = goal - a.profit;
   $("monthRemaining").textContent =
-    goal > 0
-      ? remaining > 0
-        ? `Faltam ${money(remaining)}`
-        : "Meta batida! 🎉"
-      : "";
+    goal > 0 ? (remaining > 0 ? `Faltam ${money(remaining)}` : "Meta batida! 🎉") : "";
 }
 
+let insightRotation = [];
+let insightIndex = 0;
 function renderInsight() {
   const el = $("insightText");
   const mk = monthKey(todayISO());
@@ -186,6 +205,7 @@ function renderInsight() {
 
   if (records.length === 0) {
     el.textContent = "Registre seu primeiro dia para ver suas metas em ação.";
+    insightRotation = [];
     return;
   }
 
@@ -205,16 +225,10 @@ function renderInsight() {
       messages.push(`Faltam ${money(remaining)} para atingir seu objetivo do mês.`);
     }
   }
-
   if (dailyGoal > 0 && a.days > 0) {
-    if (avg >= dailyGoal) {
-      messages.push("Seu lucro médio diário está acima da meta. Continue assim!");
-    } else {
-      messages.push(`Sua média diária é ${money(avg)} — um pouco abaixo da meta de ${money(dailyGoal)}.`);
-    }
+    if (avg >= dailyGoal) messages.push("Seu lucro médio diário está acima da meta. Continue assim!");
+    else messages.push(`Sua média diária é ${money(avg)} — um pouco abaixo da meta de ${money(dailyGoal)}.`);
   }
-
-  // Comparação do dia de hoje com a média do mês
   const todays = aggregate(records.filter((r) => r.date === todayISO()));
   if (todays.days > 0 && a.days > 1) {
     if (todays.profit > avg) messages.push("Hoje foi um dia acima da sua média. 👏");
@@ -222,13 +236,9 @@ function renderInsight() {
   }
 
   el.textContent = messages[0] || "Continue registrando para acompanhar sua evolução.";
-  // guarda as demais para alternância
   insightRotation = messages;
   insightIndex = 0;
 }
-
-let insightRotation = [];
-let insightIndex = 0;
 function rotateInsight() {
   if (insightRotation.length < 2) return;
   insightIndex = (insightIndex + 1) % insightRotation.length;
@@ -246,7 +256,6 @@ function renderHistory() {
     body.innerHTML = "";
     return;
   }
-
   empty.hidden = true;
   wrap.hidden = false;
 
@@ -284,7 +293,6 @@ function readForm() {
     other: parseNum($("inpOther").value),
   };
 }
-
 function updateFormPreview() {
   const data = readForm();
   const hasInput =
@@ -295,45 +303,48 @@ function updateFormPreview() {
     return;
   }
   preview.hidden = false;
-  const { profit } = computed(data);
-  $("formPreviewValue").textContent = money(profit);
+  $("formPreviewValue").textContent = money(computed(data).profit);
 }
-
-function handleSave(e) {
-  e.preventDefault();
-  const data = readForm();
-
-  if (data.revenue === 0 && data.km === 0 && data.fuel === 0 && data.other === 0) {
-    toast("Preencha pelo menos o faturamento.");
-    return;
-  }
-
-  // Se já existe registro na mesma data, soma ao existente (evita duplicar o dia).
-  const existing = records.find((r) => r.date === data.date);
-  if (existing) {
-    existing.revenue += data.revenue;
-    existing.km += data.km;
-    existing.fuel += data.fuel;
-    existing.other += data.other;
-  } else {
-    records.push({ id: cryptoId(), ...data });
-  }
-
-  saveRecords();
-  render();
-  resetForm();
-  toast(existing ? "Dia atualizado ✓" : "Dia salvo ✓");
-}
-
 function resetForm() {
   $("dayForm").reset();
   $("inpDate").value = todayISO();
   $("formPreview").hidden = true;
 }
 
-function cryptoId() {
-  if (window.crypto?.randomUUID) return crypto.randomUUID();
-  return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+function handleSave(e) {
+  e.preventDefault();
+  const data = readForm();
+  if (data.revenue === 0 && data.km === 0 && data.fuel === 0 && data.other === 0) {
+    toast("Preencha pelo menos o faturamento.");
+    return;
+  }
+
+  // Se já existe registro na mesma data, soma ao existente.
+  const existing = records.find((r) => r.date === data.date);
+  const id = existing ? existing.id : cryptoId();
+  const merged = existing
+    ? {
+        id,
+        date: data.date,
+        revenue: existing.revenue + data.revenue,
+        km: existing.km + data.km,
+        fuel: existing.fuel + data.fuel,
+        other: existing.other + data.other,
+      }
+    : { id, ...data };
+
+  if (cloudActive()) {
+    recordsCol().doc(id).set(merged).catch(() => toast("Erro ao salvar na nuvem."));
+    // O onSnapshot atualiza a lista e re-renderiza (compensação de latência = instantâneo).
+  } else {
+    if (existing) Object.assign(existing, merged);
+    else records.push(merged);
+    saveLocalRecords();
+    render();
+  }
+
+  resetForm();
+  toast(existing ? "Dia atualizado ✓" : "Dia salvo ✓");
 }
 
 /* ============================================================
@@ -356,13 +367,22 @@ function handleEditSave(e) {
   const id = $("editId").value;
   const r = records.find((x) => x.id === id);
   if (!r) return;
-  r.date = $("editDate").value || r.date;
-  r.revenue = parseNum($("editRevenue").value);
-  r.km = parseNum($("editKm").value);
-  r.fuel = parseNum($("editFuel").value);
-  r.other = parseNum($("editOther").value);
-  saveRecords();
-  render();
+  const updated = {
+    id,
+    date: $("editDate").value || r.date,
+    revenue: parseNum($("editRevenue").value),
+    km: parseNum($("editKm").value),
+    fuel: parseNum($("editFuel").value),
+    other: parseNum($("editOther").value),
+  };
+
+  if (cloudActive()) {
+    recordsCol().doc(id).set(updated).catch(() => toast("Erro ao salvar na nuvem."));
+  } else {
+    Object.assign(r, updated);
+    saveLocalRecords();
+    render();
+  }
   hideModal("editModal");
   toast("Registro atualizado ✓");
 }
@@ -370,9 +390,14 @@ function handleEditSave(e) {
 function handleEditDelete() {
   const id = $("editId").value;
   if (!confirm("Excluir este dia? Esta ação não pode ser desfeita.")) return;
-  records = records.filter((x) => x.id !== id);
-  saveRecords();
-  render();
+
+  if (cloudActive()) {
+    recordsCol().doc(id).delete().catch(() => toast("Erro ao excluir na nuvem."));
+  } else {
+    records = records.filter((x) => x.id !== id);
+    saveLocalRecords();
+    render();
+  }
   hideModal("editModal");
   toast("Registro excluído");
 }
@@ -382,6 +407,9 @@ function handleEditDelete() {
    ============================================================ */
 function openSettings(firstTime = false) {
   $("settingsIntro").hidden = !firstTime;
+  $("accountBox").hidden = !cloudActive();
+  if (cloudActive()) $("accountEmail").textContent = currentUser.email || "";
+
   if (config) {
     $("cfgModel").value = config.model || "";
     $("cfgYear").value = config.year || "";
@@ -389,6 +417,7 @@ function openSettings(firstTime = false) {
     $("cfgMonthlyGoal").value = config.monthlyGoal ? String(config.monthlyGoal).replace(".", ",") : "";
     $("cfgCostKm").value = String(config.costKm ?? DEFAULT_COST_KM).replace(".", ",");
   } else {
+    $("settingsForm").reset();
     $("cfgCostKm").value = String(DEFAULT_COST_KM).replace(".", ",");
   }
   showModal("settingsModal");
@@ -403,10 +432,180 @@ function handleSettingsSave(e) {
     monthlyGoal: parseNum($("cfgMonthlyGoal").value),
     costKm: parseNum($("cfgCostKm").value) || DEFAULT_COST_KM,
   };
-  saveConfig(c);
-  render();
+
+  if (cloudActive()) {
+    config = c; // otimista
+    render();
+    userDoc()
+      .set({ name: currentUser.displayName || "", config: c }, { merge: true })
+      .catch(() => toast("Erro ao salvar na nuvem."));
+  } else {
+    config = c;
+    saveLocalConfig(c);
+    render();
+  }
   hideModal("settingsModal");
   toast("Configurações salvas ✓");
+}
+
+/* ============================================================
+   Sincronização com a nuvem (Firestore)
+   ============================================================ */
+function subscribeCloud() {
+  unsubUser = userDoc().onSnapshot(
+    (doc) => {
+      const data = doc.exists ? doc.data() : null;
+      config = data && data.config ? data.config : null;
+      render();
+      if (!config && !onboardingShown) {
+        onboardingShown = true;
+        openSettings(true);
+      }
+    },
+    (err) => console.warn("[Meu Lucro] erro no doc do usuário:", err)
+  );
+
+  unsubRecords = recordsCol().onSnapshot(
+    (snap) => {
+      records = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      render();
+      maybeMigrateLocal();
+    },
+    (err) => console.warn("[Meu Lucro] erro nos registros:", err)
+  );
+}
+
+function unsubscribeCloud() {
+  if (unsubUser) unsubUser();
+  if (unsubRecords) unsubRecords();
+  unsubUser = unsubRecords = null;
+}
+
+// Migração única: se a nuvem está vazia e há dados locais antigos,
+// envia-os para a conta (uma vez por usuário).
+function maybeMigrateLocal() {
+  if (migrationTried || !cloudActive()) return;
+  migrationTried = true;
+  const uid = window.FB.uid;
+  if (records.length > 0) return; // já tem dados na nuvem
+  if (localStorage.getItem("ml_migrated_" + uid)) return;
+
+  const localRecords = loadLocalRecords();
+  const localConfig = loadLocalConfig();
+  if (localRecords.length === 0 && !localConfig) return;
+
+  const batch = window.FB.db.batch();
+  localRecords.forEach((r) => {
+    const id = r.id || cryptoId();
+    batch.set(recordsCol().doc(id), { ...r, id });
+  });
+  if (localConfig) {
+    batch.set(userDoc(), { name: currentUser.displayName || "", config: localConfig }, { merge: true });
+  }
+  batch
+    .commit()
+    .then(() => {
+      localStorage.setItem("ml_migrated_" + uid, "1");
+      toast("Dados locais importados para sua conta ✓");
+    })
+    .catch((err) => console.warn("[Meu Lucro] migração falhou:", err));
+}
+
+/* ============================================================
+   Fluxo de autenticação (UI)
+   ============================================================ */
+function setState(state) {
+  document.body.className = "state-" + state; // 'loading' | 'auth' | 'app'
+}
+
+function handleAuthChange(user) {
+  if (user) {
+    currentUser = user;
+    migrationTried = false;
+    onboardingShown = false;
+    $("accountBox").hidden = false;
+    $("accountEmail").textContent = user.email || "";
+    setState("app");
+    subscribeCloud();
+  } else {
+    currentUser = null;
+    unsubscribeCloud();
+    records = [];
+    config = null;
+    $("accountBox").hidden = true;
+    clearAuthMessages();
+    setState("auth");
+  }
+}
+
+function switchAuthTab(tab) {
+  document.querySelectorAll(".auth__tab").forEach((b) =>
+    b.classList.toggle("is-active", b.dataset.tab === tab)
+  );
+  $("loginForm").hidden = tab !== "login";
+  $("signupForm").hidden = tab !== "signup";
+  clearAuthMessages();
+}
+
+function clearAuthMessages() {
+  $("authError").hidden = true;
+  $("authNote").hidden = true;
+}
+function showAuthError(msg) {
+  $("authNote").hidden = true;
+  const el = $("authError");
+  el.textContent = msg;
+  el.hidden = false;
+}
+function showAuthNote(msg) {
+  $("authError").hidden = true;
+  const el = $("authNote");
+  el.textContent = msg;
+  el.hidden = false;
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  clearAuthMessages();
+  const email = $("loginEmail").value.trim();
+  const pass = $("loginPass").value;
+  const btn = $("loginBtn");
+  btn.disabled = true;
+  window.FB.login(email, pass)
+    .catch((err) => showAuthError(window.FB_ERROR(err)))
+    .finally(() => (btn.disabled = false));
+}
+
+function handleSignup(e) {
+  e.preventDefault();
+  clearAuthMessages();
+  const name = $("signupName").value.trim();
+  const email = $("signupEmail").value.trim();
+  const pass = $("signupPass").value;
+  if (name.length < 2) return showAuthError("Digite seu nome.");
+  const btn = $("signupBtn");
+  btn.disabled = true;
+  window.FB.signup(name, email, pass)
+    .catch((err) => showAuthError(window.FB_ERROR(err)))
+    .finally(() => (btn.disabled = false));
+}
+
+function handleForgot() {
+  clearAuthMessages();
+  const email = $("loginEmail").value.trim();
+  if (!email) {
+    showAuthError("Digite seu e-mail acima para receber o link de recuperação.");
+    $("loginEmail").focus();
+    return;
+  }
+  window.FB.resetPassword(email)
+    .then(() => showAuthNote("Enviamos um link de recuperação para o seu e-mail."))
+    .catch((err) => showAuthError(window.FB_ERROR(err)));
+}
+
+function handleLogout() {
+  hideModal("settingsModal");
+  if (cloudActive()) window.FB.logout().catch(() => {});
 }
 
 /* ============================================================
@@ -415,19 +614,16 @@ function handleSettingsSave(e) {
 function downloadReport() {
   const mk = monthKey(todayISO());
   const monthRecords = records.filter((r) => monthKey(r.date) === mk);
-
   if (records.length === 0) {
     toast("Nenhum dado para gerar relatório.");
     return;
   }
-
   const a = aggregate(monthRecords);
   const avg = a.days ? a.profit / a.days : 0;
   const period = monthLabel(todayISO());
 
   const jsPDFRef = window.jspdf?.jsPDF;
   if (!jsPDFRef) {
-    // Fallback offline: impressão (o usuário salva como PDF)
     printReport(period, a, avg, monthRecords);
     return;
   }
@@ -451,10 +647,12 @@ function downloadReport() {
     doc.setFontSize(10);
     doc.setTextColor(110, 110, 110);
     y += 16;
-    doc.text(`Veículo: ${config.model}${config.year ? " (" + config.year + ")" : ""}  ·  Custo por km: ${money(costKm())}`, left, y);
+    doc.text(
+      `Veículo: ${config.model}${config.year ? " (" + config.year + ")" : ""}  ·  Custo por km: ${money(costKm())}`,
+      left, y
+    );
   }
 
-  // Resumo
   y += 28;
   const rows = [
     ["Receita total", money(a.revenue)],
@@ -465,12 +663,12 @@ function downloadReport() {
     ["Dias trabalhados", String(a.days)],
     ["Média líquida por dia", money(avg)],
   ];
-
   doc.setDrawColor(225, 230, 235);
   rows.forEach(([label, value]) => {
-    doc.setFont("helvetica", label === "Lucro líquido" ? "bold" : "normal");
+    const bold = label === "Lucro líquido";
+    doc.setFont("helvetica", bold ? "bold" : "normal");
     doc.setFontSize(11);
-    doc.setTextColor(label === "Lucro líquido" ? 15 : 60, label === "Lucro líquido" ? 125 : 60, label === "Lucro líquido" ? 77 : 60);
+    doc.setTextColor(bold ? 15 : 60, bold ? 125 : 60, bold ? 77 : 60);
     doc.text(label, left, y);
     doc.text(value, 547 - doc.getTextWidth(value), y);
     y += 8;
@@ -478,7 +676,6 @@ function downloadReport() {
     y += 16;
   });
 
-  // Detalhamento por dia
   y += 14;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
@@ -520,7 +717,6 @@ function downloadReport() {
   toast("Relatório gerado ✓");
 }
 
-// Fallback: gera uma janela de impressão pronta para "Salvar como PDF".
 function printReport(period, a, avg, monthRecords) {
   const rows = [...monthRecords]
     .sort((x, z) => (x.date < z.date ? -1 : 1))
@@ -566,13 +762,12 @@ function printReport(period, a, avg, monthRecords) {
    ============================================================ */
 function showModal(id) {
   $(id).hidden = false;
-  document.body.style.overflow = "hidden";
+  document.body.dataset.modal = "open";
 }
 function hideModal(id) {
   $(id).hidden = true;
-  document.body.style.overflow = "";
+  delete document.body.dataset.modal;
 }
-
 let toastTimer;
 function toast(msg) {
   const t = $("toast");
@@ -587,6 +782,7 @@ function toast(msg) {
    ============================================================ */
 function init() {
   $("brandName").textContent = APP_NAME;
+  $("footerNote").textContent = APP_NAME;
   $("inpDate").value = todayISO();
 
   // Formulário de registro
@@ -598,6 +794,7 @@ function init() {
   // Configurações
   $("openSettings").addEventListener("click", () => openSettings(false));
   $("settingsForm").addEventListener("submit", handleSettingsSave);
+  $("logoutBtn").addEventListener("click", handleLogout);
 
   // Edição
   $("editForm").addEventListener("submit", handleEditSave);
@@ -606,10 +803,10 @@ function init() {
   // Relatório
   $("downloadReport").addEventListener("click", downloadReport);
 
-  // Insight clicável (alterna mensagens)
+  // Insight clicável
   $("insightCard").addEventListener("click", rotateInsight);
 
-  // Fechar modais (backdrop ou botão [data-close])
+  // Fechar modais
   document.querySelectorAll("[data-close]").forEach((el) =>
     el.addEventListener("click", () => {
       hideModal("settingsModal");
@@ -617,10 +814,27 @@ function init() {
     })
   );
 
-  render();
+  // Tela de autenticação
+  document.querySelectorAll(".auth__tab").forEach((b) =>
+    b.addEventListener("click", () => switchAuthTab(b.dataset.tab))
+  );
+  $("loginForm").addEventListener("submit", handleLogin);
+  $("signupForm").addEventListener("submit", handleSignup);
+  $("forgotBtn").addEventListener("click", handleForgot);
 
-  // Primeira utilização → abre configuração
-  if (!config) openSettings(true);
+  // Decide o modo de operação
+  if (cloudEnabled()) {
+    setState("loading");
+    window.FB.auth.onAuthStateChanged(handleAuthChange);
+  } else {
+    // Modo local (Firebase não configurado)
+    $("localBanner").hidden = false;
+    config = loadLocalConfig();
+    records = loadLocalRecords();
+    setState("app");
+    render();
+    if (!config) openSettings(true);
+  }
 
   // Service worker (PWA)
   if ("serviceWorker" in navigator) {

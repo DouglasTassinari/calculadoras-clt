@@ -1,3 +1,6 @@
 node_modules/
 .DS_Store
 Thumbs.db
+
+# Chaves do Firebase (cada um cria o seu a partir de config.example.js)
+config.js
