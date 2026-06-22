@@ -344,6 +344,7 @@ function handleSave(e) {
   }
 
   resetForm();
+  if (window.jbTrack) jbTrack("dia_salvo", { novo: !existing });
   toast(existing ? "Dia atualizado ✓" : "Dia salvo ✓");
 }
 
@@ -525,6 +526,8 @@ function handleAuthChange(user) {
     onboardingShown = false;
     $("accountBox").hidden = false;
     $("accountEmail").textContent = user.email || "";
+    if (window.jbTrack && !window.__jbAuthAction) jbTrack("user_return");
+    window.__jbAuthAction = false;
     setState("app");
     subscribeCloud();
   } else {
@@ -571,7 +574,9 @@ function handleLogin(e) {
   const pass = $("loginPass").value;
   const btn = $("loginBtn");
   btn.disabled = true;
+  window.__jbAuthAction = true;
   window.FB.login(email, pass)
+    .then(() => { if (window.jbTrack) jbTrack("login", { method: "password" }); })
     .catch((err) => showAuthError(window.FB_ERROR(err)))
     .finally(() => (btn.disabled = false));
 }
@@ -585,7 +590,9 @@ function handleSignup(e) {
   if (name.length < 2) return showAuthError("Digite seu nome.");
   const btn = $("signupBtn");
   btn.disabled = true;
+  window.__jbAuthAction = true;
   window.FB.signup(name, email, pass)
+    .then(() => { if (window.jbTrack) jbTrack("sign_up", { method: "password" }); })
     .catch((err) => showAuthError(window.FB_ERROR(err)))
     .finally(() => (btn.disabled = false));
 }

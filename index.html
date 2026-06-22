@@ -9,9 +9,36 @@
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icon.svg" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="jornada-shared.css" />
   <title>Meu Lucro</title>
+  <!-- Jornada Brasil — plataforma (Fase 1): analytics compartilhado -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MK3XD5ZVE0"></script>
+  <script>
+    window.dataLayer=window.dataLayer||[];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'granted'});
+    gtag('js',new Date());
+    gtag('config','G-MK3XD5ZVE0');
+    window.jbTrack=function(name,params){try{gtag('event',name,params||{});}catch(e){}};
+  </script>
 </head>
 <body class="state-loading">
+
+  <!-- ====================== BARRA DA PLATAFORMA (Jornada Brasil) ====================== -->
+  <header class="jb-header no-print" style="position:static">
+    <div class="jb-header__in">
+      <a class="jb-brand" href="https://jornadabrasil.com.br/">Jornada<span class="jb-brand__acc"> Brasil</span></a>
+      <nav class="jb-nav" aria-label="Navegação Jornada Brasil">
+        <a href="https://jornadabrasil.com.br/calculadoras/">Calculadoras</a>
+        <a href="https://jornadabrasil.com.br/quanto-cobrar/" onclick="window.jbTrack&&jbTrack('journey_click',{from:'lucro_nav',to:'orca'})">Quanto Cobrar</a>
+        <a href="https://jornadabrasil.com.br/meu-lucro/" class="is-active">Meu Lucro</a>
+        <a href="https://jornadabrasil.com.br/blog/">Blog</a>
+      </nav>
+    </div>
+  </header>
 
   <!-- ====================== SPLASH (carregando) ====================== -->
   <div id="splash" class="splash">
@@ -284,10 +311,34 @@
       </div>
     </section>
 
+    <!-- CTA de jornada: Meu Lucro → Jornada Brasil (PJ vs CLT) -->
+    <section class="jb-cta no-print" aria-label="Próximo passo na jornada">
+      <p class="jb-cta__t"><b>Será que continuar autônomo vale a pena?</b> Compare lado a lado uma proposta CLT e PJ e veja qual rende mais no fim do mês.</p>
+      <a class="jb-btn" href="https://jornadabrasil.com.br/pj-vs-clt/" target="_blank" rel="noopener" onclick="window.jbTrack&&jbTrack('journey_click',{from:'lucro',to:'pj_clt'})">Comparar CLT e PJ →</a>
+    </section>
+
     <footer class="app-footer">
       <span id="footerNote">Meu Lucro</span>
     </footer>
   </main>
+
+  <!-- ====================== RODAPÉ DA PLATAFORMA (Jornada Brasil) ====================== -->
+  <footer class="jb-footer no-print">
+    <div class="jb-footer__in">
+      <div>
+        <p class="jb-footer__name">Jornada Brasil</p>
+        <p class="jb-footer__desc">Ferramentas para decisões de trabalho, carreira e renda.</p>
+      </div>
+      <nav class="jb-footer__links" aria-label="Rodapé Jornada Brasil">
+        <a href="https://jornadabrasil.com.br/calculadoras/">Calculadoras</a>
+        <a href="https://jornadabrasil.com.br/quanto-cobrar/">Quanto Cobrar</a>
+        <a href="https://jornadabrasil.com.br/meu-lucro/">Meu Lucro</a>
+        <a href="https://jornadabrasil.com.br/blog/">Blog</a>
+        <a href="https://jornadabrasil.com.br/pj-vs-clt/">PJ vs CLT</a>
+      </nav>
+    </div>
+    <p class="jb-footer__legal">Meu Lucro faz parte da plataforma Jornada Brasil · Caráter educativo — não substitui orientação profissional.</p>
+  </footer>
 
   <!-- ====================== MODAL CONFIGURAÇÃO ====================== -->
   <div class="modal" id="settingsModal" hidden>
