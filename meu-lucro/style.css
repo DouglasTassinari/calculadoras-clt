@@ -3,20 +3,27 @@
    ============================================================ */
 
 :root {
-  --green: #0f7d4d;
-  --green-dark: #0b5e3a;
-  --green-soft: #e6f5ee;
-  --red: #d64545;
-  --bg: #f3f5f7;
-  --surface: #ffffff;
-  --text: #1c2430;
-  --text-soft: #647082;
-  --text-mut: #9aa4b2;
-  --border: #e7eaef;
-  --shadow: 0 6px 18px rgba(28, 36, 48, 0.06);
-  --shadow-lg: 0 12px 32px rgba(28, 36, 48, 0.12);
-  --radius: 18px;
-  --radius-sm: 12px;
+  /* Tokens consumindo a fonte da verdade da plataforma (shared/jornada-shared.css).
+     MARCA / interativo agora e o laranja Jornada Brasil (antes verde).
+     Fallback literal caso o CSS compartilhado nao carregue. */
+  --green: var(--jb-primary, #F97316);
+  --green-dark: var(--jb-primary-dark, #EA580C);
+  --green-soft: var(--jb-primary-bg, #FFEDD5);
+  /* Semantica de valor positivo / lucro — verde-sucesso Jornada Brasil */
+  --pos: var(--jb-success, #157A4C);
+  --pos-dark: var(--jb-success-text, #14593A);
+  --pos-soft: var(--jb-success-bg, #EAF5EF);
+  --red: var(--jb-danger, #BB3B2A);
+  --bg: var(--jb-bg, #F9FAFB);
+  --surface: var(--jb-surface, #FFFFFF);
+  --text: var(--jb-text, #1F2937);
+  --text-soft: var(--jb-text-2, #4B5563);
+  --text-mut: var(--jb-text-3, #5B6370);
+  --border: var(--jb-border, #E5E7EB);
+  --shadow: var(--jb-shadow, 0 1px 3px rgba(0,0,0,.05), 0 8px 24px -12px rgba(0,0,0,.10));
+  --shadow-lg: var(--jb-shadow-lg, 0 12px 32px -8px rgba(0,0,0,.18));
+  --radius: var(--jb-radius, 16px);
+  --radius-sm: var(--jb-radius-sm, 10px);
   --maxw: 560px;
 }
 
@@ -25,7 +32,7 @@
 html { -webkit-text-size-adjust: 100%; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--jb-font, "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
   background: var(--bg);
   color: var(--text);
   line-height: 1.45;
@@ -553,4 +560,31 @@ body[data-modal="open"] { overflow: hidden; }
   font-size: 0.92rem;
   color: var(--green-dark);
   word-break: break-all;
+}
+
+/* =====================================================================
+   JORNADA BRASIL — ajustes de identidade (Fase 2).
+   A marca/interativo passou a ser o laranja JB (via tokens acima).
+   Aqui preservamos a semantica de VALOR POSITIVO/LUCRO em verde-sucesso
+   e alinhamos detalhes residuais ao design system da plataforma.
+   ===================================================================== */
+/* Sombra do cabecalho do app: neutra (era tom verde) */
+.app-header { box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12); }
+
+/* Lucro / indicadores positivos permanecem verdes (verde-sucesso JB) */
+.hero-card { background: linear-gradient(135deg, #1B9C63, var(--pos)); }
+.text-positive { color: var(--pos); }
+.month-progress__top strong { color: var(--pos); }
+.month-progress__bottom span:last-child { color: var(--pos-dark); }
+.form__preview { background: var(--pos-soft); }
+.form__preview span,
+.form__preview strong { color: var(--pos-dark); }
+.goal-bar--lg .goal-bar__fill { background: linear-gradient(90deg, var(--pos), #1FB573); }
+.auth__msg--ok { background: var(--pos-soft); color: var(--pos-dark); }
+
+/* Aviso "modo local" alinhado ao ambar/alerta do design system */
+.local-banner {
+  background: var(--jb-warning-bg, #FBF3E2);
+  border-color: var(--jb-warning-border, #E9D3A3);
+  color: var(--jb-warning-text, #6B5A2A);
 }

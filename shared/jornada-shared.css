@@ -1,19 +1,50 @@
 /* =====================================================================
-   JORNADA BRASIL — camada de plataforma compartilhada (Fase 1)
-   Header, navegação, rodapé e CTAs de jornada. Autocontido: não depende
-   de nenhum CSS externo. Cores/tipografia espelham o portal jornadabrasil.com.br.
+   JORNADA BRASIL — camada de plataforma compartilhada.
+   FONTE DA VERDADE do design system: tokens (--jb-*) espelham o portal
+   jornadabrasil.com.br. Os modulos /precificar/ e /meu-lucro/ consomem
+   estes mesmos tokens para parecerem partes nativas da plataforma.
+   Autocontido: nao depende de nenhum CSS externo.
    ===================================================================== */
 :root{
-  --jb-primary:#F97316; --jb-primary-dark:#EA580C; --jb-primary-bg:#FFEDD5;
+  /* --- Marca / primaria (laranja) --- */
+  --jb-primary:#F97316; --jb-primary-dark:#EA580C;
+  --jb-primary-bg:#FFEDD5; --jb-primary-border:#FED7AA;
+  /* --- Secundaria (azul) --- */
   --jb-secondary:#1E3A8A; --jb-ink:#15275A;
-  --jb-text:#1F2937; --jb-text-2:#4B5563;
-  --jb-surface:#FFFFFF; --jb-bg:#F9FAFB; --jb-border:#E5E7EB;
+  /* --- Texto --- */
+  --jb-text:#1F2937; --jb-text-2:#4B5563; --jb-text-3:#5B6370;
+  /* --- Superficies --- */
+  --jb-surface:#FFFFFF; --jb-bg:#F9FAFB;
+  --jb-border:#E5E7EB; --jb-border-2:#F3F4F6;
+  /* --- Sucesso (verde) — valores positivos / confirmacoes --- */
+  --jb-success:#157A4C; --jb-success-bg:#EAF5EF;
+  --jb-success-text:#14593A; --jb-success-border:#BFE3CF;
+  /* --- Erro (vermelho) --- */
+  --jb-danger:#BB3B2A; --jb-danger-bg:#FAEDEB;
+  --jb-danger-text:#8F2D1F; --jb-danger-border:#ECCAC4;
+  /* --- Alerta (ambar) --- */
+  --jb-warning:#BC8A2D; --jb-warning-bg:#FBF3E2;
+  --jb-warning-text:#6B5A2A; --jb-warning-border:#E9D3A3;
+  /* --- Raio / sombra / tipografia --- */
+  --jb-radius:16px; --jb-radius-sm:10px; --jb-radius-pill:999px;
+  --jb-shadow:0 1px 3px rgba(0,0,0,.05), 0 8px 24px -12px rgba(0,0,0,.10);
+  --jb-shadow-sm:0 1px 3px rgba(0,0,0,.05);
+  --jb-shadow-lg:0 12px 32px -8px rgba(0,0,0,.18);
   --jb-font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --jb-font-mono:"JetBrains Mono",ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --jb-primary-bg:#431407; --jb-text:#F9FAFB; --jb-text-2:#9CA3AF;
-    --jb-surface:#111827; --jb-bg:#0F172A; --jb-border:#283447; --jb-ink:#E6EDF3;
+    --jb-primary-bg:#431407; --jb-primary-border:#7C2D12;
+    --jb-text:#F9FAFB; --jb-text-2:#9CA3AF; --jb-text-3:#8A93A3;
+    --jb-surface:#111827; --jb-bg:#0F172A;
+    --jb-border:#283447; --jb-border-2:#1A2332; --jb-ink:#E6EDF3;
+    --jb-success:#34D399; --jb-success-bg:#0E2A1F;
+    --jb-success-text:#6EE7B7; --jb-success-border:#1C4A38;
+    --jb-danger:#F87171; --jb-danger-bg:#2A1413;
+    --jb-danger-text:#FCA5A5; --jb-danger-border:#5B221B;
+    --jb-warning:#FBBF24; --jb-warning-bg:#2A2210;
+    --jb-warning-text:#FDE68A; --jb-warning-border:#4A3D1A;
   }
 }
 body{font-family:var(--jb-font);}
@@ -33,7 +64,7 @@ body{font-family:var(--jb-font);}
 .jb-nav a.is-active{color:var(--jb-primary-dark);background:var(--jb-primary-bg);}
 
 /* ---- CTA de jornada ---- */
-.jb-cta{max-width:1100px;margin:26px auto;padding:20px 22px;border-radius:16px;
+.jb-cta{max-width:1100px;margin:26px auto;padding:20px 22px;border-radius:var(--jb-radius);
   background:var(--jb-primary-bg);border:1px solid var(--jb-border);
   display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
 .jb-cta__t{margin:0;color:var(--jb-text);font-size:1rem;line-height:1.5;max-width:62ch;}
