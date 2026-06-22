@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orça Justo — Calculadora de orçamento para prestadores</title>
+  <meta name="description" content="Descubra quanto você realmente ganha por dia antes de fechar o orçamento." />
+
+  <!-- Tailwind (Play CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React + Babel (CDN, sem build) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    :root { color-scheme: light; }
+    body { -webkit-text-size-adjust: 100%; }
+    /* Esconde as setas de input number no mobile pra ficar mais limpo */
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background: #fff !important; }
+      .print-area { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
+      .print-only { display: block !important; }
+      @page { margin: 14mm; }
+    }
+    .print-only { display: none; }
+  </style>
+
+  <!-- Jornada Brasil — plataforma (Fase 1): tipografia, analytics e estilos compartilhados -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="jornada-shared.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MK3XD5ZVE0"></script>
+  <script>
+    window.dataLayer=window.dataLayer||[];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'granted'});
+    gtag('js',new Date());
+    gtag('config','G-MK3XD5ZVE0');
+    window.jbTrack=function(name,params){try{gtag('event',name,params||{});}catch(e){}};
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800">
+  <header class="jb-header no-print">
+    <div class="jb-header__in">
+      <a class="jb-brand" href="https://jornadabrasil.com.br/">Jornada<span class="jb-brand__acc"> Brasil</span></a>
+      <nav class="jb-nav" aria-label="Navegação Jornada Brasil">
+        <a href="https://jornadabrasil.com.br/calculadoras/">Calculadoras</a>
+        <a href="https://jornadabrasil.com.br/quanto-cobrar/" class="is-active">Quanto Cobrar</a>
+        <a href="https://jornadabrasil.com.br/meu-lucro/" onclick="window.jbTrack&&jbTrack('journey_click',{from:'orca_nav',to:'lucro'})">Meu Lucro</a>
+        <a href="https://jornadabrasil.com.br/blog/">Blog</a>
+      </nav>
+    </div>
+  </header>
+
+  <div id="root"></div>
+
+  <section class="jb-cta no-print" aria-label="Próximo passo na jornada">
+    <p class="jb-cta__t"><b>Já sabe quanto cobrar?</b> Agora acompanhe se esse valor está realmente sobrando no seu bolso.</p>
+    <a class="jb-btn" href="https://douglastassinari.github.io/meu-lucro/" target="_blank" rel="noopener" onclick="window.jbTrack&&jbTrack('journey_click',{from:'orca',to:'lucro'})">Abrir o Meu Lucro →</a>
+  </section>
+
+  <footer class="jb-footer no-print">
+    <div class="jb-footer__in">
+      <div>
+        <p class="jb-footer__name">Jornada Brasil</p>
+        <p class="jb-footer__desc">Ferramentas para decisões de trabalho, carreira e renda.</p>
+      </div>
+      <nav class="jb-footer__links" aria-label="Rodapé Jornada Brasil">
+        <a href="https://jornadabrasil.com.br/calculadoras/">Calculadoras</a>
+        <a href="https://jornadabrasil.com.br/quanto-cobrar/">Quanto Cobrar</a>
+        <a href="https://jornadabrasil.com.br/meu-lucro/">Meu Lucro</a>
+        <a href="https://jornadabrasil.com.br/blog/">Blog</a>
+        <a href="https://jornadabrasil.com.br/pj-vs-clt/" onclick="window.jbTrack&&jbTrack('journey_click',{from:'orca_footer',to:'pj_clt'})">PJ vs CLT</a>
+      </nav>
+    </div>
+    <p class="jb-footer__legal">Orça Justo faz parte da plataforma Jornada Brasil · Caráter educativo — não substitui orientação profissional.</p>
+  </footer>
+
+  <!-- O JSX abaixo NÃO é executado direto pelo navegador: é transformado pelo
+       bootstrap no final do body, usando o runtime clássico (React.createElement). -->
+  <script type="text/plain" id="app-src">
+    const { useState, useMemo, useEffect } = React;
+
+    /* Multiplicadores de complexidade aplicados ao rendimento que o usuário informa.
+       Baixa rende mais (menos dias) · Média sem ajuste · Alta rende menos (mais dias). */
+    const FATOR_COMPLEXIDADE = { "Baixa": 1.15, "Média": 1.0, "Alta": 0.8 };
+    const UNIDADES = ["m²", "m", "unidade", "serviço"];
+    const COMPLEXIDADES = ["Baixa", "Média", "Alta"];
+
+    /* ===================== HELPERS ===================== */
+    const brl = (n) => (isFinite(n) ? n : 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+    const dec = (n, d = 1) => (isFinite(n) ? n : 0).toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: d });
+    const toNum = (v) => { const n = parseFloat(String(v).replace(",", ".")); return isFinite(n) ? n : 0; };
+    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+    /* Calcula dias úteis de um item (serviço ou aditivo) com base no rendimento
+       informado pelo usuário e no fator de complexidade. */
+    function diasDoItem(item) {
+      const rend = toNum(item.rendimento);
+      const fator = FATOR_COMPLEXIDADE[item.complexidade] || 1;
+      const rendEfetivo = rend * fator;
+      const qtd = toNum(item.quantidade);
+      const dias = rendEfetivo > 0 ? qtd / rendEfetivo : 0;
+      return { dias, rendEfetivo, rend };
+    }
+
+    /* ===================== UI BÁSICA ===================== */
+    function Campo({ label, hint, children }) {
+      return (
+        <label className="block">
+          <span className="block text-sm font-medium text-slate-700">{label}</span>
+          {hint && <span className="block text-xs text-slate-400 mb-1">{hint}</span>}
+          <div className={hint ? "" : "mt-1"}>{children}</div>
+        </label>
+      );
+    }
+    const inputCls = "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none";
+
+    function NumInput({ value, onChange, prefix, suffix, placeholder }) {
+      return (
+        <div className="relative">
+          {prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">{prefix}</span>}
+          <input
+            type="number" inputMode="decimal" value={value} placeholder={placeholder}
+            onChange={(e) => onChange(e.target.value)}
+            className={inputCls + (prefix ? " pl-9" : "") + (suffix ? " pr-12" : "")}
+          />
+          {suffix && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">{suffix}</span>}
+        </div>
+      );
+    }
+
+    function LinhaResumo({ titulo, valor, sub, destaque }) {
+      return (
+        <div className={"flex items-baseline justify-between gap-3 py-1.5 " + (destaque ? "" : "border-b border-slate-100 last:border-0")}>
+          <div>
+            <div className={destaque ? "font-semibold" : "text-slate-600"}>{titulo}</div>
+            {sub && <div className="text-xs text-slate-400">{sub}</div>}
+          </div>
+          <div className={"tabular-nums " + (destaque ? "font-bold text-lg" : "font-medium text-slate-700")}>{valor}</div>
+        </div>
+      );
+    }
+
+    /* ===================== APP ===================== */
+    const ESTADO_INICIAL = {
+      prof: {
+        nome: "", contato: "",
+        ganhoDia: "", diasSemana: "", possuiAjudante: false,
+        custoAjudanteDia: "", deslocamentoDia: "", margem: "",
+      },
+      servicos: [
+        // Começa com uma linha vazia pronta pra preencher
+        { id: uid(), nome: "", unidade: "m²", quantidade: "", rendimento: "", complexidade: "Média" },
+      ],
+      aditivos: [],
+      contratoOriginal: "",
+      simuladorPreco: "",
+    };
+
+    /* Configuração do negócio — PERSISTIDA (separada do orçamento, que não é salvo). */
+    const NEGOCIO_KEY = "orcajusto_negocio_v1";
+    const NEGOCIO_INICIAL = {
+      aluguel: "", internet: "", telefone: "", energia: "", combustivel: "", ferramentas: "",
+      manutencao: "", contador: "", funcionarios: "", prolabore: "", outros: "",
+      diasMes: "22", horasDia: "8",
+    };
+    const CUSTOS_NEGOCIO = [
+      ["aluguel", "Aluguel"], ["internet", "Internet"], ["telefone", "Telefone"],
+      ["energia", "Energia"], ["combustivel", "Combustível"], ["ferramentas", "Ferramentas"],
+      ["manutencao", "Manutenção"], ["contador", "Contador"], ["funcionarios", "Funcionários"],
+      ["prolabore", "Pró-labore"], ["outros", "Outros custos"],
+    ];
+
+    function App() {
+      const [prof, setProf] = useState(ESTADO_INICIAL.prof);
+      const [servicos, setServicos] = useState(ESTADO_INICIAL.servicos);
+      const [aditivos, setAditivos] = useState(ESTADO_INICIAL.aditivos);
+      const [contratoOriginal, setContratoOriginal] = useState(ESTADO_INICIAL.contratoOriginal);
+      const [simuladorPreco, setSimuladorPreco] = useState(ESTADO_INICIAL.simuladorPreco);
+      const [mostrarAditivos, setMostrarAditivos] = useState(false);
+
+      // Orçamento NÃO é salvo (F5 limpa). Estes também são do orçamento (resetam no F5):
+      const [material, setMaterial] = useState("");
+      const [usarCustoReal, setUsarCustoReal] = useState(false);
+      const [telaNegocio, setTelaNegocio] = useState(false);
+
+      // Configuração do negócio: carrega do LocalStorage e salva a cada mudança (só ela persiste).
+      const [negocio, setNegocio] = useState(() => {
+        try {
+          const s = localStorage.getItem(NEGOCIO_KEY);
+          if (s) return { ...NEGOCIO_INICIAL, ...JSON.parse(s) };
+        } catch (e) {}
+        return NEGOCIO_INICIAL;
+      });
+      useEffect(() => {
+        try { localStorage.setItem(NEGOCIO_KEY, JSON.stringify(negocio)); } catch (e) {}
+      }, [negocio]);
+      const setNeg = (k, v) => setNegocio((n) => ({ ...n, [k]: v }));
+
+      // Diária e hora mínimas: o custo de "manter o negócio funcionando".
+      const negocioCalc = useMemo(() => {
+        const totalCustosMes = CUSTOS_NEGOCIO.reduce((s, par) => s + toNum(negocio[par[0]]), 0);
+        const diasMes = Math.max(1, toNum(negocio.diasMes) || 22);
+        const horasDia = Math.max(1, toNum(negocio.horasDia) || 8);
+        const diariaMinima = totalCustosMes > 0 ? totalCustosMes / diasMes : 0;
+        const horaMinima = diariaMinima / horasDia;
+        return { totalCustosMes, diasMes, horasDia, diariaMinima, horaMinima };
+      }, [negocio]);
+
+      // Quando "usar custo real" está ligado e há custos cadastrados, a mão de obra por dia
+      // passa a ser a diária mínima (em vez do valor digitado em "quanto quer ganhar por dia").
+      const ganhoDiaEfetivo = (usarCustoReal && negocioCalc.diariaMinima > 0)
+        ? negocioCalc.diariaMinima : toNum(prof.ganhoDia);
+
+      const setP = (k, v) => setProf((p) => ({ ...p, [k]: v }));
+
+      /* ---------- Serviços ---------- */
+      const addServico = () =>
+        setServicos((s) => [...s, { id: uid(), nome: "", unidade: "m²", quantidade: "", rendimento: "", complexidade: "Média" }]);
+      const rmServico = (id) => setServicos((s) => s.filter((x) => x.id !== id));
+      const upServico = (id, patch) =>
+        setServicos((s) => s.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+
+      /* ---------- Cálculo principal ---------- */
+      const calc = useMemo(() => {
+        const itens = servicos.map((s) => {
+          const { dias, rendEfetivo } = diasDoItem(s);
+          return { ...s, dias, rendEfetivo };
+        });
+        const diasBrutos = itens.reduce((a, b) => a + b.dias, 0);
+        const totalDias = Math.max(0, Math.ceil(diasBrutos));
+
+        const ganhoDia = ganhoDiaEfetivo;
+        const deslocamentoDia = toNum(prof.deslocamentoDia);
+        const custoAjudanteDia = prof.possuiAjudante ? toNum(prof.custoAjudanteDia) : 0;
+        const margem = toNum(prof.margem);
+
+        const maoDeObra = totalDias * ganhoDia;
+        const deslocamento = totalDias * deslocamentoDia;
+        const ajudante = totalDias * custoAjudanteDia;
+        const custosOperacionais = deslocamento + ajudante;
+        const baseCusto = maoDeObra + custosOperacionais;        // preço mínimo (break-even na sua meta/dia)
+        const reservaRisco = baseCusto * (margem / 100);          // margem / reserva de risco
+        const precoMinimo = baseCusto;
+        const precoRecomendado = baseCusto + reservaRisco;
+        const precoPremium = precoRecomendado * 1.15;
+
+        // Preço que o prestador decide cobrar: se preencheu o simulador "E se eu cobrar
+        // outro valor?", vale esse; senão, o recomendado. É ESSE valor que vai pro cliente.
+        const simNum = toNum(simuladorPreco);
+        const precoEscolhido = (simuladorPreco !== "" && simNum > 0) ? simNum : precoRecomendado;
+
+        // Orçamento do cliente: deslocamento e ajudante viram linhas próprias; o restante
+        // ("bolo dos serviços", com a margem embutida e nunca exibida) é diluído entre os
+        // serviços na proporção dos dias, e o preço por unidade sai dividindo pela quantidade.
+        const poolServicos = precoEscolhido - deslocamento - ajudante;
+        const itensOrcados = itens.map((it) => {
+          const precoServico = diasBrutos > 0 ? poolServicos * (it.dias / diasBrutos) : 0;
+          const qtd = toNum(it.quantidade);
+          const precoUnit = qtd > 0 ? precoServico / qtd : 0;
+          return { ...it, precoServico, precoUnit };
+        });
+
+        const diasSemana = Math.max(1, toNum(prof.diasSemana) || 5);
+        const semanas = totalDias / diasSemana;
+
+        // Ganho REAL por dia para um preço P = (preço - custos operacionais) / dias
+        const ganhoRealPorDia = (P) => totalDias > 0 ? (P - custosOperacionais) / totalDias : 0;
+
+        return {
+          itens: itensOrcados, poolServicos, diasBrutos, totalDias, semanas,
+          maoDeObra, deslocamento, ajudante, custosOperacionais, baseCusto, reservaRisco,
+          precoMinimo, precoRecomendado, precoPremium, precoEscolhido,
+          ganhoDia, margem, ganhoRealPorDia,
+        };
+      }, [servicos, prof, simuladorPreco, ganhoDiaEfetivo]);
+
+      // Material (custo opcional do serviço) e o resumo "para onde vai o dinheiro".
+      const materialNum = toNum(material);
+      const precoVenda = calc.precoEscolhido + materialNum;          // o que o cliente paga
+      const custosNegocioJob = calc.deslocamento + calc.ajudante;    // custos diretos do serviço
+      const lucroEstimado = precoVenda - materialNum - calc.maoDeObra - custosNegocioJob;
+
+      /* ---------- Aditivos ---------- */
+      const custoDiaMarginal = useMemo(() =>
+        ganhoDiaEfetivo + toNum(prof.deslocamentoDia) + (prof.possuiAjudante ? toNum(prof.custoAjudanteDia) : 0),
+        [prof, ganhoDiaEfetivo]);
+
+      function valorAditivo(a) {
+        if (a.valorManual !== "" && a.valorManual != null) return toNum(a.valorManual);
+        const { dias } = diasDoItem(a);
+        return dias * custoDiaMarginal * (1 + toNum(prof.margem) / 100);
+      }
+
+      const addAditivo = (tipo) =>
+        setAditivos((a) => [...a, { id: uid(), tipo, nome: "", unidade: "m²", quantidade: "", rendimento: "", complexidade: "Média", valorManual: "" }]);
+      const rmAditivo = (id) => setAditivos((a) => a.filter((x) => x.id !== id));
+      const upAditivo = (id, patch) =>
+        setAditivos((a) => a.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+
+      const contratoBase = contratoOriginal === "" ? precoVenda : toNum(contratoOriginal);
+      const totAdicionais = aditivos.filter((a) => a.tipo === "adicional").reduce((s, a) => s + valorAditivo(a), 0);
+      const totNaoExec = aditivos.filter((a) => a.tipo === "naoExecutado").reduce((s, a) => s + valorAditivo(a), 0);
+      const valorAtualizado = contratoBase + totAdicionais - totNaoExec;
+
+      /* Simulador reverso (o preço escolhido aqui é o que vai pro orçamento do cliente) */
+      const precoSimulado = calc.precoEscolhido;
+      const ganhoSimulado = calc.ganhoRealPorDia(precoSimulado);
+      const ganhoRecomendado = calc.ganhoRealPorDia(calc.precoRecomendado);
+
+      const resetTudo = () => {
+        if (confirm("Limpar tudo e recomeçar?")) {
+          setProf(ESTADO_INICIAL.prof);
+          setServicos(ESTADO_INICIAL.servicos.map((s) => ({ ...s, id: uid() })));
+          setAditivos([]); setContratoOriginal(""); setSimuladorPreco(""); setMostrarAditivos(false);
+          setMaterial(""); setUsarCustoReal(false);
+        }
+      };
+
+      const hoje = new Date().toLocaleDateString("pt-BR");
+
+      /* ===================== TELA: CONFIGURAR MEU NEGÓCIO ===================== */
+      if (telaNegocio) {
+        return (
+          <div className="max-w-2xl mx-auto px-4 pb-24 pt-6">
+            <header className="mb-4 flex items-center gap-3">
+              <button onClick={() => setTelaNegocio(false)}
+                className="rounded-lg border border-slate-300 text-slate-600 px-3 py-1.5 text-sm hover:bg-slate-50">← Voltar</button>
+              <h1 className="text-lg font-bold leading-tight">Configurar Meu Negócio</h1>
+            </header>
+
+            <p className="text-sm text-slate-500 mb-4">
+              Preencha uma vez. A gente calcula quanto você precisa cobrar por dia e por hora pra
+              <b> não trabalhar no prejuízo</b>. É tudo opcional e fica salvo só neste aparelho.
+            </p>
+
+            {/* Custos fixos mensais */}
+            <section className="bg-white rounded-2xl shadow-sm p-5 mb-4">
+              <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-wide mb-3">Custos fixos mensais</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {CUSTOS_NEGOCIO.map((par) => (
+                  <Campo key={par[0]} label={par[1]}>
+                    <NumInput value={negocio[par[0]]} onChange={(v) => setNeg(par[0], v)} prefix="R$" />
+                  </Campo>
+                ))}
+              </div>
+              <div className="border-t-2 border-slate-200 mt-3 pt-2">
+                <LinhaResumo titulo="Total de custos mensais" valor={brl(negocioCalc.totalCustosMes)} destaque />
+              </div>
+            </section>
+
+            {/* Capacidade produtiva */}
+            <section className="bg-white rounded-2xl shadow-sm p-5 mb-4">
+              <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-wide mb-3">Capacidade produtiva</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <Campo label="Dias trabalhados por mês">
+                  <NumInput value={negocio.diasMes} onChange={(v) => setNeg("diasMes", v)} suffix="dias" placeholder="22" />
+                </Campo>
+                <Campo label="Horas trabalhadas por dia">
+                  <NumInput value={negocio.horasDia} onChange={(v) => setNeg("horasDia", v)} suffix="h" placeholder="8" />
+                </Campo>
+              </div>
+            </section>
+
+            {/* Resultado: diária e hora mínimas */}
+            <section className="bg-white rounded-2xl shadow-sm p-5 mb-4">
+              <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-3">Seu custo mínimo</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-center">
+                  <div className="text-xs text-slate-500">Sua diária mínima</div>
+                  <div className="text-2xl font-bold text-emerald-700 mt-1 leading-tight">{brl(negocioCalc.diariaMinima)}</div>
+                  <div className="text-[11px] text-slate-400 mt-1">por dia trabalhado</div>
+                </div>
+                <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-center">
+                  <div className="text-xs text-slate-500">Seu valor mínimo por hora</div>
+                  <div className="text-2xl font-bold text-emerald-700 mt-1 leading-tight">{brl(negocioCalc.horaMinima)}</div>
+                  <div className="text-[11px] text-slate-400 mt-1">por hora trabalhada</div>
+                </div>
+              </div>
+              <p className="text-xs text-slate-500 mt-3">
+                É o mínimo pra cobrir seus custos. Cobrando menos que isso por dia, você trabalha no prejuízo.
+                No orçamento, marque <b>“Usar custo real do meu negócio”</b> pra usar esse valor automaticamente.
+              </p>
+            </section>
+
+            <button onClick={() => setTelaNegocio(false)}
+              className="w-full rounded-xl bg-indigo-600 text-white font-semibold py-3 hover:bg-indigo-700 shadow-sm">
+              Voltar para o orçamento
+            </button>
+          </div>
+        );
+      }
+
+      /* ===================== RENDER ===================== */
+      return (
+        <div className="max-w-2xl mx-auto px-4 pb-24 pt-6">
+
+          {/* Cabeçalho */}
+          <header className="no-print mb-5 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="h-9 w-9 rounded-xl bg-indigo-600 text-white grid place-items-center font-bold">OJ</div>
+              <div>
+                <h1 className="text-xl font-bold leading-tight">Orça Justo</h1>
+                <p className="text-xs text-slate-500">Quanto cobrar pra não trabalhar meses e ganhar menos do que imaginava.</p>
+              </div>
+            </div>
+            <button onClick={() => setTelaNegocio(true)}
+              className="shrink-0 rounded-lg border border-slate-300 text-slate-600 px-3 py-1.5 text-sm hover:bg-slate-50">
+              ⚙ Meu Negócio
+            </button>
+          </header>
+
+          {/* ---------- PASSO 1 ---------- */}
+          <section className="no-print bg-white rounded-2xl shadow-sm p-5 mb-4">
+            <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-wide mb-3">1 · Seus dados</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <Campo label="Seu nome (aparece no orçamento)">
+                  <input value={prof.nome} onChange={(e) => setP("nome", e.target.value)}
+                    placeholder="Ex.: João da Silva" className={inputCls} />
+                </Campo>
+              </div>
+              <div className="col-span-2">
+                <Campo label="Contato (aparece no orçamento)">
+                  <input value={prof.contato} onChange={(e) => setP("contato", e.target.value)}
+                    placeholder="Telefone / WhatsApp" className={inputCls} />
+                </Campo>
+              </div>
+              <Campo label="Quanto quer ganhar por dia?">
+                <NumInput value={prof.ganhoDia} onChange={(v) => setP("ganhoDia", v)} prefix="R$" />
+              </Campo>
+              <Campo label="Dias por semana">
+                <NumInput value={prof.diasSemana} onChange={(v) => setP("diasSemana", v)} suffix="dias" />
+              </Campo>
+              <Campo label="Deslocamento por dia">
+                <NumInput value={prof.deslocamentoDia} onChange={(v) => setP("deslocamentoDia", v)} prefix="R$" />
+              </Campo>
+              <Campo label="Margem / reserva">
+                <NumInput value={prof.margem} onChange={(v) => setP("margem", v)} suffix="%" />
+              </Campo>
+              <div className="col-span-2">
+                <label className="flex items-center gap-2 select-none">
+                  <input type="checkbox" checked={prof.possuiAjudante}
+                    onChange={(e) => setP("possuiAjudante", e.target.checked)}
+                    className="h-5 w-5 rounded border-slate-300 text-indigo-600" />
+                  <span className="text-sm font-medium text-slate-700">Tenho ajudante</span>
+                </label>
+              </div>
+              {prof.possuiAjudante && (
+                <Campo label="Custo do ajudante por dia">
+                  <NumInput value={prof.custoAjudanteDia} onChange={(v) => setP("custoAjudanteDia", v)} prefix="R$" />
+                </Campo>
+              )}
+              <div className="col-span-2">
+                <Campo label="Material da obra (opcional)" hint="custo de material que entra no orçamento do cliente">
+                  <NumInput value={material} onChange={setMaterial} prefix="R$" />
+                </Campo>
+              </div>
+              <div className="col-span-2 rounded-lg bg-slate-50 border border-slate-100 p-3">
+                <label className="flex items-center gap-2 select-none">
+                  <input type="checkbox" checked={usarCustoReal}
+                    onChange={(e) => setUsarCustoReal(e.target.checked)}
+                    className="h-5 w-5 rounded border-slate-300 text-indigo-600" />
+                  <span className="text-sm font-medium text-slate-700">Usar custo real do meu negócio</span>
+                </label>
+                {usarCustoReal
+                  ? (negocioCalc.diariaMinima > 0
+                    ? <p className="text-xs text-emerald-600 mt-1">Mão de obra usando sua diária mínima de <b>{brl(negocioCalc.diariaMinima)}/dia</b> (em vez do valor acima).</p>
+                    : <p className="text-xs text-amber-600 mt-1">Sem custos cadastrados. Abra <button type="button" onClick={() => setTelaNegocio(true)} className="underline font-medium">Meu Negócio</button> e preencha.</p>)
+                  : <p className="text-xs text-slate-400 mt-1">Calcula a mão de obra pela sua diária mínima (custos fixos do negócio).</p>}
+              </div>
+            </div>
+          </section>
+
+          {/* ---------- PASSO 2 ---------- */}
+          <section className="no-print bg-white rounded-2xl shadow-sm p-5 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold text-indigo-600 uppercase tracking-wide">2 · Serviços</h2>
+              <span className="text-xs text-slate-400">{calc.totalDias} dias úteis estimados</span>
+            </div>
+
+            <div className="text-xs text-slate-500 leading-relaxed mb-3 -mt-1 rounded-lg bg-slate-50 border border-slate-100 p-3">
+              <p className="mb-1.5">
+                A <span className="font-semibold text-slate-600">complexidade</span> muda o quanto você rende por dia.
+                Isso altera o <span className="font-medium">número de dias</span> da obra — e, como o preço é por dia
+                trabalhado, mexe direto no <span className="font-medium">valor final</span>:
+              </p>
+              <ul className="space-y-1">
+                <li>
+                  <span className="font-semibold text-emerald-700">Baixa</span> — simples e repetitivo: rende ~15% a mais,
+                  então leva <b>~13% menos dias</b> → preço menor.
+                </li>
+                <li>
+                  <span className="font-semibold text-slate-600">Média</span> — condições normais: usa o rendimento
+                  padrão, sem ajuste.
+                </li>
+                <li>
+                  <span className="font-semibold text-red-600">Alta</span> — acabamento fino, difícil acesso, muitos
+                  recortes ou risco de retrabalho: rende ~20% a menos, então leva <b>~25% mais dias</b> → preço maior.
+                </li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              {servicos.map((s) => {
+                const info = calc.itens.find((i) => i.id === s.id) || { dias: 0 };
+                return (
+                  <div key={s.id} className="rounded-xl border border-slate-200 p-3">
+                    <div className="flex gap-2 items-start">
+                      <input value={s.nome} placeholder="Nome do serviço"
+                        onChange={(e) => upServico(s.id, { nome: e.target.value })}
+                        className={inputCls + " flex-1"} />
+                      <button onClick={() => rmServico(s.id)} aria-label="Remover"
+                        className="text-slate-400 hover:text-red-500 px-2 py-2 text-xl leading-none">×</button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      <Campo label="Qtd.">
+                        <NumInput value={s.quantidade} onChange={(v) => upServico(s.id, { quantidade: v })} />
+                      </Campo>
+                      <Campo label="Unidade">
+                        <select value={s.unidade} onChange={(e) => upServico(s.id, { unidade: e.target.value })} className={inputCls}>
+                          {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
+                        </select>
+                      </Campo>
+                      <Campo label="Complexidade">
+                        <select value={s.complexidade} onChange={(e) => upServico(s.id, { complexidade: e.target.value })} className={inputCls}>
+                          {COMPLEXIDADES.map((c) => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </Campo>
+                    </div>
+                    <div className="flex items-center justify-between mt-2 gap-2">
+                      <Campo label="Rende por dia" hint="quanto você faz por dia">
+                        <NumInput value={s.rendimento}
+                          onChange={(v) => upServico(s.id, { rendimento: v })} suffix={s.unidade + "/d"} />
+                      </Campo>
+                      <div className="text-right shrink-0">
+                        <div className="text-xs text-slate-400">tempo</div>
+                        <div className="font-semibold text-slate-700">{dec(info.dias, 1)} dias</div>
+                      </div>
+                    </div>
+                    {toNum(s.quantidade) > 0 && toNum(s.rendimento) <= 0 && (
+                      <p className="text-xs text-amber-600 mt-2">
+                        Informe "rende por dia" para calcular o preço deste serviço.
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <button onClick={addServico}
+              className="mt-3 w-full rounded-xl border-2 border-dashed border-indigo-300 text-indigo-600 font-medium py-2.5 hover:bg-indigo-50">
+              + Adicionar serviço
+            </button>
+          </section>
+
+          {/* ---------- ANÁLISE PRO TRABALHADOR (só na tela) ---------- */}
+          <section className="no-print bg-white rounded-2xl shadow-sm p-5 mb-4">
+            <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-wide mb-1">
+              Sua análise <span className="text-slate-400 normal-case font-normal">(só você vê)</span>
+            </h2>
+            <p className="text-xs text-slate-400 mb-4">
+              {calc.totalDias} dias úteis (≈ {dec(calc.semanas, 1)} semanas a {dec(toNum(prof.diasSemana),0)} dias/semana)
+            </p>
+
+            {/* Três preços */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="rounded-xl bg-slate-50 p-3 text-center">
+                <div className="text-[11px] uppercase text-slate-400 font-semibold">Mínimo</div>
+                <div className="font-bold text-slate-700 mt-1 leading-tight">{brl(calc.precoMinimo)}</div>
+              </div>
+              <div className="rounded-xl bg-emerald-600 text-white p-3 text-center ring-2 ring-emerald-300">
+                <div className="text-[11px] uppercase opacity-90 font-semibold">Recomendado</div>
+                <div className="font-bold mt-1 leading-tight text-lg">{brl(calc.precoRecomendado)}</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-3 text-center">
+                <div className="text-[11px] uppercase text-slate-400 font-semibold">Premium</div>
+                <div className="font-bold text-slate-700 mt-1 leading-tight">{brl(calc.precoPremium)}</div>
+              </div>
+            </div>
+
+            {/* DIFERENCIAL: ganho real por dia */}
+            <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-4 mb-4">
+              <p className="text-slate-700">
+                Cobrando <b>{brl(calc.precoRecomendado)}</b>, você recebe aproximadamente{" "}
+                <b className="text-indigo-700">{brl(ganhoRecomendado)}</b> por dia de trabalho.
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                (sua meta era {brl(calc.ganhoDia)}/dia — a diferença é a sua margem de {dec(calc.margem,0)}%)
+              </p>
+            </div>
+
+            {/* Como chegamos nesse valor */}
+            <details className="mb-2" open>
+              <summary className="cursor-pointer text-sm font-semibold text-slate-600 select-none">Como chegamos nesse valor</summary>
+              <div className="mt-2">
+                <LinhaResumo titulo="Mão de obra" sub={calc.totalDias + " dias × " + brl(calc.ganhoDia)} valor={brl(calc.maoDeObra)} />
+                <LinhaResumo titulo="Deslocamento" sub={calc.totalDias + " dias × " + brl(toNum(prof.deslocamentoDia))} valor={brl(calc.deslocamento)} />
+                {prof.possuiAjudante &&
+                  <LinhaResumo titulo="Ajudante" sub={calc.totalDias + " dias × " + brl(toNum(prof.custoAjudanteDia))} valor={brl(calc.ajudante)} />}
+                <LinhaResumo titulo={"Reserva de risco / margem (" + dec(calc.margem,0) + "%)"} valor={brl(calc.reservaRisco)} />
+                <div className="border-t-2 border-slate-200 mt-1 pt-1">
+                  <LinhaResumo titulo="Preço recomendado" valor={brl(calc.precoRecomendado)} destaque />
+                </div>
+              </div>
+            </details>
+
+            {/* Resultado final: para onde vai o dinheiro da venda */}
+            <div className="mt-3 rounded-xl border border-slate-100 p-3">
+              <h3 className="text-sm font-semibold text-slate-600 mb-1">Resultado final</h3>
+              <LinhaResumo titulo="Preço de venda" valor={brl(precoVenda)} />
+              <LinhaResumo titulo="Material" valor={brl(materialNum)} />
+              <LinhaResumo titulo="Mão de obra"
+                sub={usarCustoReal && negocioCalc.diariaMinima > 0 ? "inclui seu custo fixo (diária mínima)" : null}
+                valor={brl(calc.maoDeObra)} />
+              <LinhaResumo titulo="Custos do negócio" sub="deslocamento + ajudante" valor={brl(custosNegocioJob)} />
+              <div className="border-t-2 border-slate-200 mt-1 pt-1">
+                <LinhaResumo titulo="Lucro estimado" valor={brl(lucroEstimado)} destaque />
+              </div>
+            </div>
+          </section>
+
+          {/* ---------- SIMULADOR REVERSO ---------- */}
+          <section className="no-print bg-white rounded-2xl shadow-sm p-5 mb-4">
+            <h2 className="text-sm font-bold text-amber-600 uppercase tracking-wide mb-3">E se eu cobrar outro valor?</h2>
+            <Campo label="Simular um preço de obra" hint="se preencher, é este valor que vai pro orçamento do cliente">
+              <NumInput value={simuladorPreco} placeholder={String(Math.round(calc.precoRecomendado))}
+                onChange={setSimuladorPreco} prefix="R$" />
+            </Campo>
+            <div className={"mt-3 rounded-xl p-4 " + (ganhoSimulado >= calc.ganhoDia ? "bg-emerald-50 border border-emerald-100" : "bg-red-50 border border-red-100")}>
+              <p className="text-slate-700">
+                Cobrando <b>{brl(precoSimulado)}</b>, sua remuneração fica em{" "}
+                <b className={ganhoSimulado >= calc.ganhoDia ? "text-emerald-700" : "text-red-600"}>{brl(ganhoSimulado)}</b> por dia.
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                {ganhoSimulado >= calc.ganhoDia
+                  ? "✓ Acima da sua meta de " + brl(calc.ganhoDia) + "/dia."
+                  : "⚠ Abaixo da sua meta de " + brl(calc.ganhoDia) + "/dia. Você estaria se subprecificando."}
+              </p>
+            </div>
+          </section>
+
+          {/* ---------- ORÇAMENTO DO CLIENTE (é o que vai impresso) ---------- */}
+          <section className="relative overflow-hidden bg-white rounded-2xl shadow-sm p-5 mb-4 print-area">
+            {/* Marca d'água grande */}
+            <div className="pointer-events-none select-none absolute inset-0 flex items-center justify-center">
+              <span className="font-black uppercase whitespace-nowrap"
+                style={{ fontSize: "6rem", lineHeight: 1, color: "rgba(79,70,229,0.07)", transform: "rotate(-30deg)" }}>
+                Orça Justo
+              </span>
+            </div>
+
+            <div className="relative">
+              {/* Cabeçalho: prestador + título + data */}
+              <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-3 mb-3">
+                <div className="min-w-0">
+                  <div className="text-lg font-bold text-slate-800">{prof.nome || "Prestador de serviço"}</div>
+                  {prof.contato
+                    ? <div className="text-sm text-slate-500">{prof.contato}</div>
+                    : <div className="no-print text-xs text-amber-600">Preencha seu nome e contato nos seus dados acima.</div>}
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-sm font-bold uppercase tracking-wide text-slate-500">Orçamento</div>
+                  <div className="text-xs text-slate-400">{hoje}</div>
+                </div>
+              </div>
+
+              <p className="no-print text-xs text-slate-400 mb-3">
+                Prévia do que o cliente recebe — sem margem e sem seus ganhos. É esta parte que sai na impressão.
+              </p>
+
+              {/* Descrição dos serviços */}
+              <div className="rounded-xl border border-slate-100 overflow-hidden">
+                {calc.itens.filter((it) => toNum(it.quantidade) > 0).map((it) => (
+                  <div key={it.id} className="flex items-baseline justify-between gap-3 px-3 py-2 border-b border-slate-100 last:border-0">
+                    <div className="min-w-0">
+                      <div className="font-medium text-slate-700">{it.nome || "Serviço"}</div>
+                      <div className="text-xs text-slate-400">
+                        {dec(toNum(it.quantidade), 2)} {it.unidade} × {brl(it.precoUnit)}/{it.unidade}
+                      </div>
+                    </div>
+                    <div className="tabular-nums font-semibold text-slate-700 shrink-0">{brl(it.precoServico)}</div>
+                  </div>
+                ))}
+                {calc.itens.filter((it) => toNum(it.quantidade) > 0).length === 0 && (
+                  <div className="px-3 py-3 text-sm text-slate-400 text-center">
+                    Adicione serviços com quantidade e rendimento para montar o orçamento.
+                  </div>
+                )}
+              </div>
+
+              {/* Somas e totais */}
+              <div className="mt-2">
+                <LinhaResumo titulo="Subtotal dos serviços" valor={brl(calc.poolServicos)} />
+                {materialNum > 0 && <LinhaResumo titulo="Material" valor={brl(materialNum)} />}
+                {calc.deslocamento > 0 && <LinhaResumo titulo="Deslocamento" valor={brl(calc.deslocamento)} />}
+                {prof.possuiAjudante && calc.ajudante > 0 && <LinhaResumo titulo="Ajudante" valor={brl(calc.ajudante)} />}
+                <div className="border-t-2 border-slate-300 mt-1 pt-1">
+                  <LinhaResumo titulo="Total do orçamento" valor={brl(precoVenda)} destaque />
+                </div>
+              </div>
+
+              {/* Assinatura do prestador */}
+              <div className="mt-12 mb-1 flex flex-col items-center">
+                <div className="border-t border-slate-400 w-64 max-w-full"></div>
+                <div className="text-sm font-medium text-slate-600 mt-1">{prof.nome || "Assinatura do prestador"}</div>
+                {prof.contato && <div className="text-xs text-slate-400">{prof.contato}</div>}
+              </div>
+
+              {/* Assinatura do site */}
+              <p className="text-center text-[11px] text-slate-400 mt-4">
+                Orçamento gerado com <span className="font-semibold text-indigo-500">Orça Justo</span> · douglastassinari.github.io/orca-justo
+              </p>
+            </div>
+          </section>
+
+          {/* Toggle: a seção de aditivos só aparece quando marcada (igual ao ajudante) */}
+          <label className="no-print flex items-center gap-2 select-none bg-white rounded-2xl shadow-sm p-5 mb-4 cursor-pointer">
+            <input type="checkbox" checked={mostrarAditivos}
+              onChange={(e) => setMostrarAditivos(e.target.checked)}
+              className="h-5 w-5 rounded border-slate-300 text-purple-600" />
+            <span className="text-sm font-medium text-slate-700">
+              Esta obra teve aditivos <span className="font-normal text-slate-400">(serviços extras ou não executados)</span>
+            </span>
+          </label>
+
+          {/* ---------- MÓDULO DE ADITIVOS ---------- */}
+          {mostrarAditivos && (
+          <section className="bg-white rounded-2xl shadow-sm p-5 mb-4 print-area">
+            <h2 className="text-sm font-bold text-purple-600 uppercase tracking-wide mb-3">Aditivos da obra</h2>
+
+            <div className="no-print">
+              <Campo label="Valor do contrato original" hint="vazio = usa o preço recomendado acima">
+                <NumInput value={contratoOriginal} placeholder={String(Math.round(calc.precoRecomendado))}
+                  onChange={setContratoOriginal} prefix="R$" />
+              </Campo>
+            </div>
+
+            {aditivos.length > 0 && (
+              <div className="space-y-3 mt-4 no-print">
+                {aditivos.map((a) => (
+                  <div key={a.id} className={"rounded-xl border p-3 " + (a.tipo === "adicional" ? "border-emerald-200 bg-emerald-50/40" : "border-red-200 bg-red-50/40")}>
+                    <div className="flex gap-2 items-center mb-2">
+                      <span className={"text-xs font-bold px-2 py-0.5 rounded-full " + (a.tipo === "adicional" ? "bg-emerald-600 text-white" : "bg-red-500 text-white")}>
+                        {a.tipo === "adicional" ? "+ Adicional" : "− Não executado"}
+                      </span>
+                      <input value={a.nome} placeholder="Serviço"
+                        onChange={(e) => upAditivo(a.id, { nome: e.target.value })} className={inputCls + " flex-1"} />
+                      <button onClick={() => rmAditivo(a.id)} className="text-slate-400 hover:text-red-500 px-1 text-xl leading-none">×</button>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      <Campo label="Qtd."><NumInput value={a.quantidade} onChange={(v) => upAditivo(a.id, { quantidade: v })} /></Campo>
+                      <Campo label="Unid.">
+                        <select value={a.unidade} onChange={(e) => upAditivo(a.id, { unidade: e.target.value })} className={inputCls}>
+                          {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
+                        </select>
+                      </Campo>
+                      <Campo label="Compl.">
+                        <select value={a.complexidade} onChange={(e) => upAditivo(a.id, { complexidade: e.target.value })} className={inputCls}>
+                          {COMPLEXIDADES.map((c) => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </Campo>
+                      <Campo label="Valor fixo" hint="opcional">
+                        <NumInput value={a.valorManual} placeholder="auto" onChange={(v) => upAditivo(a.id, { valorManual: v })} prefix="R$" />
+                      </Campo>
+                    </div>
+                    <div className="text-right text-sm mt-1 font-semibold text-slate-600">
+                      {a.tipo === "adicional" ? "+ " : "− "}{brl(valorAditivo(a))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex gap-2 mt-4 no-print">
+              <button onClick={() => addAditivo("adicional")}
+                className="flex-1 rounded-xl border-2 border-dashed border-emerald-300 text-emerald-700 font-medium py-2 hover:bg-emerald-50">
+                + Serviço adicional
+              </button>
+              <button onClick={() => addAditivo("naoExecutado")}
+                className="flex-1 rounded-xl border-2 border-dashed border-red-300 text-red-600 font-medium py-2 hover:bg-red-50">
+                − Não executado
+              </button>
+            </div>
+
+            {/* Relatório (aparece também no PDF) */}
+            <div className="mt-4 border-t border-slate-200 pt-3">
+              <LinhaResumo titulo="Contrato original" valor={brl(contratoBase)} />
+              {aditivos.filter(a => a.tipo === "adicional").map(a =>
+                <LinhaResumo key={a.id} titulo={"+ " + (a.nome || "Adicional")} sub={a.quantidade ? a.quantidade + " " + a.unidade : ""} valor={"+ " + brl(valorAditivo(a))} />)}
+              {aditivos.filter(a => a.tipo === "naoExecutado").map(a =>
+                <LinhaResumo key={a.id} titulo={"− " + (a.nome || "Não executado")} sub={a.quantidade ? a.quantidade + " " + a.unidade : ""} valor={"− " + brl(valorAditivo(a))} />)}
+              <div className="border-t-2 border-slate-200 mt-1 pt-1">
+                <LinhaResumo titulo="Valor atualizado da obra" valor={brl(valorAtualizado)} destaque />
+              </div>
+            </div>
+          </section>
+          )}
+
+          {/* Rodapé / ações */}
+          <div className="no-print flex gap-2">
+            <button onClick={() => window.print()}
+              className="flex-1 rounded-xl bg-indigo-600 text-white font-semibold py-3 hover:bg-indigo-700 shadow-sm">
+              Imprimir orçamento do cliente
+            </button>
+            <button onClick={resetTudo}
+              className="rounded-xl bg-white border border-slate-300 text-slate-500 font-medium px-4 hover:bg-slate-50">
+              Limpar
+            </button>
+          </div>
+          <p className="no-print text-center text-xs text-slate-400 mt-4">
+            Os dados ficam salvos só neste aparelho. MVP — Orça Justo.
+          </p>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+
+  <!-- BOOTSTRAP: transforma o JSX com runtime clássico e mostra erros na tela -->
+  <script>
+    (function () {
+      function showError(msg) {
+        var root = document.getElementById("root");
+        if (root) {
+          root.innerHTML =
+            '<div style="max-width:640px;margin:24px auto;padding:16px;border:1px solid #fecaca;' +
+            'background:#fef2f2;border-radius:12px;font-family:system-ui,sans-serif">' +
+            '<strong style="color:#b91c1c">Ops — erro ao carregar o app.</strong>' +
+            '<pre style="white-space:pre-wrap;color:#7f1d1d;font-size:12px;margin-top:8px">' +
+            String(msg).replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</pre></div>";
+        }
+        if (window.console) console.error(msg);
+      }
+      window.addEventListener("error", function (e) {
+        var root = document.getElementById("root");
+        if (root && !root.firstChild) showError(e.message || e.error || e);
+      });
+      function boot() {
+        try {
+          if (typeof React === "undefined" || typeof ReactDOM === "undefined") {
+            return showError("React não carregou (verifique a conexão e recarregue a página).");
+          }
+          if (typeof Babel === "undefined") {
+            return showError("Babel não carregou (verifique a conexão e recarregue a página).");
+          }
+          var src = document.getElementById("app-src").textContent;
+          var out = Babel.transform(src, { presets: [["react", { runtime: "classic" }]] }).code;
+          (0, eval)(out);
+        } catch (err) {
+          showError((err && err.message) ? err.message : err);
+        }
+      }
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+      } else {
+        boot();
+      }
+    })();
+  </script>
+
+  <!-- Jornada Brasil — Fase 1: mede a geração de orçamento (clique em "Imprimir orçamento") -->
+  <script>
+    (function(){
+      var _print = window.print;
+      window.print = function(){
+        if (window.jbTrack) jbTrack('orcamento_gerado', { tool: 'orca' });
+        return _print.apply(window, arguments);
+      };
+    })();
+  </script>
+</body>
+</html>
