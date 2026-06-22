@@ -19,6 +19,12 @@
 
   <!-- Ferramentas para autônomos -->
   <url>
+    <loc>https://jornadabrasil.com.br/precificar/</loc>
+    <lastmod>2026-06-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
     <loc>https://jornadabrasil.com.br/quanto-cobrar/</loc>
     <lastmod>2026-06-22</lastmod>
     <changefreq>monthly</changefreq>

@@ -1,0 +1,7 @@
+# Chaves do Firebase do modulo Meu Lucro — cada ambiente cria o seu a partir
+# de meu-lucro/config.example.js. NUNCA versionar (contem credenciais).
+meu-lucro/config.js
+
+# Lixo de SO
+.DS_Store
+Thumbs.db
