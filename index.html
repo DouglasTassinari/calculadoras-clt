@@ -30,9 +30,58 @@
     }
     .print-only { display: none; }
   </style>
+
+  <!-- Jornada Brasil — plataforma (Fase 1): tipografia, analytics e estilos compartilhados -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="jornada-shared.css">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-MK3XD5ZVE0"></script>
+  <script>
+    window.dataLayer=window.dataLayer||[];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'granted'});
+    gtag('js',new Date());
+    gtag('config','G-MK3XD5ZVE0');
+    window.jbTrack=function(name,params){try{gtag('event',name,params||{});}catch(e){}};
+  </script>
 </head>
 <body class="bg-slate-100 text-slate-800">
+  <header class="jb-header no-print">
+    <div class="jb-header__in">
+      <a class="jb-brand" href="https://jornadabrasil.com.br/">Jornada<span class="jb-brand__acc"> Brasil</span></a>
+      <nav class="jb-nav" aria-label="Navegação Jornada Brasil">
+        <a href="https://jornadabrasil.com.br/calculadoras/">Calculadoras</a>
+        <a href="https://jornadabrasil.com.br/quanto-cobrar/" class="is-active">Quanto Cobrar</a>
+        <a href="https://jornadabrasil.com.br/meu-lucro/" onclick="window.jbTrack&&jbTrack('journey_click',{from:'orca_nav',to:'lucro'})">Meu Lucro</a>
+        <a href="https://jornadabrasil.com.br/blog/">Blog</a>
+      </nav>
+    </div>
+  </header>
+
   <div id="root"></div>
+
+  <section class="jb-cta no-print" aria-label="Próximo passo na jornada">
+    <p class="jb-cta__t"><b>Já sabe quanto cobrar?</b> Agora acompanhe se esse valor está realmente sobrando no seu bolso.</p>
+    <a class="jb-btn" href="https://douglastassinari.github.io/meu-lucro/" target="_blank" rel="noopener" onclick="window.jbTrack&&jbTrack('journey_click',{from:'orca',to:'lucro'})">Abrir o Meu Lucro →</a>
+  </section>
+
+  <footer class="jb-footer no-print">
+    <div class="jb-footer__in">
+      <div>
+        <p class="jb-footer__name">Jornada Brasil</p>
+        <p class="jb-footer__desc">Ferramentas para decisões de trabalho, carreira e renda.</p>
+      </div>
+      <nav class="jb-footer__links" aria-label="Rodapé Jornada Brasil">
+        <a href="https://jornadabrasil.com.br/calculadoras/">Calculadoras</a>
+        <a href="https://jornadabrasil.com.br/quanto-cobrar/">Quanto Cobrar</a>
+        <a href="https://jornadabrasil.com.br/meu-lucro/">Meu Lucro</a>
+        <a href="https://jornadabrasil.com.br/blog/">Blog</a>
+        <a href="https://jornadabrasil.com.br/pj-vs-clt/" onclick="window.jbTrack&&jbTrack('journey_click',{from:'orca_footer',to:'pj_clt'})">PJ vs CLT</a>
+      </nav>
+    </div>
+    <p class="jb-footer__legal">Orça Justo faz parte da plataforma Jornada Brasil · Caráter educativo — não substitui orientação profissional.</p>
+  </footer>
 
   <!-- O JSX abaixo NÃO é executado direto pelo navegador: é transformado pelo
        bootstrap no final do body, usando o runtime clássico (React.createElement). -->
@@ -816,6 +865,17 @@
       } else {
         boot();
       }
+    })();
+  </script>
+
+  <!-- Jornada Brasil — Fase 1: mede a geração de orçamento (clique em "Imprimir orçamento") -->
+  <script>
+    (function(){
+      var _print = window.print;
+      window.print = function(){
+        if (window.jbTrack) jbTrack('orcamento_gerado', { tool: 'orca' });
+        return _print.apply(window, arguments);
+      };
     })();
   </script>
 </body>

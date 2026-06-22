@@ -1,0 +1,58 @@
+/* =====================================================================
+   JORNADA BRASIL — camada de plataforma compartilhada (Fase 1)
+   Header, navegação, rodapé e CTAs de jornada. Autocontido: não depende
+   de nenhum CSS externo. Cores/tipografia espelham o portal jornadabrasil.com.br.
+   ===================================================================== */
+:root{
+  --jb-primary:#F97316; --jb-primary-dark:#EA580C; --jb-primary-bg:#FFEDD5;
+  --jb-secondary:#1E3A8A; --jb-ink:#15275A;
+  --jb-text:#1F2937; --jb-text-2:#4B5563;
+  --jb-surface:#FFFFFF; --jb-bg:#F9FAFB; --jb-border:#E5E7EB;
+  --jb-font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --jb-primary-bg:#431407; --jb-text:#F9FAFB; --jb-text-2:#9CA3AF;
+    --jb-surface:#111827; --jb-bg:#0F172A; --jb-border:#283447; --jb-ink:#E6EDF3;
+  }
+}
+body{font-family:var(--jb-font);}
+
+/* ---- Header / navegação ---- */
+.jb-header{position:sticky;top:0;z-index:200;background:var(--jb-surface);
+  border-bottom:1px solid var(--jb-border);}
+.jb-header__in{max-width:1100px;margin:0 auto;padding:10px 18px;display:flex;
+  align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+.jb-brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+  font-weight:700;font-size:1.15rem;color:var(--jb-ink);letter-spacing:-.02em;}
+.jb-brand__acc{color:var(--jb-primary);}
+.jb-nav{display:flex;gap:2px;flex-wrap:wrap;}
+.jb-nav a{padding:7px 11px;border-radius:8px;text-decoration:none;font-size:.9rem;
+  font-weight:500;color:var(--jb-text-2);white-space:nowrap;}
+.jb-nav a:hover{background:var(--jb-bg);color:var(--jb-text);}
+.jb-nav a.is-active{color:var(--jb-primary-dark);background:var(--jb-primary-bg);}
+
+/* ---- CTA de jornada ---- */
+.jb-cta{max-width:1100px;margin:26px auto;padding:20px 22px;border-radius:16px;
+  background:var(--jb-primary-bg);border:1px solid var(--jb-border);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.jb-cta__t{margin:0;color:var(--jb-text);font-size:1rem;line-height:1.5;max-width:62ch;}
+.jb-cta__t b{color:var(--jb-primary-dark);}
+.jb-btn{display:inline-flex;align-items:center;gap:8px;background:var(--jb-primary-dark);
+  color:#fff;text-decoration:none;font-weight:600;font-size:.95rem;border:0;cursor:pointer;
+  padding:11px 18px;border-radius:10px;white-space:nowrap;}
+.jb-btn:hover{background:#c2410c;color:#fff;}
+
+/* ---- Rodapé ---- */
+.jb-footer{background:var(--jb-secondary);color:#fff;margin-top:40px;}
+.jb-footer__in{max-width:1100px;margin:0 auto;padding:30px 18px 14px;display:flex;
+  justify-content:space-between;gap:24px;flex-wrap:wrap;}
+.jb-footer__name{font-weight:700;font-size:1.05rem;margin:0 0 6px;}
+.jb-footer__desc{margin:0;font-size:.86rem;color:rgba(255,255,255,.7);max-width:34ch;}
+.jb-footer__links{display:flex;gap:18px;flex-wrap:wrap;align-content:flex-start;}
+.jb-footer__links a{color:rgba(255,255,255,.82);text-decoration:none;font-size:.9rem;}
+.jb-footer__links a:hover{color:#fff;text-decoration:underline;}
+.jb-footer__legal{max-width:1100px;margin:0 auto;padding:0 18px 22px;
+  font-size:.78rem;color:rgba(255,255,255,.55);line-height:1.5;}
+
+@media print{ .jb-header,.jb-footer,.jb-cta,.no-print{display:none!important;} }
