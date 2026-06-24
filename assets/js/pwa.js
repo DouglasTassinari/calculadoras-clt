@@ -71,3 +71,13 @@
     });
   }
 })();
+
+// Carrega a camada de retenção local (Passo 11) em todas as páginas — isolada e fail-safe.
+(function () {
+  try {
+    var s = document.createElement('script');
+    s.src = '/assets/js/jb-retention.js';
+    s.defer = true;
+    document.head.appendChild(s);
+  } catch (e) {}
+})();
