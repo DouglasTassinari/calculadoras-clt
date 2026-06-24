@@ -37,6 +37,11 @@
         }
       } catch (e) {}
       return out;
+    },
+    // Passo 12/14: migra um lote de dados (ex.: do dispositivo para a conta no 1o login).
+    importAll: function (obj) {
+      if (!obj) return;
+      try { for (var k in obj) { if (Object.prototype.hasOwnProperty.call(obj, k)) this.set(k, obj[k]); } } catch (e) {}
     }
   };
   window.JBStore = JBStore;
