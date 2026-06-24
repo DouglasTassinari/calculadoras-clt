@@ -58,7 +58,9 @@
     auxilio: { t: 'Auxílio-Doença', u: '/auxilio-doenca/' },
     maternidade: { t: 'Salário-Maternidade', u: '/salario-maternidade/' },
     ir: { t: 'Imposto de Renda', u: '/imposto-de-renda/' },
-    pj: { t: 'PJ vs CLT', u: '/pj-vs-clt/' }
+    pj: { t: 'PJ vs CLT', u: '/pj-vs-clt/' },
+    orca: { t: 'Precificar', u: '/precificar/' },
+    lucro: { t: 'Meu Lucro', u: '/meu-lucro/' }
   };
   var KEY_RECENT = 'recentTools';
   var KEY_SNAP = 'calcSnap:';
@@ -149,8 +151,25 @@
     try {
       var mainEl = document.getElementById('main-content');
       var calc = mainEl ? mainEl.getAttribute('data-calc') : null;
-      if (calc) { recordRecent(calc); setupResume(calc); }
+      if (!calc) {
+        var p = location.pathname;
+        if (p.indexOf('/precificar') === 0) calc = 'orca';
+        else if (p.indexOf('/meu-lucro') === 0) calc = 'lucro';
+      }
+      if (calc && TOOLS[calc]) { recordRecent(calc); if (document.getElementById('calc-form')) setupResume(calc); }
       renderContinue(calc);
+
+      // Passo 15: integra os módulos Precificar e Meu Lucro ao histórico —
+      // registra a intenção ao clicar no portal, sem tocar nos apps.
+      document.addEventListener('click', function (ev) {
+        try {
+          var a = ev.target && ev.target.closest && ev.target.closest('a[href]');
+          if (!a) return;
+          var href = a.getAttribute('href') || '';
+          if (href.indexOf('/precificar') === 0) recordRecent('orca');
+          else if (href.indexOf('/meu-lucro') === 0) recordRecent('lucro');
+        } catch (e) {}
+      }, true);
     } catch (e) {}
   }
 
