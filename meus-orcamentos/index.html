@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus orçamentos — Jornada Brasil</title>
+  <meta name="description" content="Todos os orçamentos que você salvou no Calcular Preço: pesquise, ordene, reabra, duplique ou exclua.">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://jornadabrasil.com.br/meus-orcamentos/">
+  <meta name="theme-color" content="#1E3A8A">
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/assets/img/icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/shared/jb-account.css">
+  <link rel="stylesheet" href="/shared/jb-extras.css">
+  <style>
+    .mo-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 14px 0 18px; }
+    .mo-search { flex: 1 1 220px; min-width: 180px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: .95rem; }
+    .mo-sort { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: .9rem; }
+    .mo-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 720px) { .mo-grid { grid-template-columns: 1fr 1fr; } }
+    .mo-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
+    .mo-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .mo-card-nome { font-weight: 700; font-size: 1.05rem; overflow: hidden; text-overflow: ellipsis; }
+    .mo-card-preco { font-weight: 700; white-space: nowrap; font-family: "JetBrains Mono", ui-monospace, monospace; }
+    .mo-card-meta { color: var(--text-2); font-size: .82rem; }
+    .mo-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .mo-act { font: 600 .8rem Inter, system-ui, sans-serif; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+    .mo-act.primary { background: #F97316; color: #fff; border-color: #F97316; }
+    .mo-act.danger { color: var(--red); }
+    .mo-act:hover { filter: brightness(.97); }
+    .conta-gate { text-align: center; padding: 48px 20px; }
+    .conta-gate h1 { margin-bottom: 8px; }
+    .conta-gate p { color: var(--text-2); max-width: 460px; margin: 0 auto 22px; }
+    .mo-empty { color: var(--text-2); padding: 36px 20px; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ir para o conteúdo principal</a>
+  <header class="site-header" role="banner">
+    <div class="container">
+      <a href="/" class="brand"><picture><source srcset="/assets/img/logo-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo-dark.png" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo.webp" type="image/webp"><img src="/assets/img/logo.png" alt="Jornada Brasil — Calculadoras trabalhistas gratuitas" class="brand-img brand-img-full"></picture><picture><source srcset="/assets/img/logo-mark-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo-mark-dark.png" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo-mark.webp" type="image/webp"><img src="/assets/img/logo-mark.png" alt="Jornada Brasil" class="brand-img brand-img-mark"></picture></a>
+      <nav class="main-nav" role="navigation">
+        <a href="/" class="nav-link">Início</a>
+        <a href="/calculadoras/" class="nav-link">Calculadoras</a><a href="/calcular-preco/" class="nav-link">Calcular Preço</a><a href="/meu-lucro/" class="nav-link">Meu Lucro</a>
+        <a href="/blog/" class="nav-link">Blog</a>
+        <a href="/sobre/" class="nav-link">Sobre</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content" class="page-main">
+    <div class="container">
+      <nav class="breadcrumb"><a href="/">Início</a><span class="breadcrumb-sep">›</span><a href="/conta/">Minha conta</a><span class="breadcrumb-sep">›</span><span aria-current="page">Meus orçamentos</span></nav>
+
+      <div id="gate" class="conta-gate hidden">
+        <h1>Seus orçamentos salvos</h1>
+        <p>Entre com sua conta Google para ver, reabrir e gerenciar os orçamentos que você criou no Calcular Preço.</p>
+        <button id="gateLogin" class="btn btn-primary">Entrar com Google</button>
+      </div>
+
+      <div id="loading" class="conta-gate"><p>Carregando…</p></div>
+
+      <div id="app" class="hidden">
+        <div style="margin-bottom: 6px">
+          <h1 class="calc-titulo" style="margin-bottom: 4px">Meus orçamentos</h1>
+          <p class="calc-desc-page">Pesquise, ordene, reabra, duplique ou exclua seus orçamentos do Calcular Preço.</p>
+        </div>
+
+        <div class="mo-toolbar no-print">
+          <input id="moSearch" class="mo-search" type="search" placeholder="Pesquisar por nome…" aria-label="Pesquisar orçamentos">
+          <select id="moSort" class="mo-sort" aria-label="Ordenar">
+            <option value="recent">Mais recentes</option>
+            <option value="old">Mais antigos</option>
+            <option value="name">Nome (A–Z)</option>
+            <option value="price_desc">Maior preço</option>
+            <option value="price_asc">Menor preço</option>
+          </select>
+          <a class="mo-act primary" href="/calcular-preco/">+ Novo orçamento</a>
+        </div>
+
+        <div id="grid" class="mo-grid"></div>
+        <div id="empty" class="mo-empty hidden"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand"><p class="footer-brand-name">Jornada Brasil</p><p class="footer-desc">Portal de Calculadoras trabalhistas gratuitas.</p></div>
+        <div class="footer-links"><h4>Calculadoras</h4><ul><li><a href="/salario-liquido/">Salário Líquido</a></li><li><a href="/rescisao/">Rescisão</a></li><li><a href="/ferias/">Férias</a></li><li><a href="/decimo-terceiro/">13º Salário</a></li></ul></div>
+        <div class="footer-links"><h4>Portal</h4><ul><li><a href="/calcular-preco/">Calcular Preço</a></li><li><a href="/meu-lucro/">Meu Lucro</a></li><li><a href="/blog/">Blog</a></li><li><a href="/sobre/">Sobre</a></li><li><a href="/contato/">Contato</a></li><li><a href="/privacidade/">Privacidade</a></li><li><a href="/termos/">Termos</a></li></ul></div>
+        <div class="footer-refs"><h4>Fontes</h4><ul><li><a href="https://www.receita.fazenda.gov.br" target="_blank" rel="noopener">Receita Federal</a></li><li><a href="https://www.inss.gov.br" target="_blank" rel="noopener">INSS</a></li></ul></div>
+      </div>
+      <div class="footer-disclaimer"><p>Caráter educativo — não substitui orientação profissional. Jornada Brasil · Tabelas 2026 · junho/2026</p></div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/shared/jb-supabase.js"></script>
+  <script src="/shared/jb-data.js"></script>
+  <script src="/shared/jb-account.js" defer></script>
+  <script src="/shared/jb-plano.js" defer></script>
+  <script>
+  (function () {
+    var BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+    var money = function (n) { return BRL.format(isFinite(+n) ? +n : 0); };
+    var $ = function (id) { return document.getElementById(id); };
+    function dateBR(s) { if (!s) return ""; var p = String(s).slice(0,10).split("-"); return p.length===3 ? p[2]+"/"+p[1]+"/"+p[0] : s; }
+    function esc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
+
+    var all = [];
+
+    function show(state) {
+      $("gate").classList.toggle("hidden", state !== "gate");
+      $("loading").classList.toggle("hidden", state !== "loading");
+      $("app").classList.toggle("hidden", state !== "app");
+    }
+
+    $("gateLogin").addEventListener("click", function () { window.JBAuth.signInWithGoogle(window.location.href); });
+    $("moSearch").addEventListener("input", render);
+    $("moSort").addEventListener("change", render);
+
+    window.JBAuth.ready.then(function (user) {
+      if (!user) { show("gate"); }
+      else { show("app"); load(); }
+    });
+    window.JBAuth.onChange(function (user) { if (!user) show("gate"); });
+
+    function load() {
+      window.JBData.listOrcamentos().then(function (res) {
+        all = (res && res.data) || [];
+        render();
+      });
+    }
+
+    function render() {
+      var q = ($("moSearch").value || "").trim().toLowerCase();
+      var sort = $("moSort").value;
+      var list = all.filter(function (o) { return !q || (o.nome || "").toLowerCase().indexOf(q) !== -1; });
+      list.sort(function (a, b) {
+        switch (sort) {
+          case "old": return new Date(a.created_at) - new Date(b.created_at);
+          case "name": return (a.nome || "").localeCompare(b.nome || "", "pt-BR");
+          case "price_desc": return (b.preco_final || 0) - (a.preco_final || 0);
+          case "price_asc": return (a.preco_final || 0) - (b.preco_final || 0);
+          default: return new Date(b.created_at) - new Date(a.created_at);
+        }
+      });
+
+      var grid = $("grid"), empty = $("empty");
+      grid.innerHTML = "";
+      if (!all.length) {
+        empty.classList.remove("hidden");
+        empty.innerHTML = 'Você ainda não salvou orçamentos. Crie o primeiro em <a href="/calcular-preco/">Calcular Preço</a>.';
+        return;
+      }
+      if (!list.length) {
+        empty.classList.remove("hidden");
+        empty.textContent = "Nenhum orçamento encontrado para esta busca.";
+        return;
+      }
+      empty.classList.add("hidden");
+
+      list.forEach(function (o) {
+        var card = document.createElement("div");
+        card.className = "mo-card";
+        card.innerHTML =
+          '<div class="mo-card-top">' +
+            '<div class="mo-card-nome">' + esc(o.nome || "Orçamento") + '</div>' +
+            '<div class="mo-card-preco">' + (o.preco_final != null ? money(o.preco_final) : "—") + '</div>' +
+          '</div>' +
+          '<div class="mo-card-meta">Salvo em ' + dateBR(o.created_at) + (o.margem != null ? ' · margem ' + o.margem + '%' : '') + (o.valor_hora != null ? ' · hora ' + money(o.valor_hora) : '') + '</div>' +
+          '<div class="mo-actions">' +
+            '<button class="mo-act primary" data-open>Reabrir</button>' +
+            '<button class="mo-act" data-dup>Duplicar</button>' +
+            '<button class="mo-act danger" data-del>Excluir</button>' +
+          '</div>';
+        card.querySelector("[data-open]").addEventListener("click", function () {
+          location.href = "/calcular-preco/?orc=" + encodeURIComponent(o.id);
+        });
+        card.querySelector("[data-dup]").addEventListener("click", function (e) {
+          var btn = e.target; btn.disabled = true;
+          var copy = { nome: (o.nome || "Orçamento") + " (cópia)", valor_hora: o.valor_hora, custos: o.custos, margem: o.margem, preco_final: o.preco_final, params: o.params };
+          window.JBData.saveOrcamento(copy).then(function (r) {
+            btn.disabled = false;
+            if (r && r.error) { alert("Não foi possível duplicar."); return; }
+            load();
+          });
+        });
+        card.querySelector("[data-del]").addEventListener("click", function () {
+          if (!confirm('Excluir "' + (o.nome || "Orçamento") + '"?')) return;
+          window.JBData.deleteOrcamento(o.id).then(function (r) {
+            if (r && r.error) { alert("Não foi possível excluir."); return; }
+            all = all.filter(function (x) { return x.id !== o.id; });
+            render();
+          });
+        });
+        grid.appendChild(card);
+      });
+    }
+  })();
+  </script>
+</body>
+</html>

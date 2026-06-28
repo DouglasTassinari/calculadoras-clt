@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus favoritos — Jornada Brasil</title>
+  <meta name="description" content="Suas calculadoras e artigos favoritos no Jornada Brasil, reunidos em um só lugar.">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://jornadabrasil.com.br/favoritos/">
+  <meta name="theme-color" content="#1E3A8A">
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/assets/img/icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/shared/jb-account.css">
+  <link rel="stylesheet" href="/shared/jb-extras.css">
+  <style>
+    .fav-section { margin-top: 22px; }
+    .fav-section h2 { font-size: 1.05rem; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+    .fav-section h2 .count { font-size: .78rem; font-weight: 600; color: var(--text-2); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; }
+    .fav-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 720px) { .fav-grid { grid-template-columns: 1fr 1fr; } }
+    .fav-card { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+    .fav-card a.fav-link { text-decoration: none; color: var(--text); font-weight: 600; min-width: 0; }
+    .fav-card a.fav-link:hover { color: var(--primary, #1E3A8A); }
+    .fav-card .fav-sub { display: block; font-size: .78rem; color: var(--text-2); font-weight: 400; margin-top: 2px; }
+    .fav-rm { flex-shrink: 0; font: 600 .78rem Inter, system-ui, sans-serif; padding: 6px 11px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--red); cursor: pointer; }
+    .fav-rm:hover { background: var(--bg); }
+    .conta-gate { text-align: center; padding: 48px 20px; }
+    .conta-gate h1 { margin-bottom: 8px; }
+    .conta-gate p { color: var(--text-2); max-width: 460px; margin: 0 auto 22px; }
+    .fav-empty { color: var(--text-2); padding: 36px 20px; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ir para o conteúdo principal</a>
+  <header class="site-header" role="banner">
+    <div class="container">
+      <a href="/" class="brand"><picture><source srcset="/assets/img/logo-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo-dark.png" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo.webp" type="image/webp"><img src="/assets/img/logo.png" alt="Jornada Brasil — Calculadoras trabalhistas gratuitas" class="brand-img brand-img-full"></picture><picture><source srcset="/assets/img/logo-mark-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo-mark-dark.png" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo-mark.webp" type="image/webp"><img src="/assets/img/logo-mark.png" alt="Jornada Brasil" class="brand-img brand-img-mark"></picture></a>
+      <nav class="main-nav" role="navigation">
+        <a href="/" class="nav-link">Início</a>
+        <a href="/calculadoras/" class="nav-link">Calculadoras</a><a href="/calcular-preco/" class="nav-link">Calcular Preço</a><a href="/meu-lucro/" class="nav-link">Meu Lucro</a>
+        <a href="/blog/" class="nav-link">Blog</a>
+        <a href="/sobre/" class="nav-link">Sobre</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content" class="page-main">
+    <div class="container">
+      <nav class="breadcrumb"><a href="/">Início</a><span class="breadcrumb-sep">›</span><a href="/conta/">Minha conta</a><span class="breadcrumb-sep">›</span><span aria-current="page">Favoritos</span></nav>
+
+      <div id="gate" class="conta-gate hidden">
+        <h1>Seus favoritos</h1>
+        <p>Entre com sua conta Google e salve calculadoras e artigos com a estrela ⭐ para encontrá-los rapidamente aqui.</p>
+        <button id="gateLogin" class="btn btn-primary">Entrar com Google</button>
+      </div>
+
+      <div id="loading" class="conta-gate"><p>Carregando…</p></div>
+
+      <div id="app" class="hidden">
+        <div style="margin-bottom: 6px">
+          <h1 class="calc-titulo" style="margin-bottom: 4px">Meus favoritos</h1>
+          <p class="calc-desc-page">As calculadoras e os artigos que você marcou com a estrela.</p>
+        </div>
+
+        <div id="empty" class="fav-empty hidden"></div>
+
+        <section id="secCalc" class="fav-section hidden">
+          <h2>Calculadoras <span class="count" id="cntCalc">0</span></h2>
+          <div id="gridCalc" class="fav-grid"></div>
+        </section>
+
+        <section id="secArt" class="fav-section hidden">
+          <h2>Artigos <span class="count" id="cntArt">0</span></h2>
+          <div id="gridArt" class="fav-grid"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand"><p class="footer-brand-name">Jornada Brasil</p><p class="footer-desc">Portal de Calculadoras trabalhistas gratuitas.</p></div>
+        <div class="footer-links"><h4>Calculadoras</h4><ul><li><a href="/salario-liquido/">Salário Líquido</a></li><li><a href="/rescisao/">Rescisão</a></li><li><a href="/ferias/">Férias</a></li><li><a href="/decimo-terceiro/">13º Salário</a></li></ul></div>
+        <div class="footer-links"><h4>Portal</h4><ul><li><a href="/calcular-preco/">Calcular Preço</a></li><li><a href="/meu-lucro/">Meu Lucro</a></li><li><a href="/blog/">Blog</a></li><li><a href="/sobre/">Sobre</a></li><li><a href="/contato/">Contato</a></li><li><a href="/privacidade/">Privacidade</a></li><li><a href="/termos/">Termos</a></li></ul></div>
+        <div class="footer-refs"><h4>Fontes</h4><ul><li><a href="https://www.receita.fazenda.gov.br" target="_blank" rel="noopener">Receita Federal</a></li><li><a href="https://www.inss.gov.br" target="_blank" rel="noopener">INSS</a></li></ul></div>
+      </div>
+      <div class="footer-disclaimer"><p>Caráter educativo — não substitui orientação profissional. Jornada Brasil · Tabelas 2026 · junho/2026</p></div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/shared/jb-supabase.js"></script>
+  <script src="/shared/jb-data.js"></script>
+  <script src="/shared/jb-account.js" defer></script>
+  <script src="/shared/jb-plano.js" defer></script>
+  <script>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    function esc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
+
+    function show(state) {
+      $("gate").classList.toggle("hidden", state !== "gate");
+      $("loading").classList.toggle("hidden", state !== "loading");
+      $("app").classList.toggle("hidden", state !== "app");
+    }
+
+    $("gateLogin").addEventListener("click", function () { window.JBAuth.signInWithGoogle(window.location.href); });
+
+    window.JBAuth.ready.then(function (user) {
+      if (!user) { show("gate"); }
+      else { show("app"); load(); }
+    });
+    window.JBAuth.onChange(function (user) { if (!user) show("gate"); });
+
+    function load() {
+      window.JBData.listFavoritos().then(function (res) {
+        var all = (res && res.data) || [];
+        var calc = all.filter(function (f) { return f.tipo === "calculadora"; });
+        var art = all.filter(function (f) { return f.tipo === "artigo"; });
+
+        if (!all.length) {
+          $("empty").classList.remove("hidden");
+          $("empty").innerHTML = 'Você ainda não tem favoritos. Abra uma <a href="/calculadoras/">calculadora</a> ou um <a href="/blog/">artigo</a> e clique em <b>Favoritar ⭐</b>.';
+          return;
+        }
+        $("empty").classList.add("hidden");
+        renderSection("Calc", calc);
+        renderSection("Art", art);
+      });
+    }
+
+    function renderSection(key, list) {
+      var sec = $("sec" + key), grid = $("grid" + key), cnt = $("cnt" + key);
+      if (!list.length) { sec.classList.add("hidden"); return; }
+      sec.classList.remove("hidden");
+      cnt.textContent = list.length;
+      grid.innerHTML = "";
+      list.forEach(function (f) {
+        var card = document.createElement("div");
+        card.className = "fav-card";
+        var href = f.url || "/";
+        card.innerHTML =
+          '<a class="fav-link" href="' + esc(href) + '">' + esc(f.titulo || f.slug) +
+            '<span class="fav-sub">' + esc(href) + '</span></a>' +
+          '<button class="fav-rm" type="button">Remover</button>';
+        card.querySelector(".fav-rm").addEventListener("click", function () {
+          window.JBData.removeFavorito(f.tipo, f.slug).then(function (r) {
+            if (r && r.error) { alert("Não foi possível remover."); return; }
+            card.remove();
+            var left = grid.querySelectorAll(".fav-card").length;
+            cnt.textContent = left;
+            if (!left) sec.classList.add("hidden");
+            if (!$("gridCalc").querySelector(".fav-card") && !$("gridArt").querySelector(".fav-card")) {
+              $("empty").classList.remove("hidden");
+              $("empty").innerHTML = 'Você não tem mais favoritos. Marque calculadoras e artigos com a estrela ⭐ para vê-los aqui.';
+            }
+          });
+        });
+        grid.appendChild(card);
+      });
+    }
+  })();
+  </script>
+</body>
+</html>

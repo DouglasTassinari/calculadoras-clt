@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Histórico de cálculos — Jornada Brasil</title>
+  <meta name="description" content="Seu histórico de cálculos no Jornada Brasil: filtre, visualize e reabra qualquer cálculo salvo automaticamente.">
+  <meta name="robots" content="noindex, follow">
+  <link rel="canonical" href="https://jornadabrasil.com.br/historico/">
+  <meta name="theme-color" content="#1E3A8A">
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/assets/img/icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/shared/jb-account.css">
+  <link rel="stylesheet" href="/shared/jb-extras.css">
+  <style>
+    .hi-filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 18px; }
+    .hi-chip { font: 600 .82rem Inter, system-ui, sans-serif; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text-2); cursor: pointer; }
+    .hi-chip.is-on { background: var(--primary, #1E3A8A); color: #fff; border-color: var(--primary, #1E3A8A); }
+    .hi-list { display: flex; flex-direction: column; gap: 12px; }
+    .hi-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+    .hi-item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .hi-item-tit { font-weight: 700; }
+    .hi-item-sub { color: var(--text-2); font-size: .82rem; margin-top: 2px; }
+    .hi-item-val { text-align: right; white-space: nowrap; }
+    .hi-item-val .n { font-weight: 700; font-family: "JetBrains Mono", ui-monospace, monospace; }
+    .hi-item-val .l { display: block; font-size: .72rem; color: var(--text-2); text-transform: uppercase; letter-spacing: .03em; }
+    .hi-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .hi-act { font: 600 .8rem Inter, system-ui, sans-serif; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; }
+    .hi-act.primary { background: #F97316; color: #fff; border-color: #F97316; }
+    .hi-act.danger { color: var(--red); }
+    .hi-detail { margin-top: 12px; border-top: 1px solid var(--border-2); padding-top: 10px; display: none; }
+    .hi-detail.open { display: block; }
+    .hi-detail-row { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: .88rem; border-bottom: 1px dashed var(--border-2); }
+    .hi-detail-row:last-child { border-bottom: none; }
+    .hi-detail-row .v { font-weight: 600; font-family: "JetBrains Mono", ui-monospace, monospace; }
+    .conta-gate { text-align: center; padding: 48px 20px; }
+    .conta-gate h1 { margin-bottom: 8px; }
+    .conta-gate p { color: var(--text-2); max-width: 460px; margin: 0 auto 22px; }
+    .hi-empty { color: var(--text-2); padding: 36px 20px; text-align: center; border: 1px dashed var(--border); border-radius: var(--radius); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ir para o conteúdo principal</a>
+  <header class="site-header" role="banner">
+    <div class="container">
+      <a href="/" class="brand"><picture><source srcset="/assets/img/logo-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo-dark.png" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo.webp" type="image/webp"><img src="/assets/img/logo.png" alt="Jornada Brasil — Calculadoras trabalhistas gratuitas" class="brand-img brand-img-full"></picture><picture><source srcset="/assets/img/logo-mark-dark.webp" type="image/webp" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo-mark-dark.png" media="(prefers-color-scheme: dark)"><source srcset="/assets/img/logo-mark.webp" type="image/webp"><img src="/assets/img/logo-mark.png" alt="Jornada Brasil" class="brand-img brand-img-mark"></picture></a>
+      <nav class="main-nav" role="navigation">
+        <a href="/" class="nav-link">Início</a>
+        <a href="/calculadoras/" class="nav-link">Calculadoras</a><a href="/calcular-preco/" class="nav-link">Calcular Preço</a><a href="/meu-lucro/" class="nav-link">Meu Lucro</a>
+        <a href="/blog/" class="nav-link">Blog</a>
+        <a href="/sobre/" class="nav-link">Sobre</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content" class="page-main">
+    <div class="container">
+      <nav class="breadcrumb"><a href="/">Início</a><span class="breadcrumb-sep">›</span><a href="/conta/">Minha conta</a><span class="breadcrumb-sep">›</span><span aria-current="page">Histórico</span></nav>
+
+      <div id="gate" class="conta-gate hidden">
+        <h1>Seu histórico de cálculos</h1>
+        <p>Entre com sua conta Google. A partir daí, todo cálculo que você fizer nas calculadoras fica salvo aqui para você reabrir quando quiser.</p>
+        <button id="gateLogin" class="btn btn-primary">Entrar com Google</button>
+      </div>
+
+      <div id="loading" class="conta-gate"><p>Carregando…</p></div>
+
+      <div id="app" class="hidden">
+        <div style="margin-bottom: 6px">
+          <h1 class="calc-titulo" style="margin-bottom: 4px">Histórico de cálculos</h1>
+          <p class="calc-desc-page">Cada cálculo feito nas calculadoras é salvo automaticamente. Filtre, visualize os detalhes ou reabra com um clique.</p>
+        </div>
+
+        <div id="filters" class="hi-filters no-print"></div>
+        <div id="list" class="hi-list"></div>
+        <div id="empty" class="hi-empty hidden"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand"><p class="footer-brand-name">Jornada Brasil</p><p class="footer-desc">Portal de Calculadoras trabalhistas gratuitas.</p></div>
+        <div class="footer-links"><h4>Calculadoras</h4><ul><li><a href="/salario-liquido/">Salário Líquido</a></li><li><a href="/rescisao/">Rescisão</a></li><li><a href="/ferias/">Férias</a></li><li><a href="/decimo-terceiro/">13º Salário</a></li></ul></div>
+        <div class="footer-links"><h4>Portal</h4><ul><li><a href="/calcular-preco/">Calcular Preço</a></li><li><a href="/meu-lucro/">Meu Lucro</a></li><li><a href="/blog/">Blog</a></li><li><a href="/sobre/">Sobre</a></li><li><a href="/contato/">Contato</a></li><li><a href="/privacidade/">Privacidade</a></li><li><a href="/termos/">Termos</a></li></ul></div>
+        <div class="footer-refs"><h4>Fontes</h4><ul><li><a href="https://www.receita.fazenda.gov.br" target="_blank" rel="noopener">Receita Federal</a></li><li><a href="https://www.inss.gov.br" target="_blank" rel="noopener">INSS</a></li></ul></div>
+      </div>
+      <div class="footer-disclaimer"><p>Caráter educativo — não substitui orientação profissional. Jornada Brasil · Tabelas 2026 · junho/2026</p></div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/shared/jb-supabase.js"></script>
+  <script src="/shared/jb-data.js"></script>
+  <script src="/shared/jb-account.js" defer></script>
+  <script src="/shared/jb-plano.js" defer></script>
+  <script>
+  (function () {
+    var BRL = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+    var money = function (n) { return BRL.format(isFinite(+n) ? +n : 0); };
+    var $ = function (id) { return document.getElementById(id); };
+    function esc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
+    function dtBR(s) { if (!s) return ""; var d = new Date(s); return d.toLocaleString("pt-BR", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit" }); }
+
+    var all = [];
+    var filtro = "todos";
+
+    function show(state) {
+      $("gate").classList.toggle("hidden", state !== "gate");
+      $("loading").classList.toggle("hidden", state !== "loading");
+      $("app").classList.toggle("hidden", state !== "app");
+    }
+
+    $("gateLogin").addEventListener("click", function () { window.JBAuth.signInWithGoogle(window.location.href); });
+
+    window.JBAuth.ready.then(function (user) {
+      if (!user) { show("gate"); }
+      else { show("app"); load(); }
+    });
+    window.JBAuth.onChange(function (user) { if (!user) show("gate"); });
+
+    function load() {
+      window.JBData.listHistorico().then(function (res) {
+        all = (res && res.data) || [];
+        buildFilters();
+        render();
+      });
+    }
+
+    function buildFilters() {
+      var tipos = {};
+      all.forEach(function (h) { if (h.titulo || h.tipo) tipos[h.tipo] = h.titulo || h.tipo; });
+      var wrap = $("filters");
+      wrap.innerHTML = "";
+      var chips = [["todos", "Todos"]].concat(Object.keys(tipos).map(function (t) { return [t, tipos[t]]; }));
+      chips.forEach(function (c) {
+        var b = document.createElement("button");
+        b.className = "hi-chip" + (filtro === c[0] ? " is-on" : "");
+        b.textContent = c[1];
+        b.addEventListener("click", function () { filtro = c[0]; buildFilters(); render(); });
+        wrap.appendChild(b);
+      });
+    }
+
+    function render() {
+      var list = all.filter(function (h) { return filtro === "todos" || h.tipo === filtro; });
+      var box = $("list"), empty = $("empty");
+      box.innerHTML = "";
+      if (!all.length) {
+        empty.classList.remove("hidden");
+        empty.innerHTML = 'Seu histórico está vazio. Use qualquer <a href="/calculadoras/">calculadora</a> e o resultado aparecerá aqui automaticamente.';
+        return;
+      }
+      if (!list.length) { empty.classList.remove("hidden"); empty.textContent = "Nenhum cálculo neste filtro."; return; }
+      empty.classList.add("hidden");
+
+      list.forEach(function (h) {
+        var item = document.createElement("div");
+        item.className = "hi-item";
+        var resumo = Array.isArray(h.resumo) ? h.resumo : [];
+        var detalhe = resumo.map(function (r) {
+          return '<div class="hi-detail-row"><span>' + esc(r.nome) + '</span><span class="v">' + esc(r.valor) + '</span></div>';
+        }).join("") || '<div class="hi-detail-row"><span>Sem detalhes adicionais.</span><span class="v"></span></div>';
+
+        item.innerHTML =
+          '<div class="hi-item-top">' +
+            '<div><div class="hi-item-tit">' + esc(h.titulo || h.tipo || "Cálculo") + '</div>' +
+            '<div class="hi-item-sub">' + dtBR(h.created_at) + '</div></div>' +
+            '<div class="hi-item-val"><span class="n">' + (h.valor_principal != null ? money(h.valor_principal) : "—") + '</span>' +
+            '<span class="l">' + esc(h.valor_label || "Resultado") + '</span></div>' +
+          '</div>' +
+          '<div class="hi-detail">' + detalhe + '</div>' +
+          '<div class="hi-actions">' +
+            '<button class="hi-act primary" data-open>Reabrir cálculo</button>' +
+            '<button class="hi-act" data-view>Ver detalhes</button>' +
+            '<button class="hi-act danger" data-del>Excluir</button>' +
+          '</div>';
+
+        var detail = item.querySelector(".hi-detail");
+        item.querySelector("[data-view]").addEventListener("click", function (e) {
+          detail.classList.toggle("open");
+          e.target.textContent = detail.classList.contains("open") ? "Ocultar detalhes" : "Ver detalhes";
+        });
+        item.querySelector("[data-open]").addEventListener("click", function () {
+          if (!h.url || !h.tipo) { alert("Não foi possível identificar a calculadora deste cálculo."); return; }
+          try { localStorage.setItem("jb:histApply:" + h.tipo, JSON.stringify(h.inputs || {})); } catch (err) {}
+          location.href = h.url;
+        });
+        item.querySelector("[data-del]").addEventListener("click", function () {
+          if (!confirm("Excluir este cálculo do histórico?")) return;
+          window.JBData.deleteHistorico(h.id).then(function (r) {
+            if (r && r.error) { alert("Não foi possível excluir."); return; }
+            all = all.filter(function (x) { return x.id !== h.id; });
+            buildFilters(); render();
+          });
+        });
+        box.appendChild(item);
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
