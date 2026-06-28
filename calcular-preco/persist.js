@@ -61,7 +61,14 @@
 
   btnSave.addEventListener("click", function () {
     window.JBAuth.ready.then(function (user) {
-      if (!user) { toast("Entre com o Google para salvar"); window.JBAuth.signInWithGoogle(window.location.href); return; }
+      if (!user) {
+        // Guarda o orçamento em andamento antes do redirect do Google (o estado do React some no F5).
+        var pend = ensureSnapshot();
+        if (pend) { try { localStorage.setItem("cp_pending", JSON.stringify(pend)); } catch (e) {} }
+        toast("Entre com o Google para salvar");
+        window.JBAuth.signInWithGoogle(window.location.href);
+        return;
+      }
       var snap = ensureSnapshot();
       if (!snap) { toast("Preencha o orçamento primeiro", false); return; }
       var def = snap.nome || ("Orçamento " + new Date().toLocaleDateString("pt-BR"));
@@ -129,6 +136,25 @@
     });
   }
 
+  // ---------- retomar "salvar" interrompido pelo login ----------
+  function handlePending() {
+    var raw;
+    try { raw = localStorage.getItem("cp_pending"); } catch (e) {}
+    if (!raw) return;
+    window.JBAuth.ready.then(function (user) {
+      if (!user) return;
+      var snap;
+      try { snap = JSON.parse(raw); } catch (e) { try { localStorage.removeItem("cp_pending"); } catch (e2) {} return; }
+      try { localStorage.removeItem("cp_pending"); } catch (e) {}
+      if (window.__cpApply && snap.params) window.__cpApply(snap.params);
+      snap.nome = snap.nome || ("Orçamento " + new Date().toLocaleDateString("pt-BR"));
+      window.JBData.saveOrcamento(snap).then(function (res) {
+        if (res.error) { toast("Clique em salvar novamente", false); return; }
+        toast("Orçamento salvo ✓");
+      });
+    });
+  }
+
   // ---------- reabrir via ?orc=ID ----------
   function tryOpenFromUrl() {
     var m = /[?&]orc=([^&]+)/.exec(location.search);
@@ -145,6 +171,7 @@
       });
     });
   }
-  if (window.__cpReadyFired) tryOpenFromUrl();
-  else window.addEventListener("cp:ready", tryOpenFromUrl, { once: true });
+  function onReady() { handlePending(); tryOpenFromUrl(); }
+  if (window.__cpReadyFired) onReady();
+  else window.addEventListener("cp:ready", onReady, { once: true });
 })();

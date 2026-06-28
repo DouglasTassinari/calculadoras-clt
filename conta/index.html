@@ -174,12 +174,18 @@
       } else { av.textContent = initial(u.name); }
       $("perfilNome").textContent = u.name;
       $("perfilEmail").textContent = u.email || "";
+      // Último acesso = último login real (last_sign_in_at do Supabase Auth).
+      var last = u.raw && (u.raw.last_sign_in_at || u.raw.updated_at);
+      $("perfilUltimo").textContent = last ? ("Último acesso: " + dtBR(last)) : "";
     }
 
     function loadAll() {
-      // Último acesso (profiles.last_seen anterior a este carregamento)
-      window.jbSupa.from("profiles").select("last_seen,created_at").eq("id", window.JBAuth.user.id).single().then(function (r) {
-        if (r.data) $("perfilUltimo").textContent = "Membro desde " + dateBR(r.data.created_at);
+      // Membro desde (data de criação do perfil)
+      window.jbSupa.from("profiles").select("created_at").eq("id", window.JBAuth.user.id).single().then(function (r) {
+        if (r.data && r.data.created_at) {
+          var atual = $("perfilUltimo").textContent;
+          $("perfilUltimo").textContent = (atual ? atual + " · " : "") + "Membro desde " + dateBR(r.data.created_at);
+        }
       });
 
       Promise.all([
