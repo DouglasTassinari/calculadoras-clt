@@ -181,7 +181,7 @@ ul, ol { padding-left: 1.5em; }
 }
 .nav-link:hover { background: var(--bg); color: var(--text); }
 .nav-link.active { color: var(--accent-text); background: var(--primary-bg); }
-/* Mobile: nav rola na horizontal (mesmo padrão de .calc-tabs) — sem overflow da página */
+/* Mobile (fallback sem JS): nav rola na horizontal — sem overflow da página */
 @media (max-width: 768px) {
   .main-nav {
     overflow-x: auto;
@@ -190,6 +190,60 @@ ul, ol { padding-left: 1.5em; }
     -webkit-overflow-scrolling: touch;
   }
   .main-nav::-webkit-scrollbar { display: none; }
+}
+
+/* ---- Botão hambúrguer (menu mobile) ---- */
+.nav-toggle {
+  display: none;
+  margin-left: auto;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background .15s;
+}
+.nav-toggle:hover { background: var(--bg); }
+.nav-toggle:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+.nav-toggle svg { width: 24px; height: 24px; display: block; }
+.nav-toggle .nav-toggle-close { display: none; }
+.nav-toggle[aria-expanded="true"] .nav-toggle-open { display: none; }
+.nav-toggle[aria-expanded="true"] .nav-toggle-close { display: block; }
+
+/* Quando o JS está ativo, abaixo do breakpoint o menu vira hambúrguer + painel vertical */
+@media (max-width: 768px) {
+  .site-header.nav-enhanced .nav-toggle { display: inline-flex; }
+  .site-header.nav-enhanced .main-nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: none;             /* fechado por padrão */
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    margin: 0;
+    padding: 8px clamp(20px, 4vw, 56px) 14px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: calc(100vh - 72px);
+    overscroll-behavior: contain;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .site-header.nav-enhanced .main-nav.is-open { display: flex; }
+  .site-header.nav-enhanced .nav-link {
+    padding: 13px 14px;
+    font-size: 1rem;
+    border-radius: 10px;
+  }
 }
 
 /* ---- Footer ---- */
@@ -765,6 +819,11 @@ details.memoria[open] summary .chev { transform: rotate(180deg); }
 .blog-card h3 a:hover { color: var(--primary); }
 .blog-card-excerpt { font-size: .85rem; color: var(--text-2); line-height: 1.6; }
 .blog-card-date { font-size: .75rem; color: var(--text-3); margin-top: auto; }
+/* Mobile: cartões do blog em coluna única (evita overflow horizontal quando
+   a página força grid-template-columns: repeat(3,1fr) via style inline) */
+@media (max-width: 768px) {
+  .blog-grid { grid-template-columns: 1fr !important; }
+}
 
 /* ---- Related calcs ---- */
 .related-calcs {

@@ -74,10 +74,34 @@ body{font-family:var(--jb-font);}
 .jb-nav a:hover{background:var(--jb-bg);color:var(--jb-text);}
 .jb-nav a.is-active{color:var(--jb-accent-text);background:var(--jb-primary-bg);}
 .jb-nav a:focus-visible{outline:3px solid var(--jb-primary);outline-offset:2px;}
-/* Mobile: nav rola na horizontal (mesmo padrao de .calc-tabs) — sem overflow */
+/* Mobile (fallback sem JS): nav rola na horizontal — sem overflow */
 @media(max-width:768px){
   .jb-nav{overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}
   .jb-nav::-webkit-scrollbar{display:none;}
+}
+
+/* ---- Botao hamburguer (menu mobile) ---- */
+.nav-toggle{display:none;margin-left:auto;align-items:center;justify-content:center;
+  width:44px;height:44px;padding:0;flex-shrink:0;border:1px solid var(--jb-border);
+  border-radius:var(--jb-radius-sm,10px);background:var(--jb-surface);color:var(--jb-text);
+  cursor:pointer;transition:background .15s;}
+.nav-toggle:hover{background:var(--jb-bg);}
+.nav-toggle:focus-visible{outline:3px solid var(--jb-primary);outline-offset:2px;}
+.nav-toggle svg{width:24px;height:24px;display:block;}
+.nav-toggle .nav-toggle-close{display:none;}
+.nav-toggle[aria-expanded="true"] .nav-toggle-open{display:none;}
+.nav-toggle[aria-expanded="true"] .nav-toggle-close{display:block;}
+@media(max-width:768px){
+  /* ancora o dropdown no container interno (o .jb-header tem position:static inline) */
+  .jb-header.nav-enhanced .jb-header__in{position:relative;}
+  .jb-header.nav-enhanced .nav-toggle{display:inline-flex;}
+  .jb-header.nav-enhanced .jb-nav{
+    position:absolute;top:100%;left:0;right:0;display:none;flex-direction:column;
+    align-items:stretch;gap:2px;margin:0;padding:8px clamp(20px,4vw,56px) 14px;
+    overflow-x:hidden;overflow-y:auto;max-height:calc(100vh - 72px);overscroll-behavior:contain;
+    background:var(--jb-surface);border-bottom:1px solid var(--jb-border);box-shadow:var(--jb-shadow,0 8px 24px -12px rgba(0,0,0,.18));}
+  .jb-header.nav-enhanced .jb-nav.is-open{display:flex;}
+  .jb-header.nav-enhanced .jb-nav a{padding:13px 14px;font-size:1rem;border-radius:10px;}
 }
 
 /* ---- CTA de jornada ---- */
