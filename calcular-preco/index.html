@@ -94,14 +94,38 @@
 
     @media print {
       .no-print { display: none !important; }
-      body { background: #fff !important; }
-      .print-area { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
+      body { background: #fff !important; color: #1f2937 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .print-area { box-shadow: none !important; border: 1px solid #e5e7eb !important; border-radius: 10px !important; padding: 18px 20px !important; margin: 0 0 10px !important; }
       .print-only { display: block !important; }
       /* Garante a marca d'água legível e elegante também em PDF P&B */
       .jb-watermark { opacity: 0.08 !important; }
-      @page { margin: 14mm; }
+
+      /* ---- Documento comercial A4 (Fase 5) ---- */
+      @page { size: A4; margin: 30mm 14mm 22mm; }
+      /* Evita cortar serviços, totais ou assinatura no meio de uma página */
+      .print-area, .print-area .flex, .print-area > div > div { break-inside: avoid; }
+
+      /* Cabeçalho/rodapé fixos = papel timbrado repetido em toda página.
+         top:0 / bottom:0 ancoram na borda do papel; as margens do @page
+         (30mm topo / 22mm base) reservam o espaço do conteúdo abaixo/acima. */
+      .jb-print-header {
+        position: fixed; top: 0; left: 14mm; right: 14mm; height: 20mm;
+        display: flex !important; align-items: flex-end; justify-content: space-between;
+        padding-bottom: 5px; border-bottom: 2px solid #1E3A8A;
+      }
+      .jb-print-header img { height: 32px; width: auto; }
+      .jb-print-header .doc { text-align: right; font: 700 11px/1.3 Inter, system-ui, sans-serif; color: #1E3A8A; text-transform: uppercase; letter-spacing: .08em; }
+      .jb-print-header .doc small { display: block; font-weight: 500; color: #6b7280; letter-spacing: .02em; text-transform: none; }
+      .jb-print-footer {
+        position: fixed; bottom: 0; left: 14mm; right: 14mm; height: 14mm;
+        display: flex !important; align-items: flex-start; justify-content: space-between;
+        padding-top: 5px; border-top: 1px solid #e5e7eb;
+        font: 500 9.5px/1.3 Inter, system-ui, sans-serif; color: #94a3b8;
+      }
+      .jb-print-footer b { color: #475569; }
     }
     .print-only { display: none; }
+    .jb-print-header, .jb-print-footer { display: none; }
 
     /* =================================================================
        JORNADA BRASIL — Dark mode nativo do Calcular Preço.
@@ -154,6 +178,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
   <link rel="stylesheet" href="/shared/jornada-shared.css">
   <link rel="stylesheet" href="/shared/jb-account.css">
+  <link rel="stylesheet" href="/shared/jb-extras.css">
   <script defer src="/shared/jb-analytics.js"></script>
 </head>
 <body class="bg-slate-100 text-slate-800">
@@ -183,6 +208,16 @@
   </header>
 
   <div id="root"></div>
+
+  <!-- Papel timbrado (Fase 5): cabeçalho e rodapé repetidos em cada página impressa/PDF -->
+  <div class="jb-print-header" aria-hidden="true">
+    <img src="/assets/img/logo.png" alt="Jornada Brasil">
+    <div class="doc">Orçamento<small>jornadabrasil.com.br/calcular-preco</small></div>
+  </div>
+  <div class="jb-print-footer" aria-hidden="true">
+    <span>Documento gerado em <b id="jbPrintData"></b></span>
+    <span>Jornada Brasil · Calcular Preço</span>
+  </div>
 
   <section class="jb-cta no-print" aria-label="Próximo passo na jornada">
     <p class="jb-cta__t"><b>Já definiu seu preço?</b> O próximo passo é o <b>Meu Lucro</b>: acompanhe se esse valor está realmente sobrando no seu bolso a cada dia de trabalho.</p>
@@ -1041,11 +1076,19 @@
   <!-- Jornada Brasil — Fase 1: mede a geração de orçamento (clique em "Imprimir orçamento") -->
   <script>
     (function(){
+      // Data do rodapé do papel timbrado (Fase 5) — atualizada também na hora de imprimir.
+      function carimbarData(){
+        var el = document.getElementById("jbPrintData");
+        if (el) el.textContent = new Date().toLocaleDateString("pt-BR", { day:"2-digit", month:"long", year:"numeric" });
+      }
+      carimbarData();
       var _print = window.print;
       window.print = function(){
+        carimbarData();
         if (window.jbTrack) jbTrack('orcamento_gerado', { tool: 'orca' });
         return _print.apply(window, arguments);
       };
+      window.addEventListener("beforeprint", carimbarData);
     })();
   </script>
 
@@ -1054,6 +1097,7 @@
   <script src="/shared/jb-supabase.js"></script>
   <script src="/shared/jb-data.js"></script>
   <script src="/shared/jb-account.js" defer></script>
+  <script src="/shared/jb-plano.js" defer></script>
   <script src="persist.js" defer></script>
 </body>
 </html>

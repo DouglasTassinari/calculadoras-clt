@@ -35,6 +35,15 @@
     ".cp-close{float:right;background:none;border:none;font-size:1.4rem;cursor:pointer;color:inherit;line-height:1}",
     ".cp-empty{color:#6B7280;padding:18px 0;text-align:center}",
     ".cp-toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#157A4C;color:#fff;padding:10px 18px;border-radius:10px;z-index:1100;font:600 .9rem Inter,system-ui,sans-serif;box-shadow:0 6px 18px -6px rgba(0,0,0,.4)}",
+    ".cp-recover{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);z-index:1100;display:flex;align-items:center;gap:14px;flex-wrap:wrap;max-width:92vw;background:#fff;color:#1F2937;border:1px solid #FED7AA;border-left:4px solid #F97316;border-radius:12px;padding:12px 16px;box-shadow:0 10px 30px -8px rgba(0,0,0,.35)}",
+    "@media(prefers-color-scheme:dark){.cp-recover{background:#111827;color:#F9FAFB;border-color:rgba(249,115,22,.4)}}",
+    ".cp-recover .t{display:flex;flex-direction:column;gap:1px;min-width:0}",
+    ".cp-recover .t b{font:700 .92rem Inter,system-ui,sans-serif}",
+    ".cp-recover .t span{font-size:.82rem;color:#6B7280}",
+    ".cp-recover .a{display:flex;gap:8px;flex-shrink:0}",
+    ".cp-recover button{font:600 .84rem Inter,system-ui,sans-serif;padding:8px 15px;border-radius:9px;cursor:pointer;border:none}",
+    ".cp-recover .yes{background:#F97316;color:#fff}",
+    ".cp-recover .no{background:transparent;color:#6B7280;border:1px solid rgba(128,128,128,.3)}",
   ].join("");
   document.head.appendChild(css);
 
@@ -171,7 +180,75 @@
       });
     });
   }
-  function onReady() { handlePending(); tryOpenFromUrl(); }
+  // ---------- recuperação de trabalho (Fase 6) ----------
+  var CP_DRAFT = "cp_draft";
+  var MAXAGE = 7 * 24 * 60 * 60 * 1000; // 7 dias
+
+  function draftMeaningful(snap) {
+    if (!snap || !snap.params) return false;
+    var p = snap.params;
+    if (p.prof && ((p.prof.nome && p.prof.nome.trim()) || (p.prof.contato && p.prof.contato.trim()))) return true;
+    if (Array.isArray(p.servicos) && p.servicos.some(function (s) { return (s.nome && s.nome.trim()) && (+s.quantidade > 0); })) return true;
+    if (Array.isArray(p.aditivos) && p.aditivos.length) return true;
+    return false;
+  }
+
+  function startAutosave() {
+    var lastHash = null;
+    function tick() {
+      var snap = ensureSnapshot();
+      if (!snap) return;
+      if (!draftMeaningful(snap)) {
+        // form vazio/limpo: descarta rascunho antigo para não oferecer recuperação à toa
+        try { if (localStorage.getItem(CP_DRAFT)) localStorage.removeItem(CP_DRAFT); } catch (e) {}
+        lastHash = null;
+        return;
+      }
+      var hash = JSON.stringify(snap.params);
+      if (hash === lastHash) return;
+      lastHash = hash;
+      try { localStorage.setItem(CP_DRAFT, JSON.stringify({ at: Date.now(), snap: snap })); } catch (e) {}
+    }
+    setInterval(tick, 4000);
+    window.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") tick(); });
+    window.addEventListener("pagehide", tick);
+  }
+
+  function offerRecovery() {
+    // não atrapalha quando há retomada de login ou abertura por ?orc=
+    var hasPending = false;
+    try { hasPending = !!localStorage.getItem("cp_pending"); } catch (e) {}
+    if (hasPending || /[?&]orc=/.test(location.search)) return;
+
+    var raw;
+    try { raw = localStorage.getItem(CP_DRAFT); } catch (e) { return; }
+    if (!raw) return;
+    var draft;
+    try { draft = JSON.parse(raw); } catch (e) { try { localStorage.removeItem(CP_DRAFT); } catch (e2) {} return; }
+    if (!draft || !draft.snap || (Date.now() - (draft.at || 0)) > MAXAGE || !draftMeaningful(draft.snap)) {
+      try { localStorage.removeItem(CP_DRAFT); } catch (e) {}
+      return;
+    }
+
+    var bar = document.createElement("div");
+    bar.className = "cp-recover no-print";
+    bar.innerHTML =
+      '<div class="t"><b>Encontramos um orçamento não concluído.</b><span>Quer retomar de onde parou?</span></div>' +
+      '<div class="a"><button type="button" class="yes">Retomar</button><button type="button" class="no">Descartar</button></div>';
+    document.body.appendChild(bar);
+    bar.querySelector(".yes").addEventListener("click", function () {
+      if (window.__cpApply) window.__cpApply(draft.snap.params || {});
+      bar.remove();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      toast("Orçamento retomado ✓");
+    });
+    bar.querySelector(".no").addEventListener("click", function () {
+      try { localStorage.removeItem(CP_DRAFT); } catch (e) {}
+      bar.remove();
+    });
+  }
+
+  function onReady() { handlePending(); tryOpenFromUrl(); offerRecovery(); startAutosave(); }
   if (window.__cpReadyFired) onReady();
   else window.addEventListener("cp:ready", onReady, { once: true });
 })();
