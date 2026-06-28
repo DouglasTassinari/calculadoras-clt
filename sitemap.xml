@@ -101,6 +101,24 @@
 
   <!-- Blog -->
   <url>
+    <loc>https://jornadabrasil.com.br/blog/como-precificar-servico/</loc>
+    <lastmod>2026-06-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jornadabrasil.com.br/blog/quanto-ganha-motorista-aplicativo/</loc>
+    <lastmod>2026-06-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jornadabrasil.com.br/blog/como-calcular-salario-liquido/</loc>
+    <lastmod>2026-06-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://jornadabrasil.com.br/blog/demissao-sem-justa-causa/</loc>
     <lastmod>2026-06-16</lastmod>
     <changefreq>monthly</changefreq>
