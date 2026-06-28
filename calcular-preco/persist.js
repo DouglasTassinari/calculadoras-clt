@@ -44,6 +44,13 @@
     ".cp-recover button{font:600 .84rem Inter,system-ui,sans-serif;padding:8px 15px;border-radius:9px;cursor:pointer;border:none}",
     ".cp-recover .yes{background:#F97316;color:#fff}",
     ".cp-recover .no{background:transparent;color:#6B7280;border:1px solid rgba(128,128,128,.3)}",
+    ".cp-cta{position:relative;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 36px 12px 16px;border:1px solid #FED7AA;border-left:4px solid #F97316;border-radius:12px;background:#FFF7ED;color:#1F2937;font:500 .88rem/1.4 Inter,system-ui,sans-serif}",
+    "@media(prefers-color-scheme:dark){.cp-cta{background:rgba(249,115,22,.10);border-color:rgba(249,115,22,.35);color:#F9FAFB}}",
+    ".cp-cta .ico{font-size:1.2rem;line-height:1}",
+    ".cp-cta .tx{flex:1;min-width:170px}",
+    ".cp-cta .tx b{font-weight:700}",
+    ".cp-cta .go{flex-shrink:0;background:#F97316;color:#fff;border:none;border-radius:9px;padding:9px 15px;font:600 .85rem Inter,system-ui,sans-serif;cursor:pointer;white-space:nowrap}",
+    ".cp-cta .x{position:absolute;top:7px;right:9px;background:none;border:none;color:#9CA3AF;font-size:1.05rem;cursor:pointer;line-height:1}",
   ].join("");
   document.head.appendChild(css);
 
@@ -68,13 +75,46 @@
 
   function ensureSnapshot() { return window.__CP && window.__CP.snapshot ? window.__CP.snapshot() : null; }
 
+  // ---------- CTA de conversão (somente visitante deslogado; sem popup) ----------
+  function mountCTA() {
+    try { if (localStorage.getItem("cp_cta_dismiss") === "1") return; } catch (e) {}
+    var root = document.getElementById("root");
+    if (!root || document.querySelector(".cp-cta-host")) return;
+    var host = document.createElement("div");
+    host.className = "cp-cta-host no-print";
+    host.style.cssText = "max-width:680px;margin:14px auto -4px;padding:0 16px;box-sizing:border-box";
+    host.innerHTML =
+      '<div class="cp-cta">' +
+        '<span class="ico">🔒</span>' +
+        '<span class="tx"><b>Crie uma conta grátis</b> e salve seus orçamentos. Recupere seus cálculos, histórico e favoritos de qualquer aparelho.</span>' +
+        '<button type="button" class="go">Criar conta grátis</button>' +
+        '<button type="button" class="x" aria-label="Dispensar">×</button>' +
+      '</div>';
+    root.parentNode.insertBefore(host, root);
+    host.querySelector(".go").addEventListener("click", function () {
+      var pend = ensureSnapshot();
+      if (pend) { try { localStorage.setItem("cp_pending", JSON.stringify(pend)); } catch (e) {} }
+      window.JBAuth.signInWithGoogle(window.location.href);
+    });
+    host.querySelector(".x").addEventListener("click", function () {
+      try { localStorage.setItem("cp_cta_dismiss", "1"); } catch (e) {}
+      host.remove();
+    });
+  }
+  function removeCTA() {
+    var h = document.querySelector(".cp-cta-host");
+    if (h && h.parentNode) h.parentNode.removeChild(h);
+  }
+  window.JBAuth.ready.then(function (user) { if (!user) mountCTA(); });
+  window.JBAuth.onChange(function (user) { if (user) removeCTA(); });
+
   btnSave.addEventListener("click", function () {
     window.JBAuth.ready.then(function (user) {
       if (!user) {
         // Guarda o orçamento em andamento antes do redirect do Google (o estado do React some no F5).
         var pend = ensureSnapshot();
         if (pend) { try { localStorage.setItem("cp_pending", JSON.stringify(pend)); } catch (e) {} }
-        toast("Entre com o Google para salvar");
+        toast("Crie uma conta grátis para salvar e acessar de qualquer aparelho");
         window.JBAuth.signInWithGoogle(window.location.href);
         return;
       }
@@ -95,7 +135,7 @@
 
   btnList.addEventListener("click", function () {
     window.JBAuth.ready.then(function (user) {
-      if (!user) { toast("Entre com o Google para ver seus orçamentos"); window.JBAuth.signInWithGoogle(window.location.href); return; }
+      if (!user) { toast("Crie uma conta grátis para ver seus orçamentos salvos"); window.JBAuth.signInWithGoogle(window.location.href); return; }
       openList();
     });
   });
