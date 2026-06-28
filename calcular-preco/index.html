@@ -153,6 +153,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
   <link rel="stylesheet" href="/shared/jornada-shared.css">
+  <link rel="stylesheet" href="/shared/jb-account.css">
   <script defer src="/shared/jb-analytics.js"></script>
 </head>
 <body class="bg-slate-100 text-slate-800">
@@ -465,6 +466,35 @@
       };
 
       const hoje = new Date().toLocaleDateString("pt-BR");
+
+      /* ---- Persistência (Jornada Brasil / Supabase): expõe snapshot e restauração ---- */
+      useEffect(() => {
+        window.__CP = {
+          snapshot: function () {
+            return {
+              nome: (prof.nome && prof.nome.trim()) ? prof.nome.trim() : "",
+              valor_hora: negocioCalc.horaMinima || null,
+              margem: toNum(prof.margem) || null,
+              preco_final: calc.precoRecomendado || null,
+              custos: { negocio: negocio, material: material, usarCustoReal: usarCustoReal, totalCustosMes: negocioCalc.totalCustosMes },
+              params: { prof: prof, servicos: servicos, aditivos: aditivos, contratoOriginal: contratoOriginal, simuladorPreco: simuladorPreco, material: material, usarCustoReal: usarCustoReal, negocio: negocio },
+            };
+          },
+        };
+        window.__cpApply = function (params) {
+          if (!params) return;
+          if (params.prof) setProf(Object.assign({}, ESTADO_INICIAL.prof, params.prof));
+          if (params.servicos && params.servicos.length) setServicos(params.servicos);
+          setAditivos(params.aditivos || []);
+          setContratoOriginal(params.contratoOriginal || "");
+          setSimuladorPreco(params.simuladorPreco || "");
+          setMaterial(params.material || "");
+          setUsarCustoReal(!!params.usarCustoReal);
+          if (params.negocio) setNegocio(Object.assign({}, NEGOCIO_INICIAL, params.negocio));
+          setTelaNegocio(false);
+        };
+        if (!window.__cpReadyFired) { window.__cpReadyFired = true; window.dispatchEvent(new Event("cp:ready")); }
+      });
 
       /* ===================== TELA: CONFIGURAR MEU NEGÓCIO ===================== */
       if (telaNegocio) {
@@ -1015,5 +1045,12 @@
       };
     })();
   </script>
+
+  <!-- Jornada Brasil — conta e persistência (Supabase) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/shared/jb-supabase.js"></script>
+  <script src="/shared/jb-data.js"></script>
+  <script src="/shared/jb-account.js" defer></script>
+  <script src="persist.js" defer></script>
 </body>
 </html>

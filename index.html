@@ -165,7 +165,8 @@
 
   <!-- CSS completo: não-bloqueante (preload + swap para stylesheet) -->
   <link rel="preload" href="/assets/css/style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="/assets/css/style.css"></noscript>
+  <noscript><link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/shared/jb-account.css"></noscript>
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -435,5 +436,10 @@
   <script src="/assets/js/consent.js" defer></script>
   <script src="/assets/js/pwa.js" defer></script>
 <script src="/assets/js/contact-widget.js" defer></script>
+  <!-- Jornada Brasil — conta (Supabase) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="/shared/jb-supabase.js"></script>
+  <script defer src="/shared/jb-data.js"></script>
+  <script defer src="/shared/jb-account.js"></script>
 </body>
 </html>

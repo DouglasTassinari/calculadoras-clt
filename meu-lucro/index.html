@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="/shared/jornada-shared.css" />
+  <link rel="stylesheet" href="/shared/jb-account.css" />
   <title>Meu Lucro — Quanto Você Realmente Ganha como Motorista de App 2026 | Jornada Brasil</title>
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://jornadabrasil.com.br/meu-lucro/" />
@@ -327,7 +328,11 @@
     <section class="section">
       <div class="section__head">
         <h2 class="section__title">Histórico</h2>
-        <button class="btn btn--ghost btn--sm" id="downloadReport">Baixar relatório</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label class="sr-only" for="historyPeriod">Período</label>
+          <select id="historyPeriod" class="input input--sm" aria-label="Filtrar por período" style="max-width:170px"></select>
+          <button class="btn btn--ghost btn--sm" id="downloadReport">Baixar relatório</button>
+        </div>
       </div>
 
       <div class="card history">
@@ -524,6 +529,11 @@
   <script defer src="auth.js"></script>
   <!-- Geração de PDF -->
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Jornada Brasil — conta e persistência (Supabase) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="/shared/jb-supabase.js"></script>
+  <script defer src="/shared/jb-data.js"></script>
+  <script defer src="/shared/jb-account.js"></script>
   <!-- App -->
   <script defer src="script.js"></script>
 </body>
