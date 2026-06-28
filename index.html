@@ -127,7 +127,7 @@
   @media(max-width:768px){.main-nav{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.main-nav::-webkit-scrollbar{display:none}}
   .nav-toggle{display:none;margin-left:auto;align-items:center;justify-content:center;width:44px;height:44px;padding:0;flex-shrink:0;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);cursor:pointer}
   .nav-toggle svg{width:24px;height:24px;display:block}.nav-toggle .nav-toggle-close{display:none}.nav-toggle[aria-expanded="true"] .nav-toggle-open{display:none}.nav-toggle[aria-expanded="true"] .nav-toggle-close{display:block}
-  @media(max-width:768px){.site-header.nav-enhanced .nav-toggle{display:inline-flex}.site-header.nav-enhanced .main-nav{position:absolute;top:100%;left:0;right:0;display:none;flex-direction:column;align-items:stretch;gap:2px;margin:0;padding:8px clamp(20px,4vw,56px) 14px;overflow-x:hidden;overflow-y:auto;max-height:calc(100vh - 72px);overscroll-behavior:contain;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--shadow)}.site-header.nav-enhanced .main-nav.is-open{display:flex}.site-header.nav-enhanced .nav-link{padding:13px 14px;font-size:1rem;border-radius:10px}}
+  @media(max-width:768px){.site-header.nav-enhanced .nav-toggle{display:inline-flex}.site-header.nav-enhanced .main-nav{position:absolute;top:100%;left:0;right:0;z-index:250;display:none;flex-direction:column;align-items:stretch;gap:2px;margin:0;padding:8px clamp(20px,4vw,56px) 14px;overflow-x:hidden;overflow-y:auto;max-height:calc(100vh - 72px);overscroll-behavior:contain;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--shadow)}.site-header.nav-enhanced .main-nav.is-open{display:flex}.site-header.nav-enhanced .nav-link{padding:13px 14px;font-size:1rem;border-radius:10px}}
   .nav-link{padding:8px 14px;border-radius:8px;color:var(--text-2);text-decoration:none;font-size:.9rem;font-weight:500;white-space:nowrap;transition:.15s}
   .nav-link:hover{background:var(--bg);color:var(--text)}
   .nav-link.active{color:var(--accent-text);background:var(--primary-bg)}
@@ -167,8 +167,8 @@
   </style>
 
   <!-- CSS completo: não-bloqueante (preload + swap para stylesheet) -->
-  <link rel="preload" href="/assets/css/style.css?v=20260628b" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260628b">
+  <link rel="preload" href="/assets/css/style.css?v=20260628c" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="/assets/css/style.css?v=20260628c">
   <link rel="stylesheet" href="/shared/jb-account.css">
   <link rel="stylesheet" href="/shared/jb-extras.css"></noscript>
 
@@ -447,6 +447,6 @@
   <script defer src="/shared/jb-account.js"></script>
   <script defer src="/shared/jb-extras.js"></script>
   <script defer src="/shared/jb-plano.js"></script>
-  <script src="/assets/js/nav.js?v=20260628b" defer></script>
+  <script src="/assets/js/nav.js?v=20260628c" defer></script>
 </body>
 </html>
