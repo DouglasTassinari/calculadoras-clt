@@ -288,7 +288,26 @@
     });
   }
 
-  function onReady() { handlePending(); tryOpenFromUrl(); offerRecovery(); startAutosave(); }
+  // ---------- numeração por usuário (item 4) ----------
+  // Para usuário logado, o nº do orçamento passa a ser sequencial por conta
+  // (qtd de orçamentos salvos + 1), em vez do contador por aparelho. Não roda
+  // quando há reabertura (?orc=) ou retomada pós-login (cp_pending): nesses
+  // casos o nº vem dos params do orçamento.
+  function applyUserNumero() {
+    if (/[?&]orc=/.test(location.search)) return;
+    try { if (localStorage.getItem("cp_pending")) return; } catch (e) {}
+    window.JBAuth.ready.then(function (user) {
+      if (!user || !window.JBData) return;
+      window.JBData.listOrcamentos().then(function (res) {
+        if (!res || res.error || !window.__CP || !window.__CP.setNumero) return;
+        var n = ((res.data) || []).length + 1;
+        var num = String(n).padStart(4, "0") + "/" + new Date().getFullYear();
+        window.__CP.setNumero(num);
+      });
+    });
+  }
+
+  function onReady() { handlePending(); tryOpenFromUrl(); offerRecovery(); startAutosave(); applyUserNumero(); }
   if (window.__cpReadyFired) onReady();
   else window.addEventListener("cp:ready", onReady, { once: true });
 })();
