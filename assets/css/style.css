@@ -167,6 +167,7 @@ ul, ol { padding-left: 1.5em; }
   display: flex;
   gap: 4px;
   margin-left: auto;
+  min-width: 0; /* permite encolher e rolar em vez de estourar a largura */
 }
 .nav-link {
   padding: 8px 14px;
@@ -175,10 +176,21 @@ ul, ol { padding-left: 1.5em; }
   text-decoration: none;
   font-size: .9rem;
   font-weight: 500;
+  white-space: nowrap;
   transition: .15s;
 }
 .nav-link:hover { background: var(--bg); color: var(--text); }
 .nav-link.active { color: var(--accent-text); background: var(--primary-bg); }
+/* Mobile: nav rola na horizontal (mesmo padrão de .calc-tabs) — sem overflow da página */
+@media (max-width: 768px) {
+  .main-nav {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .main-nav::-webkit-scrollbar { display: none; }
+}
 
 /* ---- Footer ---- */
 .site-footer {

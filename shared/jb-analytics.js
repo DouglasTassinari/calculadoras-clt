@@ -1,7 +1,7 @@
 /* =====================================================================
    JORNADA BRASIL — analytics centralizado da plataforma.
    GA4 (G-MK3XD5ZVE0) + Microsoft Clarity (x7ir0zxu39) + helper jbTrack.
-   Carregado pelos modulos /precificar/ e /meu-lucro/. Idempotente:
+   Carregado pelos modulos /calcular-preco/ e /meu-lucro/. Idempotente:
    pode ser incluido mais de uma vez sem duplicar tags.
    (O portal na raiz mantem seu proprio setup inline, ja validado.)
    ===================================================================== */

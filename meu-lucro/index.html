@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0f7d4d" />
+  <meta name="theme-color" content="#1E3A8A" />
   <meta name="description" content="Controle o lucro real de cada dia como motorista de aplicativo. Desconte combustível e desgaste do veículo e descubra quanto sobra de verdade. App gratuito." />
   <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/assets/img/icons/apple-touch-icon.png" />
   <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -73,12 +73,25 @@
   <!-- ====================== BARRA DA PLATAFORMA (Jornada Brasil) ====================== -->
   <header class="jb-header no-print" style="position:static">
     <div class="jb-header__in">
-      <a class="jb-brand" href="/">Jornada<span class="jb-brand__acc"> Brasil</span></a>
+      <a class="jb-brand" href="/" aria-label="Jornada Brasil — Página inicial">
+        <picture>
+          <source srcset="/assets/img/logo-sm.webp 1x, /assets/img/logo.webp 2x" type="image/webp">
+          <img src="/assets/img/logo.png" alt="Jornada Brasil — Calculadoras trabalhistas gratuitas"
+               class="jb-brand-img jb-brand-img--full" width="510" height="88" decoding="async">
+        </picture>
+        <picture>
+          <source srcset="/assets/img/logo-mark.webp" type="image/webp">
+          <img src="/assets/img/logo-mark.png" alt="Jornada Brasil"
+               class="jb-brand-img jb-brand-img--mark" width="198" height="160" decoding="async">
+        </picture>
+      </a>
       <nav class="jb-nav" aria-label="Navegação Jornada Brasil">
+        <a href="/">Início</a>
         <a href="/calculadoras/">Calculadoras</a>
-        <a href="/precificar/" onclick="window.jbTrack&&jbTrack('journey_click',{from:'lucro_nav',to:'orca'})">Quanto Cobrar</a>
-        <a href="/meu-lucro/" class="is-active">Meu Lucro</a>
+        <a href="/calcular-preco/" onclick="window.jbTrack&&jbTrack('journey_click',{from:'lucro_nav',to:'orca'})">Calcular Preço</a>
+        <a href="/meu-lucro/" class="is-active" aria-current="page">Meu Lucro</a>
         <a href="/blog/">Blog</a>
+        <a href="/sobre/">Sobre</a>
       </nav>
     </div>
   </header>
@@ -86,11 +99,7 @@
   <!-- ====================== SPLASH (carregando) ====================== -->
   <div id="splash" class="splash">
     <span class="splash__logo" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="9"></circle>
-        <circle cx="12" cy="12" r="2.5"></circle>
-        <path d="M12 3v4M12 17v4M3 12h4M17 12h4"></path>
-      </svg>
+      <img src="/assets/img/favicon.svg" width="48" height="48" alt="" decoding="async">
     </span>
     <div class="spinner" aria-label="Carregando"></div>
   </div>
@@ -100,11 +109,7 @@
     <div class="auth__card">
       <div class="auth__brand">
         <span class="auth__logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="9"></circle>
-            <circle cx="12" cy="12" r="2.5"></circle>
-            <path d="M12 3v4M12 17v4M3 12h4M17 12h4"></path>
-          </svg>
+          <img src="/assets/img/favicon.svg" width="40" height="40" alt="" decoding="async">
         </span>
         <h1 class="auth__title">Meu Lucro</h1>
         <p class="auth__subtitle">Seus ganhos reais, salvos na sua conta e sincronizados em qualquer aparelho.</p>
@@ -155,13 +160,6 @@
   <header class="app-header">
     <div class="app-header__inner">
       <div class="brand">
-        <span class="brand__logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="9"></circle>
-            <path d="M12 3v4M12 17v4M3 12h4M17 12h4"></path>
-            <circle cx="12" cy="12" r="2.5"></circle>
-          </svg>
-        </span>
         <span class="brand__name" id="brandName">Meu Lucro</span>
       </div>
       <button class="icon-btn" id="openSettings" aria-label="Configurações" title="Configurações">
@@ -372,12 +370,29 @@
         <p class="jb-footer__name">Jornada Brasil</p>
         <p class="jb-footer__desc">Ferramentas para decisões de trabalho, carreira e renda.</p>
       </div>
-      <nav class="jb-footer__links" aria-label="Rodapé Jornada Brasil">
-        <a href="/calculadoras/">Calculadoras</a>
-        <a href="/quanto-cobrar/">Quanto Cobrar</a>
-        <a href="/meu-lucro/">Meu Lucro</a>
-        <a href="/blog/">Blog</a>
-        <a href="/pj-vs-clt/">PJ vs CLT</a>
+      <nav class="jb-footer__col" aria-label="Links de calculadoras">
+        <h4>Calculadoras</h4>
+        <ul>
+          <li><a href="/pj-vs-clt/" onclick="window.jbTrack&&jbTrack('journey_click',{from:'lucro_footer',to:'pj_clt'})">PJ vs CLT</a></li>
+          <li><a href="/salario-liquido/">Salário Líquido</a></li>
+          <li><a href="/rescisao/">Rescisão</a></li>
+          <li><a href="/ferias/">Férias</a></li>
+        </ul>
+      </nav>
+      <nav class="jb-footer__col" aria-label="Links do portal">
+        <h4>Portal</h4>
+        <ul>
+          <li><a href="/calcular-preco/">Calcular Preço</a></li>
+          <li><a href="/meu-lucro/">Meu Lucro</a></li>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/sobre/">Sobre</a></li>
+        </ul>
+      </nav>
+      <nav class="jb-footer__col" aria-label="Fontes oficiais">
+        <h4>Fontes</h4>
+        <ul>
+          <li><a href="https://www.gov.br/empresas-e-negocios/pt-br/empreendedor" target="_blank" rel="noopener">Portal do Empreendedor</a></li>
+        </ul>
       </nav>
     </div>
     <p class="jb-footer__legal">Meu Lucro faz parte da plataforma Jornada Brasil · Caráter educativo — não substitui orientação profissional.</p>

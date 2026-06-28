@@ -738,7 +738,7 @@ function printReport(period, a, avg, monthRecords) {
     <html><head><title>Relatório ${period}</title>
     <style>
       body{font-family:Arial,sans-serif;color:#222;padding:32px;}
-      h1{color:#0f7d4d;margin:0 0 4px;}
+      h1{color:#B45309;margin:0 0 4px;}
       h2{font-size:16px;margin:0 0 18px;color:#444;}
       table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px;}
       td,th{padding:8px;border-bottom:1px solid #e1e6eb;text-align:left;}

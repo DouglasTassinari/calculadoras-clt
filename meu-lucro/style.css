@@ -588,3 +588,71 @@ body[data-modal="open"] { overflow: hidden; }
   border-color: var(--jb-warning-border, #E9D3A3);
   color: var(--jb-warning-text, #6B5A2A);
 }
+
+/* =====================================================================
+   JORNADA BRASIL — Fase 3: replicação fiel do design system + dark mode.
+   Alinha componentes (app-bar, botões, inputs, modais, toast) aos tokens
+   da plataforma e troca cores hardcoded que quebravam o tema escuro por
+   tokens que possuem versão clara E escura. Nenhum estilo novo: reusa o
+   vocabulário visual da home (superficie/borda/raio/halo de foco).
+   ===================================================================== */
+
+/* Header da plataforma agora e o 1o elemento: respeita o notch no PWA
+   standalone (viewport-fit=cover). env() = 0 em telas sem recorte. */
+.jb-header { padding-top: env(safe-area-inset-top); }
+
+/* App-bar do app: barra NEUTRA de superficie — a home/portal nunca usa
+   barra de marca colorida. Mantem identidade pelo chip laranja + titulo. */
+.app-header {
+  background: var(--surface);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  box-shadow: none;
+  padding: 12px 16px;
+}
+.brand__logo { background: var(--green-soft); color: var(--green); }
+.icon-btn { background: var(--bg); color: var(--text-soft); }
+.icon-btn:active { background: var(--border); }
+
+/* Botoes: raio do design system (10px). Pilula fica so para badge/tab. */
+.btn { border-radius: var(--radius-sm); }
+.btn--ghost { border-width: 1px; }
+.btn--danger { background: var(--jb-danger-bg, #FAEDEB); color: var(--red); }
+.btn--danger:hover { background: var(--jb-danger-border, #ECCAC4); }
+
+/* Inputs: superficie + borda 1px + halo de foco primario (igual a home). */
+input[type="text"], input[type="date"], input[type="email"],
+input[type="password"], input[type="number"], .input-money {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+input:focus, .input-money:focus-within {
+  background: var(--surface);
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-soft);
+}
+
+/* Segmented control (abas de login) + mensagem de erro → tokens. */
+.auth__tabs { background: var(--border-2); }
+.auth__tab.is-active { background: var(--surface); color: var(--green-dark); }
+.auth__msg--error {
+  background: var(--jb-danger-bg, #FAEDEB);
+  color: var(--jb-danger-text, #8F2D1F);
+}
+
+/* Card de insight: superficie por token (era #fff fixo → branco no dark). */
+.insight-card { background: var(--surface); }
+
+/* Logo da plataforma (favicon JB) ja tem moldura propria: remove o chip
+   de fundo do splash/login para nao emoldurar duas vezes. */
+.splash__logo, .auth__logo { background: transparent; }
+
+/* Modal: botao fechar neutro por token (era cinza fixo). */
+.modal__head .icon-btn { background: var(--bg); color: var(--text-soft); }
+
+/* Conta: texto legivel em ambos os temas. */
+.account__label, .account__info strong { color: var(--jb-accent-text, #B45309); }
+
+/* Toast: chip escuro fixo — independe do tema (evita branco-sobre-branco
+   que ocorria com background:var(--text) no modo escuro). */
+.toast { background: #1F2937; color: #fff; }

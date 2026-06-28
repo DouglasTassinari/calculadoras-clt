@@ -1,0 +1,8 @@
+# Jornada Brasil — redirecionamentos 301 (Cloudflare/Netlify Pages)
+# Modulo de preco unificado em /calcular-preco/ (antes /precificar/ e /quanto-cobrar/)
+/precificar/*      /calcular-preco/:splat   301
+/precificar/       /calcular-preco/         301
+/precificar        /calcular-preco/         301
+/quanto-cobrar/*   /calcular-preco/:splat   301
+/quanto-cobrar/    /calcular-preco/         301
+/quanto-cobrar     /calcular-preco/         301
