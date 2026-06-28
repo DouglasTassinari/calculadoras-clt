@@ -2,7 +2,7 @@
    Meu Lucro — Service Worker (PWA offline)
    ============================================================ */
 
-const CACHE = "meu-lucro-v2";
+const CACHE = "meu-lucro-v3";
 
 const ASSETS = [
   "./",
