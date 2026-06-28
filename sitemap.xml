@@ -101,6 +101,30 @@
 
   <!-- Blog -->
   <url>
+    <loc>https://jornadabrasil.com.br/blog/demissao-por-acordo/</loc>
+    <lastmod>2026-06-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jornadabrasil.com.br/blog/fgts-saque-aniversario/</loc>
+    <lastmod>2026-06-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jornadabrasil.com.br/blog/vale-transporte/</loc>
+    <lastmod>2026-06-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jornadabrasil.com.br/blog/inss-autonomo/</loc>
+    <lastmod>2026-06-28</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://jornadabrasil.com.br/blog/quanto-cobrar-por-hora/</loc>
     <lastmod>2026-06-28</lastmod>
     <changefreq>monthly</changefreq>
