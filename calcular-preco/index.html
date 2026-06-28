@@ -95,37 +95,26 @@
     @media print {
       .no-print { display: none !important; }
       body { background: #fff !important; color: #1f2937 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .print-area { box-shadow: none !important; border: 1px solid #e5e7eb !important; border-radius: 10px !important; padding: 18px 20px !important; margin: 0 0 10px !important; }
       .print-only { display: block !important; }
-      /* Garante a marca d'água legível e elegante também em PDF P&B */
+
+      /* ---- Documento comercial A4 (orçamento profissional) ----
+         Ocupa toda a largura útil da folha: sem cara de card/widget. */
+      @page { size: A4; margin: 14mm; }
+      .max-w-2xl { max-width: 100% !important; }
+      .px-4 { padding-left: 0 !important; padding-right: 0 !important; }
+      .print-area {
+        box-shadow: none !important; border: none !important; border-radius: 0 !important;
+        padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important;
+      }
+      .print-doc { font-size: 11pt; line-height: 1.45; }
+      /* Marca d'água central, grande e discreta (estilo documento bancário) */
       .jb-watermark { opacity: 0.08 !important; }
-
-      /* ---- Documento comercial A4 (Fase 5) ---- */
-      @page { size: A4; margin: 30mm 14mm 22mm; }
-      /* Evita cortar serviços, totais ou assinatura no meio de uma página */
-      .print-area, .print-area .flex, .print-area > div > div { break-inside: avoid; }
-
-      /* Cabeçalho/rodapé fixos = papel timbrado repetido em toda página.
-         top:0 / bottom:0 ancoram na borda do papel; as margens do @page
-         (30mm topo / 22mm base) reservam o espaço do conteúdo abaixo/acima. */
-      .jb-print-header {
-        position: fixed; top: 0; left: 14mm; right: 14mm; height: 20mm;
-        display: flex !important; align-items: flex-end; justify-content: space-between;
-        padding-bottom: 5px; border-bottom: 2px solid #1E3A8A;
-      }
-      .jb-print-header img { height: 32px; width: auto; }
-      .jb-print-header .doc { text-align: right; font: 700 11px/1.3 Inter, system-ui, sans-serif; color: #1E3A8A; text-transform: uppercase; letter-spacing: .08em; }
-      .jb-print-header .doc small { display: block; font-weight: 500; color: #6b7280; letter-spacing: .02em; text-transform: none; }
-      .jb-print-footer {
-        position: fixed; bottom: 0; left: 14mm; right: 14mm; height: 14mm;
-        display: flex !important; align-items: flex-start; justify-content: space-between;
-        padding-top: 5px; border-top: 1px solid #e5e7eb;
-        font: 500 9.5px/1.3 Inter, system-ui, sans-serif; color: #94a3b8;
-      }
-      .jb-print-footer b { color: #475569; }
+      /* Cabeçalho da tabela de serviços se repete a cada página */
+      thead { display: table-header-group; }
+      /* Não corta linhas da tabela nem blocos-chave no meio da página */
+      tr, .avoid-break { break-inside: avoid; }
     }
     .print-only { display: none; }
-    .jb-print-header, .jb-print-footer { display: none; }
 
     /* =================================================================
        JORNADA BRASIL — Dark mode nativo do Calcular Preço.
@@ -209,16 +198,6 @@
 
   <div id="root"></div>
 
-  <!-- Papel timbrado (Fase 5): cabeçalho e rodapé repetidos em cada página impressa/PDF -->
-  <div class="jb-print-header" aria-hidden="true">
-    <img src="/assets/img/logo.png" alt="Jornada Brasil">
-    <div class="doc">Orçamento<small>jornadabrasil.com.br/calcular-preco</small></div>
-  </div>
-  <div class="jb-print-footer" aria-hidden="true">
-    <span>Documento gerado em <b id="jbPrintData"></b></span>
-    <span>Jornada Brasil · Calcular Preço</span>
-  </div>
-
   <section class="jb-cta no-print" aria-label="Próximo passo na jornada">
     <p class="jb-cta__t"><b>Já definiu seu preço?</b> O próximo passo é o <b>Meu Lucro</b>: acompanhe se esse valor está realmente sobrando no seu bolso a cada dia de trabalho.</p>
     <a class="jb-btn" href="/meu-lucro/" onclick="window.jbTrack&&jbTrack('journey_click',{from:'orca',to:'lucro'})">Ir para o Meu Lucro →</a>
@@ -268,6 +247,37 @@
     const FATOR_COMPLEXIDADE = { "Baixa": 1.15, "Média": 1.0, "Alta": 0.8 };
     const UNIDADES = ["m²", "m", "unidade", "serviço"];
     const COMPLEXIDADES = ["Baixa", "Média", "Alta"];
+
+    /* ===================== MARCA / WHITE-LABEL (preparação Premium) =====================
+       Arquitetura pronta para o plano Premium, porém DESLIGADA: hoje todo orçamento
+       sai com a identidade Jornada Brasil. Quando o Premium for ligado, getMarca()
+       passará a ler o perfil do usuário (logo próprio, dados da empresa, white label,
+       assinatura automática) — sem mexer no restante do componente.
+       Obs.: NÃO usar JBPlano.isPremium() aqui (com billing desligado ele retorna true);
+       o white label é controlado por flag própria até a monetização existir. */
+    function getMarca() {
+      return {
+        whiteLabel: false,             // Premium: remove a marca Jornada Brasil
+        logo: "/assets/img/logo.png",  // Premium: logo do próprio usuário
+        empresa: null,                 // Premium: { nome, documento, contato } do prestador
+        assinaturaAuto: false,         // Premium: assinatura/carimbo automático
+        marcaRodape: true,             // "Gerado por Calcular Preço · jornadabrasil.com.br"
+        marcaDagua: true,              // marca d'água com o logo no fundo do documento
+      };
+    }
+    const MARCA = getMarca();
+
+    /* Número sequencial do orçamento (por aparelho). Estável durante a edição;
+       um novo documento (carregar a página / "Limpar") recebe o próximo número. */
+    function gerarNumeroOrc() {
+      const ano = new Date().getFullYear();
+      let seq;
+      try {
+        seq = (parseInt(localStorage.getItem("cp_orc_seq") || "0", 10) || 0) + 1;
+        localStorage.setItem("cp_orc_seq", String(seq));
+      } catch (e) { seq = Math.floor(Math.random() * 9000) + 1000; }
+      return String(seq).padStart(4, "0") + "/" + ano;
+    }
 
     /* ===================== HELPERS ===================== */
     const brl = (n) => (isFinite(n) ? n : 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -366,6 +376,23 @@
       const [material, setMaterial] = useState("");
       const [usarCustoReal, setUsarCustoReal] = useState(false);
       const [telaNegocio, setTelaNegocio] = useState(false);
+
+      /* ---- Orçamento comercial (tudo opcional, toggles desligados = zero atrito) ---- */
+      const [numeroOrc, setNumeroOrc] = useState(gerarNumeroOrc);
+      const [desconto, setDesconto] = useState("");
+      // Personalizar para o cliente
+      const [mostrarCliente, setMostrarCliente] = useState(false);
+      const [cliente, setCliente] = useState({ nome: "", empresa: "", documento: "", telefone: "", email: "" });
+      const setCli = (k, v) => setCliente((c) => ({ ...c, [k]: v }));
+      // Condições comerciais
+      const [mostrarCondicoes, setMostrarCondicoes] = useState(false);
+      const [condicoes, setCondicoes] = useState({
+        validade: "15 dias",
+        prazo: "Conforme negociação",
+        pagamento: "Pix, transferência ou conforme combinado",
+        observacoes: "",
+      });
+      const setCond = (k, v) => setCondicoes((c) => ({ ...c, [k]: v }));
 
       // Configuração do negócio: carrega do LocalStorage e salva a cada mudança (só ela persiste).
       const [negocio, setNegocio] = useState(() => {
@@ -467,6 +494,13 @@
       const custosNegocioJob = calc.deslocamento + calc.ajudante;    // custos diretos do serviço
       const lucroEstimado = precoVenda - materialNum - calc.maoDeObra - custosNegocioJob;
 
+      // Desconto opcional e total final do orçamento comercial
+      const descontoNum = Math.min(precoVenda, Math.max(0, toNum(desconto)));
+      const totalFinal = Math.max(0, precoVenda - descontoNum);
+      // Cliente só aparece no PDF se houver ao menos um campo preenchido
+      const clienteTemDados = mostrarCliente && Object.keys(cliente).some((k) => cliente[k] && cliente[k].trim());
+      const dataEmissao = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+
       /* ---------- Aditivos ---------- */
       const custoDiaMarginal = useMemo(() =>
         ganhoDiaEfetivo + toNum(prof.deslocamentoDia) + (prof.possuiAjudante ? toNum(prof.custoAjudanteDia) : 0),
@@ -500,6 +534,10 @@
           setServicos(ESTADO_INICIAL.servicos.map((s) => ({ ...s, id: uid() })));
           setAditivos([]); setContratoOriginal(""); setSimuladorPreco(""); setMostrarAditivos(false);
           setMaterial(""); setUsarCustoReal(false);
+          setDesconto(""); setNumeroOrc(gerarNumeroOrc());
+          setMostrarCliente(false); setCliente({ nome: "", empresa: "", documento: "", telefone: "", email: "" });
+          setMostrarCondicoes(false);
+          setCondicoes({ validade: "15 dias", prazo: "Conforme negociação", pagamento: "Pix, transferência ou conforme combinado", observacoes: "" });
         }
       };
 
@@ -515,7 +553,13 @@
               margem: toNum(prof.margem) || null,
               preco_final: calc.precoRecomendado || null,
               custos: { negocio: negocio, material: material, usarCustoReal: usarCustoReal, totalCustosMes: negocioCalc.totalCustosMes },
-              params: { prof: prof, servicos: servicos, aditivos: aditivos, contratoOriginal: contratoOriginal, simuladorPreco: simuladorPreco, material: material, usarCustoReal: usarCustoReal, negocio: negocio },
+              params: {
+                prof: prof, servicos: servicos, aditivos: aditivos, contratoOriginal: contratoOriginal,
+                simuladorPreco: simuladorPreco, material: material, usarCustoReal: usarCustoReal, negocio: negocio,
+                numeroOrc: numeroOrc, desconto: desconto,
+                mostrarCliente: mostrarCliente, cliente: cliente,
+                mostrarCondicoes: mostrarCondicoes, condicoes: condicoes,
+              },
             };
           },
         };
@@ -529,6 +573,12 @@
           setMaterial(params.material || "");
           setUsarCustoReal(!!params.usarCustoReal);
           if (params.negocio) setNegocio(Object.assign({}, NEGOCIO_INICIAL, params.negocio));
+          if (params.numeroOrc) setNumeroOrc(params.numeroOrc);
+          setDesconto(params.desconto || "");
+          setMostrarCliente(!!params.mostrarCliente);
+          if (params.cliente) setCliente(Object.assign({ nome: "", empresa: "", documento: "", telefone: "", email: "" }, params.cliente));
+          setMostrarCondicoes(!!params.mostrarCondicoes);
+          if (params.condicoes) setCondicoes(Object.assign({ validade: "", prazo: "", pagamento: "", observacoes: "" }, params.condicoes));
           setTelaNegocio(false);
         };
         if (!window.__cpReadyFired) { window.__cpReadyFired = true; window.dispatchEvent(new Event("cp:ready")); }
@@ -854,76 +904,163 @@
             </div>
           </section>
 
-          {/* ---------- ORÇAMENTO DO CLIENTE (é o que vai impresso) ---------- */}
-          <section className="relative overflow-hidden bg-white rounded-2xl shadow-sm p-5 mb-4 print-area">
-            {/* Marca d'água — logotipo oficial Jornada Brasil (mesma identidade do header) */}
-            <div className="pointer-events-none select-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
-              <img src="/assets/img/logo.png" alt=""
-                className="jb-watermark"
-                style={{ width: "62%", maxWidth: "100%", height: "auto", opacity: 0.07, transform: "rotate(-22deg)" }} />
-            </div>
+          {/* ---------- PERSONALIZAÇÃO (opcional, não sai no PDF) ---------- */}
+          <section className="no-print bg-white rounded-2xl shadow-sm p-5 mb-4">
+            <label className="flex items-center gap-2 select-none cursor-pointer">
+              <input type="checkbox" checked={mostrarCliente}
+                onChange={(e) => setMostrarCliente(e.target.checked)}
+                className="h-5 w-5 rounded border-slate-300 text-indigo-600" />
+              <span className="text-sm font-medium text-slate-700">Personalizar orçamento para o cliente <span className="font-normal text-slate-400">(opcional)</span></span>
+            </label>
+            {mostrarCliente && (
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <div className="col-span-2"><Campo label="Nome do cliente"><input value={cliente.nome} onChange={(e) => setCli("nome", e.target.value)} placeholder="Ex.: Maria Souza" className={inputCls} /></Campo></div>
+                <div className="col-span-2"><Campo label="Empresa"><input value={cliente.empresa} onChange={(e) => setCli("empresa", e.target.value)} placeholder="Opcional" className={inputCls} /></Campo></div>
+                <Campo label="CPF / CNPJ"><input value={cliente.documento} onChange={(e) => setCli("documento", e.target.value)} placeholder="Opcional" className={inputCls} /></Campo>
+                <Campo label="Telefone"><input value={cliente.telefone} onChange={(e) => setCli("telefone", e.target.value)} placeholder="Opcional" className={inputCls} /></Campo>
+                <div className="col-span-2"><Campo label="E-mail"><input value={cliente.email} onChange={(e) => setCli("email", e.target.value)} placeholder="Opcional" className={inputCls} /></Campo></div>
+                <p className="col-span-2 text-xs text-slate-400">Campos vazios não aparecem no orçamento — nada de traços ou placeholders.</p>
+              </div>
+            )}
+          </section>
+
+          <section className="no-print bg-white rounded-2xl shadow-sm p-5 mb-4">
+            <label className="flex items-center gap-2 select-none cursor-pointer">
+              <input type="checkbox" checked={mostrarCondicoes}
+                onChange={(e) => setMostrarCondicoes(e.target.checked)}
+                className="h-5 w-5 rounded border-slate-300 text-indigo-600" />
+              <span className="text-sm font-medium text-slate-700">Exibir condições comerciais <span className="font-normal text-slate-400">(opcional)</span></span>
+            </label>
+            {mostrarCondicoes && (
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                <Campo label="Validade da proposta"><input value={condicoes.validade} onChange={(e) => setCond("validade", e.target.value)} className={inputCls} /></Campo>
+                <Campo label="Prazo de entrega"><input value={condicoes.prazo} onChange={(e) => setCond("prazo", e.target.value)} className={inputCls} /></Campo>
+                <div className="col-span-2"><Campo label="Forma de pagamento"><input value={condicoes.pagamento} onChange={(e) => setCond("pagamento", e.target.value)} className={inputCls} /></Campo></div>
+                <Campo label="Desconto (opcional)"><NumInput value={desconto} onChange={setDesconto} prefix="R$" /></Campo>
+                <div className="col-span-2"><Campo label="Observações"><textarea value={condicoes.observacoes} onChange={(e) => setCond("observacoes", e.target.value)} rows="2" placeholder="Opcional — só aparece se preenchido" className={inputCls} /></Campo></div>
+              </div>
+            )}
+          </section>
+
+          <p className="no-print text-xs text-slate-400 mb-2 px-1">
+            Pré-visualização do orçamento do cliente — é exatamente isto que sai no PDF/impressão.
+          </p>
+
+          {/* ---------- ORÇAMENTO COMERCIAL (documento que vai impresso/PDF) ---------- */}
+          <section className="relative overflow-hidden bg-white rounded-2xl shadow-sm p-6 mb-4 print-area print-doc">
+            {/* Marca d'água — logo Jornada Brasil, central, grande e discreto (estilo documento bancário) */}
+            {MARCA.marcaDagua && (
+              <div className="pointer-events-none select-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
+                <img src={MARCA.logo} alt="" className="jb-watermark"
+                  style={{ width: "72%", maxWidth: "560px", height: "auto", opacity: 0.08 }} />
+              </div>
+            )}
 
             <div className="relative">
-              {/* Cabeçalho: prestador + título + data */}
-              <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-3 mb-3">
-                <div className="min-w-0">
-                  <div className="text-lg font-bold text-slate-800">{prof.nome || "Prestador de serviço"}</div>
-                  {prof.contato
-                    ? <div className="text-sm text-slate-500">{prof.contato}</div>
-                    : <div className="no-print text-xs text-amber-600">Preencha seu nome e contato nos seus dados acima.</div>}
+              {/* CABEÇALHO: logo + título + número + data */}
+              <div className="flex items-start justify-between gap-4 border-b-2 border-slate-800 pb-4 mb-5">
+                <div className="flex items-center gap-3 min-w-0">
+                  {!MARCA.whiteLabel && <img src={MARCA.logo} alt="Jornada Brasil" style={{ height: "40px", width: "auto" }} />}
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-sm font-bold uppercase tracking-wide text-slate-500">Orçamento</div>
-                  <div className="text-xs text-slate-400">{hoje}</div>
+                  <div className="text-base font-extrabold uppercase tracking-wide text-slate-800">Orçamento Comercial</div>
+                  <div className="text-xs text-slate-500 mt-0.5">Nº {numeroOrc}</div>
+                  <div className="text-xs text-slate-500">Emissão: {dataEmissao}</div>
                 </div>
               </div>
 
-              <p className="no-print text-xs text-slate-400 mb-3">
-                Prévia do que o cliente recebe — sem margem e sem seus ganhos. É esta parte que sai na impressão.
-              </p>
-
-              {/* Descrição dos serviços */}
-              <div className="rounded-xl border border-slate-100 overflow-hidden">
-                {calc.itens.filter((it) => toNum(it.quantidade) > 0).map((it) => (
-                  <div key={it.id} className="flex items-baseline justify-between gap-3 px-3 py-2 border-b border-slate-100 last:border-0">
-                    <div className="min-w-0">
-                      <div className="font-medium text-slate-700">{it.nome || "Serviço"}</div>
-                      <div className="text-xs text-slate-400">
-                        {dec(toNum(it.quantidade), 2)} {it.unidade} × {brl(it.precoUnit)}/{it.unidade}
-                      </div>
-                    </div>
-                    <div className="tabular-nums font-semibold text-slate-700 shrink-0">{brl(it.precoServico)}</div>
-                  </div>
-                ))}
-                {calc.itens.filter((it) => toNum(it.quantidade) > 0).length === 0 && (
-                  <div className="px-3 py-3 text-sm text-slate-400 text-center">
-                    Adicione serviços com quantidade e rendimento para montar o orçamento.
+              {/* PRESTADOR / CLIENTE */}
+              <div className="grid grid-cols-2 gap-6 mb-5">
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Prestador</div>
+                  <div className="font-semibold text-slate-800">{prof.nome || "Prestador de serviço"}</div>
+                  {prof.contato && <div className="text-sm text-slate-500">{prof.contato}</div>}
+                </div>
+                {clienteTemDados && (
+                  <div>
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Cliente</div>
+                    {cliente.nome && <div className="font-semibold text-slate-800">{cliente.nome}</div>}
+                    {cliente.empresa && <div className="text-sm text-slate-600">{cliente.empresa}</div>}
+                    {cliente.documento && <div className="text-sm text-slate-500">{cliente.documento}</div>}
+                    {cliente.telefone && <div className="text-sm text-slate-500">{cliente.telefone}</div>}
+                    {cliente.email && <div className="text-sm text-slate-500">{cliente.email}</div>}
                   </div>
                 )}
               </div>
 
-              {/* Somas e totais */}
-              <div className="mt-2">
-                <LinhaResumo titulo="Subtotal dos serviços" valor={brl(calc.poolServicos)} />
-                {materialNum > 0 && <LinhaResumo titulo="Material" valor={brl(materialNum)} />}
-                {calc.deslocamento > 0 && <LinhaResumo titulo="Deslocamento" valor={brl(calc.deslocamento)} />}
-                {prof.possuiAjudante && calc.ajudante > 0 && <LinhaResumo titulo="Ajudante" valor={brl(calc.ajudante)} />}
-                <div className="border-t-2 border-slate-300 mt-1 pt-1">
-                  <LinhaResumo titulo="Total do orçamento" valor={brl(precoVenda)} destaque />
+              {/* TABELA DE SERVIÇOS */}
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="text-slate-500 border-b-2 border-slate-300">
+                    <th className="text-left font-semibold py-2 pr-2">Serviço</th>
+                    <th className="text-right font-semibold py-2 px-2 whitespace-nowrap">Qtd.</th>
+                    <th className="text-right font-semibold py-2 px-2 whitespace-nowrap">Valor unit.</th>
+                    <th className="text-right font-semibold py-2 pl-2 whitespace-nowrap">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {calc.itens.filter((it) => toNum(it.quantidade) > 0).map((it) => (
+                    <tr key={it.id} className="border-b border-slate-100 align-top">
+                      <td className="py-2 pr-2 text-slate-700">{it.nome || "Serviço"}</td>
+                      <td className="py-2 px-2 text-right tabular-nums text-slate-600 whitespace-nowrap">{dec(toNum(it.quantidade), 2)} {it.unidade}</td>
+                      <td className="py-2 px-2 text-right tabular-nums text-slate-600 whitespace-nowrap">{brl(it.precoUnit)}</td>
+                      <td className="py-2 pl-2 text-right tabular-nums font-semibold text-slate-800 whitespace-nowrap">{brl(it.precoServico)}</td>
+                    </tr>
+                  ))}
+                  {calc.itens.filter((it) => toNum(it.quantidade) > 0).length === 0 && (
+                    <tr><td colSpan="4" className="py-3 text-sm text-slate-400 text-center">Adicione serviços com quantidade e rendimento para montar o orçamento.</td></tr>
+                  )}
+                </tbody>
+              </table>
+
+              {/* RESUMO FINANCEIRO */}
+              <div className="flex justify-end mt-4 avoid-break">
+                <div className="w-full sm:w-3/5">
+                  <div className="flex justify-between py-1 text-sm"><span className="text-slate-500">Subtotal dos serviços</span><span className="tabular-nums text-slate-700">{brl(calc.poolServicos)}</span></div>
+                  {materialNum > 0 && <div className="flex justify-between py-1 text-sm"><span className="text-slate-500">Material</span><span className="tabular-nums text-slate-700">{brl(materialNum)}</span></div>}
+                  {calc.deslocamento > 0 && <div className="flex justify-between py-1 text-sm"><span className="text-slate-500">Deslocamento</span><span className="tabular-nums text-slate-700">{brl(calc.deslocamento)}</span></div>}
+                  {prof.possuiAjudante && calc.ajudante > 0 && <div className="flex justify-between py-1 text-sm"><span className="text-slate-500">Ajudante</span><span className="tabular-nums text-slate-700">{brl(calc.ajudante)}</span></div>}
+                  {descontoNum > 0 && <div className="flex justify-between py-1 text-sm"><span className="text-emerald-600">Desconto</span><span className="tabular-nums text-emerald-600">− {brl(descontoNum)}</span></div>}
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t-2 border-slate-800">
+                    <span className="font-bold uppercase tracking-wide text-slate-800">Total</span>
+                    <span className="tabular-nums font-extrabold text-2xl text-slate-900">{brl(totalFinal)}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Assinatura do prestador */}
-              <div className="mt-12 mb-1 flex flex-col items-center">
+              {/* CONDIÇÕES COMERCIAIS (só quando habilitado) */}
+              {mostrarCondicoes && (condicoes.validade || condicoes.prazo || condicoes.pagamento) && (
+                <div className="mt-6 avoid-break">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Condições comerciais</div>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                    {condicoes.validade && <div><span className="text-slate-400">Validade da proposta: </span><span className="text-slate-700 font-medium">{condicoes.validade}</span></div>}
+                    {condicoes.prazo && <div><span className="text-slate-400">Prazo de entrega: </span><span className="text-slate-700 font-medium">{condicoes.prazo}</span></div>}
+                    {condicoes.pagamento && <div className="col-span-2"><span className="text-slate-400">Forma de pagamento: </span><span className="text-slate-700 font-medium">{condicoes.pagamento}</span></div>}
+                  </div>
+                </div>
+              )}
+
+              {/* OBSERVAÇÕES (só se preenchido) */}
+              {mostrarCondicoes && condicoes.observacoes && condicoes.observacoes.trim() && (
+                <div className="mt-5 avoid-break">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">Observações</div>
+                  <p className="text-sm text-slate-600 whitespace-pre-line">{condicoes.observacoes}</p>
+                </div>
+              )}
+
+              {/* ASSINATURA */}
+              <div className="mt-12 mb-1 flex flex-col items-center avoid-break">
                 <div className="border-t border-slate-400 w-64 max-w-full"></div>
                 <div className="text-sm font-medium text-slate-600 mt-1">{prof.nome || "Assinatura do prestador"}</div>
                 {prof.contato && <div className="text-xs text-slate-400">{prof.contato}</div>}
               </div>
 
-              {/* Assinatura do site */}
-              <p className="text-center text-[11px] text-slate-400 mt-4">
-                Orçamento gerado com <span className="font-semibold text-indigo-500">Calcular Preço</span> · jornadabrasil.com.br/calcular-preco
-              </p>
+              {/* RODAPÉ */}
+              {MARCA.marcaRodape && (
+                <p className="text-center text-[11px] text-slate-400 mt-6 pt-3 border-t border-slate-100">
+                  Orçamento gerado com <span className="font-semibold text-indigo-500">Calcular Preço</span> · jornadabrasil.com.br/calcular-preco
+                </p>
+              )}
             </div>
           </section>
 
@@ -1076,19 +1213,11 @@
   <!-- Jornada Brasil — Fase 1: mede a geração de orçamento (clique em "Imprimir orçamento") -->
   <script>
     (function(){
-      // Data do rodapé do papel timbrado (Fase 5) — atualizada também na hora de imprimir.
-      function carimbarData(){
-        var el = document.getElementById("jbPrintData");
-        if (el) el.textContent = new Date().toLocaleDateString("pt-BR", { day:"2-digit", month:"long", year:"numeric" });
-      }
-      carimbarData();
       var _print = window.print;
       window.print = function(){
-        carimbarData();
         if (window.jbTrack) jbTrack('orcamento_gerado', { tool: 'orca' });
         return _print.apply(window, arguments);
       };
-      window.addEventListener("beforeprint", carimbarData);
     })();
   </script>
 
