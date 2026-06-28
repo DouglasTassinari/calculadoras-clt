@@ -35,7 +35,9 @@
             '<div><div class="jb-acct-menu-name"></div><div class="jb-acct-menu-email"></div></div>' +
           '</div>' +
           '<a class="jb-acct-menu-item" href="/conta/" role="menuitem">Minha conta</a>' +
-          '<a class="jb-acct-menu-item" href="/calcular-preco/" role="menuitem">Meus orçamentos</a>' +
+          '<a class="jb-acct-menu-item" href="/meus-orcamentos/" role="menuitem">Meus orçamentos</a>' +
+          '<a class="jb-acct-menu-item" href="/historico/" role="menuitem">Histórico</a>' +
+          '<a class="jb-acct-menu-item" href="/favoritos/" role="menuitem">Favoritos</a>' +
           '<a class="jb-acct-menu-item" href="/meu-lucro/" role="menuitem">Meu Lucro</a>' +
           '<button type="button" class="jb-acct-menu-item jb-acct-signout" role="menuitem">Sair</button>' +
         '</div>' +

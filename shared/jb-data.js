@@ -69,6 +69,67 @@
     deleteRegistro: function (id) {
       return sb().from("registros_meu_lucro").delete().eq("id", id);
     },
+
+    // ---------------- Histórico de cálculos (Fase 3) ----------------
+    listHistorico: function (tipo) {
+      var q = sb().from("historico_calculos").select("*").order("created_at", { ascending: false });
+      if (tipo) q = q.eq("tipo", tipo);
+      return q;
+    },
+    saveHistorico: function (h) {
+      var u = uid();
+      if (!u) return Promise.resolve({ error: { message: "Não autenticado" } });
+      return sb().from("historico_calculos").insert({
+        user_id: u,
+        tipo: h.tipo || "calculo",
+        titulo: h.titulo || null,
+        url: h.url || null,
+        valor_principal: h.valor_principal != null ? h.valor_principal : null,
+        valor_label: h.valor_label || null,
+        resumo: h.resumo || [],
+        inputs: h.inputs || {},
+      }).select().single();
+    },
+    updateHistorico: function (id, h) {
+      var patch = {};
+      ["tipo", "titulo", "url", "valor_principal", "valor_label", "resumo", "inputs"].forEach(function (k) {
+        if (h[k] !== undefined) patch[k] = h[k];
+      });
+      return sb().from("historico_calculos").update(patch).eq("id", id).select().single();
+    },
+    deleteHistorico: function (id) {
+      return sb().from("historico_calculos").delete().eq("id", id);
+    },
+
+    // ---------------- Favoritos (Fase 4) ----------------
+    listFavoritos: function (tipo) {
+      var q = sb().from("favoritos").select("*").order("created_at", { ascending: false });
+      if (tipo) q = q.eq("tipo", tipo);
+      return q;
+    },
+    addFavorito: function (f) {
+      var u = uid();
+      if (!u) return Promise.resolve({ error: { message: "Não autenticado" } });
+      return sb().from("favoritos").upsert({
+        user_id: u,
+        tipo: f.tipo || "calculadora",
+        slug: f.slug,
+        titulo: f.titulo || null,
+        url: f.url || null,
+      }, { onConflict: "user_id,tipo,slug" }).select().single();
+    },
+    removeFavorito: function (tipo, slug) {
+      var u = uid();
+      if (!u) return Promise.resolve({ error: { message: "Não autenticado" } });
+      return sb().from("favoritos").delete().eq("user_id", u).eq("tipo", tipo).eq("slug", slug);
+    },
+
+    // ---------------- Perfil / plano (Fases 1 e 8) ----------------
+    getProfile: function () {
+      var u = uid();
+      if (!u) return Promise.resolve({ data: null, error: { message: "Não autenticado" } });
+      return sb().from("profiles").select("*").eq("id", u).single();
+    },
   };
 
   function mapReg(r, u) {
