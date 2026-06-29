@@ -34,13 +34,13 @@ const IRRF_ISENTAO_ANUAL = 60000.00;
 const IRRF_TETO_REDUTOR_ANUAL = 88200.00;
 const REDUTOR_ANUAL_MAX = 3754.68; // = R$ 312,89/mês × 12
 
-// Tabela anual IR (declaração 2027, ano-calendário 2026)
+// Tabela anual IR (declaração 2027, ano-calendário 2026) = tabela mensal × 12
 const IRRF_ANUAL_TAB = [
-  { ate: 28467.20,  aliq: 0,     deduz: 0 },
-  { ate: 33919.80,  aliq: 0.075, deduz: 2135.04 },
-  { ate: 45012.60,  aliq: 0.15,  deduz: 4679.03 },
-  { ate: 55976.16,  aliq: 0.225, deduz: 8054.97 },
-  { ate: Infinity,  aliq: 0.275, deduz: 10853.78 },
+  { ate: 29145.60,  aliq: 0,     deduz: 0 },
+  { ate: 33919.80,  aliq: 0.075, deduz: 2185.92 },
+  { ate: 45012.60,  aliq: 0.15,  deduz: 4729.92 },
+  { ate: 55976.16,  aliq: 0.225, deduz: 8105.88 },
+  { ate: Infinity,  aliq: 0.275, deduz: 10904.76 },
 ];
 const IRRF_DEP_ANUAL = 2275.08;
 const IRRF_SIMPL_PCT = 0.20;
