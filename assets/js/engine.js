@@ -29,6 +29,10 @@ const IRRF_SIMPLIFICADO = 607.20;
 // 2026: isenção efetiva até R$ 5.000; redutor gradual de R$ 5.000 a R$ 7.350
 const IRRF_ISENTAO = 5000.00;
 const IRRF_TETO_REDUTOR = 7350.00;
+// Redutor anual (declaração 2027): isenção efetiva até R$ 60.000; redução gradual até R$ 88.200 (Lei 15.270/2025)
+const IRRF_ISENTAO_ANUAL = 60000.00;
+const IRRF_TETO_REDUTOR_ANUAL = 88200.00;
+const REDUTOR_ANUAL_MAX = 3754.68; // = R$ 312,89/mês × 12
 
 // Tabela anual IR (declaração 2027, ano-calendário 2026)
 const IRRF_ANUAL_TAB = [
@@ -62,10 +66,23 @@ function irrfTabela(base){
 }
 
 function calcRedutor(rend, imp){
-  // 2026: até R$ 5.000 isento; R$ 5.000,01–R$ 7.350 redução gradual (fórmula Lei 14.848/2024)
+  // 2026: até R$ 5.000 isento; R$ 5.000,01–R$ 7.350 redução gradual (Lei 15.270/2025)
   if (rend <= IRRF_ISENTAO) return imp; // isenção total
   if (rend >= IRRF_TETO_REDUTOR) return 0; // sem redutor acima de R$ 7.350
   const redutor = r2(Math.max(978.62 - 0.133145 * rend, 0));
+  return r2(Math.min(redutor, imp));
+}
+
+function calcRedutorAnual(rendAnual, imp){
+  // Declaração 2027 (ano-calendário 2026): isenção efetiva até R$ 60.000;
+  // R$ 60.000,01–R$ 88.200 redução gradual decrescente; acima disso, sem redutor (Lei 15.270/2025)
+  rendAnual = nz(rendAnual);
+  if (rendAnual <= IRRF_ISENTAO_ANUAL) return imp; // isenção efetiva
+  if (rendAnual >= IRRF_TETO_REDUTOR_ANUAL) return 0; // sem redutor
+  const redutor = r2(Math.max(
+    REDUTOR_ANUAL_MAX * (IRRF_TETO_REDUTOR_ANUAL - rendAnual) / (IRRF_TETO_REDUTOR_ANUAL - IRRF_ISENTAO_ANUAL),
+    0
+  ));
   return r2(Math.min(redutor, imp));
 }
 
@@ -975,20 +992,24 @@ const CALCS = {
       const usouSimpl = baseSimpl < baseCompleta;
       const base = usouSimpl ? baseSimpl : baseCompleta;
       const faixa = IRRF_ANUAL_TAB.find(f=> base <= f.ate);
-      const imposto = r2(Math.max(0, base * faixa.aliq - faixa.deduz));
+      const impostoApurado = r2(Math.max(0, base * faixa.aliq - faixa.deduz));
+      const redutorAnual = calcRedutorAnual(v.rendTrib, impostoApurado);
+      const imposto = r2(Math.max(0, impostoApurado - redutorAnual));
       const irrfRetido = nz(v.irrfRetidoFonte);
       const diferenca = r2(imposto - irrfRetido);
       const aRestituir = diferenca < 0 ? r2(-diferenca) : 0;
       const aRecolher  = diferenca > 0 ? diferenca : 0;
       const blocos=[
         {titulo:`Forma de declaração: ${usouSimpl?'Simplificada (mais vantajosa)':'Completa (mais vantajosa)'}`, linhas:[
-          {nome:'Desconto simplificado (20%, máx R$ 16.754,34)', valor:simpl, pos:false},
+          {nome:'Desconto simplificado (20%, máx R$ 17.640,00)', valor:simpl, pos:false},
           {nome:'Deduções legais completas', valor:dedCompleta, pos:false},
           {nome:usouSimpl?'Usando simplificada':'Usando completa', valor:usouSimpl?simpl:dedCompleta, pos:true},
         ]},
         {titulo:'Apuração do imposto', linhas:[
           {nome:'Base de cálculo após deduções', valor:base, pos:false},
-          {nome:`Alíquota ${PCT(faixa.aliq*100)}`, valor:imposto, pos:false},
+          {nome:`Alíquota ${PCT(faixa.aliq*100)} (imposto apurado)`, valor:impostoApurado, pos:false},
+          ...(redutorAnual>0?[{nome:'(−) Redutor Lei 15.270/2025', valor:redutorAnual, pos:true}]:[]),
+          {nome:'Imposto devido', valor:imposto, pos:false},
           {nome:'IRRF retido na fonte', valor:irrfRetido, pos:false},
           {nome: diferenca>=0?'Imposto a recolher (DARF)':'Imposto a restituir', valor:Math.abs(diferenca), pos:diferenca<0},
         ]},
@@ -1005,7 +1026,12 @@ const CALCS = {
           : `Declaração completa: deduções de ${BRL(dedCompleta)} (mais vantajosa que simplificada de ${BRL(simpl)}).`,
         nz(v.deps)>0?`Dedução por dependentes: ${v.deps} × ${BRL(IRRF_DEP_ANUAL)} = ${BRL(dedDeps)}.`:'',
         nz(v.despEduc)>0?`Educação: limitado a R$ 3.561,50 por pessoa = ${BRL(despEducLim)}.`:'',
-        `Base de cálculo: ${BRL(base)} → ${PCT(faixa.aliq*100)} = imposto de ${BRL(imposto)}.`,
+        `Base de cálculo: ${BRL(base)} → ${PCT(faixa.aliq*100)} = imposto apurado de ${BRL(impostoApurado)}.`,
+        redutorAnual>0
+          ? (v.rendTrib<=IRRF_ISENTAO_ANUAL
+              ? `Redutor da Lei 15.270/2025: renda anual de até ${BRL(IRRF_ISENTAO_ANUAL)} é isenta — redutor de ${BRL(redutorAnual)} zera o imposto.`
+              : `Redutor da Lei 15.270/2025 (renda entre ${BRL(IRRF_ISENTAO_ANUAL)} e ${BRL(IRRF_TETO_REDUTOR_ANUAL)}): −${BRL(redutorAnual)} → imposto devido de ${BRL(imposto)}.`)
+          : '',
         `Retido na fonte: ${BRL(irrfRetido)} → ${diferenca>=0?`recolher ${BRL(aRecolher)}`:`restituir ${BRL(aRestituir)}`}.`,
       ].filter(Boolean);
       return { proventos:[], descontos:[], blocos, destaque:{label:diferenca>=0?'A recolher':'A restituir', sub:usouSimpl?'declaração simplificada':'declaração completa', valor:Math.abs(diferenca)}, memoria, avisos };

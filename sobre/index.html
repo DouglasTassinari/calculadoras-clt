@@ -106,7 +106,7 @@
         <p>Todos os cálculos são realizados diretamente no navegador do usuário (client-side JavaScript), sem envio de dados a servidores. O motor de cálculo implementa:</p>
         <ul>
           <li><strong>INSS progressivo:</strong> alíquotas por faixas conforme Portaria Interministerial MPS/MF nº 2 de 2024, com teto de R$ 8.475,55 e alíquota efetiva calculada pela diferença entre alíquota × base e parcela a deduzir.</li>
-          <li><strong>IRRF com redutor:</strong> tabela mensal da Receita Federal 2026 com aplicação do redutor criado pela Lei 15.270/2025, que garante isenção total até R$ 2.428,80 e redução progressiva até R$ 5.000,00.</li>
+          <li><strong>IRRF com redutor:</strong> tabela progressiva mensal da Receita Federal (isenção formal até R$ 2.428,80) combinada com o redutor criado pela Lei 15.270/2025, que garante isenção efetiva até R$ 5.000,00/mês e redução parcial decrescente para quem recebe entre R$ 5.000,01 e R$ 7.350,00.</li>
           <li><strong>Desconto simplificado:</strong> comparação automática entre o desconto simplificado de R$ 607,20 e as deduções legais, aplicando o mais vantajoso.</li>
           <li><strong>Aviso prévio proporcional:</strong> cálculo conforme Lei 12.506/2011 (30 dias + 3 dias por ano completo, limitado a 90 dias).</li>
           <li><strong>Seguro-desemprego:</strong> tabela CODEFAT de 2026 com três faixas de cálculo.</li>
@@ -119,7 +119,8 @@
           <tbody>
             <tr><td>Salário mínimo</td><td>R$ 1.621,00 (jan/2026)</td><td>Decreto nº 12.797/2025</td></tr>
             <tr><td>Teto do INSS</td><td>R$ 8.475,55</td><td>Portaria Interministerial MPS/MF</td></tr>
-            <tr><td>Isenção IRRF</td><td>até R$ 2.428,80/mês</td><td>Lei 15.270/2025 / Receita Federal</td></tr>
+            <tr><td>Isenção IRRF (efetiva, com redutor)</td><td>até R$ 5.000,00/mês</td><td>Lei 15.270/2025 / Receita Federal</td></tr>
+            <tr><td>Redução parcial IRRF</td><td>R$ 5.000,01 a R$ 7.350,00/mês</td><td>Lei 15.270/2025 / Receita Federal</td></tr>
             <tr><td>Dedução por dependente (IRRF)</td><td>R$ 189,59/mês</td><td>Receita Federal 2026</td></tr>
             <tr><td>Dedução por dependente (IR anual)</td><td>R$ 2.275,08/ano</td><td>Receita Federal 2026</td></tr>
             <tr><td>Desconto simplificado IRRF</td><td>R$ 607,20/mês</td><td>Receita Federal 2026</td></tr>
