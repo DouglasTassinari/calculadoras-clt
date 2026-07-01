@@ -1,0 +1,119 @@
+name: Notificar inscritos (Web Push)
+
+# Dispara notificação push quando:
+#  - sai um novo artigo no blog (blog/<slug>/index.html adicionado)
+#  - sai uma nova calculadora/página no topo (<slug>/index.html adicionado)
+#  - manualmente, para "atualização relevante da plataforma" (workflow_dispatch)
+#
+# Requer o secret do repositório: PUSH_SEND_SECRET (mesmo valor do secret da Edge Function).
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      title:
+        description: "Título da notificação"
+        required: true
+      body:
+        description: "Texto da notificação"
+        required: false
+      url:
+        description: "URL de destino (ex: /blog/novo-post/)"
+        required: false
+        default: "/"
+      topic:
+        description: "Tópico (blog | calc | plataforma)"
+        required: false
+        default: "plataforma"
+
+concurrency:
+  group: notify-push
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Enviar notificações
+        env:
+          FUNCTION_URL: "https://spiiwtqavxjtdxeeqlbf.supabase.co/functions/v1/send-push"
+          SEND_SECRET: ${{ secrets.PUSH_SEND_SECRET }}
+          EVENT: ${{ github.event_name }}
+          IN_TITLE: ${{ github.event.inputs.title }}
+          IN_BODY: ${{ github.event.inputs.body }}
+          IN_URL: ${{ github.event.inputs.url }}
+          IN_TOPIC: ${{ github.event.inputs.topic }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${SEND_SECRET:-}" ]; then
+            echo "::warning::PUSH_SEND_SECRET não configurado — nada enviado."
+            exit 0
+          fi
+
+          send() {
+            local title="$1" body="$2" url="$3" topic="$4"
+            echo "→ push: [$topic] $title ($url)"
+            code=$(curl -s -o /tmp/resp.json -w "%{http_code}" -X POST "$FUNCTION_URL" \
+              -H "x-send-secret: $SEND_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "$(jq -n --arg t "$title" --arg b "$body" --arg u "$url" --arg tp "$topic" \
+                    '{title:$t, body:$b, url:$u, topic:$tp, tag:($tp+"-"+($u|@base64))}')")
+            echo "   HTTP $code — $(cat /tmp/resp.json)"
+          }
+
+          # Extrai o <title> da página e limpa o sufixo da marca
+          page_title() {
+            grep -o '<title>[^<]*</title>' "$1" 2>/dev/null | head -1 \
+              | sed -e 's/<[^>]*>//g' -e 's/ *[|—-] *Jornada Brasil.*$//' \
+              | sed 's/^ *//;s/ *$//'
+          }
+
+          # -------- Disparo manual (atualização da plataforma) --------
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            send "${IN_TITLE}" "${IN_BODY:-}" "${IN_URL:-/}" "${IN_TOPIC:-plataforma}"
+            exit 0
+          fi
+
+          # -------- Disparo automático (push) --------
+          BEFORE='${{ github.event.before }}'
+          SHA='${{ github.sha }}'
+          if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            echo "Sem commit anterior comparável (primeiro push?). Nada enviado."
+            exit 0
+          fi
+
+          # Páginas de topo que NÃO devem gerar notificação de "nova calculadora"
+          BLOCK="privacidade termos cookies sobre contato conta favoritos historico meus-orcamentos desenvolvimento calculadoras blog"
+
+          # Arquivos adicionados (A) desde o commit anterior
+          git diff --name-status "$BEFORE" "$SHA" | grep '^A' | awk '{print $2}' > /tmp/added.txt || true
+
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            case "$f" in
+              blog/*/index.html)
+                slug=$(echo "$f" | cut -d/ -f2)
+                [ -f "$f" ] || continue
+                t=$(page_title "$f"); [ -z "$t" ] && t="Novo artigo no blog"
+                send "$t" "Novo artigo no Jornada Brasil. Toque para ler." "/blog/$slug/" "blog"
+                ;;
+              */index.html)
+                slug=$(echo "$f" | cut -d/ -f1)
+                # ignora subníveis (só topo) e a blocklist
+                if [ "$(echo "$f" | awk -F/ '{print NF}')" -ne 2 ]; then continue; fi
+                skip=0; for b in $BLOCK; do [ "$slug" = "$b" ] && skip=1; done
+                [ "$skip" = "1" ] && continue
+                [ -f "$f" ] || continue
+                t=$(page_title "$f"); [ -z "$t" ] && t="Nova calculadora"
+                send "$t" "Nova ferramenta disponível no Jornada Brasil." "/$slug/" "calc"
+                ;;
+            esac
+          done < /tmp/added.txt
+
+          echo "Concluído."

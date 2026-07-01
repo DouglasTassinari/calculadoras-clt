@@ -73,7 +73,7 @@
         "mainEntity": [
           {"@type":"Question","name":"Como calcular o salário líquido?","acceptedAnswer":{"@type":"Answer","text":"Parta do salário bruto e subtraia, nesta ordem: o INSS (calculado pelas faixas progressivas), o IRRF (aplicado sobre o salário já descontado o INSS e os dependentes) e os demais descontos como vale-transporte, vale-refeição e plano de saúde. O que sobra é o salário líquido que cai na conta."}},
           {"@type":"Question","name":"O INSS é descontado sobre o salário todo?","acceptedAnswer":{"@type":"Answer","text":"Não. O INSS é progressivo: cada faixa do salário é tributada por uma alíquota diferente (7,5%, 9%, 12% e 14%), por isso a alíquota efetiva é sempre menor que a nominal. Há ainda um teto: em 2026 o desconto máximo do INSS é de R$ 988,09, correspondente ao teto de contribuição de R$ 8.475,55."}},
-          {"@type":"Question","name":"Quem é isento de Imposto de Renda em 2026?","acceptedAnswer":{"@type":"Answer","text":"Pela Lei 15.270/2025, há isenção total de IRRF para a base de cálculo até R$ 2.428,80 e uma redução progressiva do imposto para quem recebe até R$ 5.000. Acima disso, aplica-se a tabela progressiva normal do IRRF, com as alíquotas e parcelas a deduzir vigentes."}},
+          {"@type":"Question","name":"Quem é isento de Imposto de Renda em 2026?","acceptedAnswer":{"@type":"Answer","text":"Pela Lei 15.270/2025, há isenção efetiva de IRRF (imposto zero) para quem recebe até R$ 5.000 por mês, graças a um redutor que anula o imposto apurado na tabela. Entre R$ 5.000,01 e R$ 7.350,00 há redução parcial decrescente; acima de R$ 7.350,00 aplica-se a tabela progressiva integral (cuja isenção formal vai até R$ 2.428,80)."}},
           {"@type":"Question","name":"Qual a diferença entre salário bruto e líquido?","acceptedAnswer":{"@type":"Answer","text":"O salário bruto é o valor combinado no contrato, antes dos descontos. O líquido é o que efetivamente cai na conta, depois de descontados INSS, IRRF e benefícios como vale-transporte. A diferença entre os dois pode ser significativa, especialmente em salários mais altos."}}
         ]
       }
@@ -150,9 +150,9 @@
           <h2>2º desconto: IRRF com o redutor de 2026</h2>
           <p>O Imposto de Renda Retido na Fonte incide sobre a <strong>base de cálculo</strong>, que é o salário bruto <em>menos o INSS</em> e <em>menos R$ 189,59 por dependente</em>. A grande novidade vem da <strong>Lei 15.270/2025</strong>:</p>
           <ul>
-            <li><strong>Isenção total</strong> de IRRF para base de cálculo até <strong>R$ 2.428,80</strong>.</li>
-            <li><strong>Redução progressiva</strong> do imposto para quem recebe até <strong>R$ 5.000</strong>.</li>
-            <li>Acima disso, vale a <strong>tabela progressiva</strong> normal, com alíquotas e parcela a deduzir vigentes.</li>
+            <li><strong>Isenção efetiva</strong> (imposto zero) para quem recebe até <strong>R$ 5.000/mês</strong> — o redutor anula o imposto apurado.</li>
+            <li><strong>Redução parcial</strong> decrescente do imposto para rendimentos entre <strong>R$ 5.000,01 e R$ 7.350,00</strong> (redutor de até R$ 312,89).</li>
+            <li>Acima de R$ 7.350, vale a <strong>tabela progressiva</strong> integral (isenção formal da tabela até R$ 2.428,80).</li>
           </ul>
           <p>Entenda os detalhes em <a href="/blog/irrf-tabela-2026/">Lei 15.270/2025: a nova isenção de IR e o redutor progressivo</a>.</p>
 
@@ -164,11 +164,11 @@
             </thead>
             <tbody>
               <tr><td>Salário bruto</td><td>Combinado no contrato</td><td>R$ 4.000,00</td></tr>
-              <tr><td>(−) INSS progressivo</td><td>Soma das faixas até R$ 4.000</td><td>≈ − R$ 384,00</td></tr>
-              <tr><td>(=) Base do IRRF</td><td>4.000 − INSS</td><td>≈ R$ 3.616,00</td></tr>
-              <tr><td>(−) IRRF</td><td>Tabela 2026 com redutor</td><td>≈ − R$ 90,00</td></tr>
+              <tr><td>(−) INSS progressivo</td><td>Soma das faixas até R$ 4.000</td><td>≈ − R$ 368,60</td></tr>
+              <tr><td>(=) Base do IRRF</td><td>4.000 − INSS</td><td>≈ R$ 3.631,40</td></tr>
+              <tr><td>(−) IRRF</td><td>Rendimento ≤ R$ 5.000 → isento pelo redutor de 2026</td><td>R$ 0,00</td></tr>
               <tr><td>(−) Vale-transporte</td><td>6% de 4.000</td><td>− R$ 240,00</td></tr>
-              <tr><td>(=) Salário líquido</td><td>Aproximado</td><td><strong>≈ R$ 3.286,00</strong></td></tr>
+              <tr><td>(=) Salário líquido</td><td>Aproximado</td><td><strong>≈ R$ 3.391,40</strong></td></tr>
             </tbody>
           </table>
           <p>Os valores de INSS e IRRF são <strong>aproximados</strong> e dependem do cálculo exato das faixas e do redutor — por isso o melhor é usar uma calculadora que aplica as tabelas oficiais automaticamente, em vez de fazer a conta no papel.</p>
@@ -201,7 +201,7 @@
             </details>
             <details class="faq-item">
               <summary>Quem é isento de Imposto de Renda em 2026?</summary>
-              <div class="faq-answer"><p>Pela Lei 15.270/2025, há isenção total de IRRF para base até R$ 2.428,80 e redução progressiva do imposto para quem recebe até R$ 5.000. Acima disso, aplica-se a tabela progressiva normal.</p></div>
+              <div class="faq-answer"><p>Pela Lei 15.270/2025, há isenção efetiva de IRRF (imposto zero) para quem recebe até R$ 5.000/mês, graças a um redutor que anula o imposto apurado. Entre R$ 5.000,01 e R$ 7.350,00 há redução parcial decrescente; acima de R$ 7.350,00 aplica-se a tabela progressiva integral (isenção formal da tabela até R$ 2.428,80).</p></div>
             </details>
             <details class="faq-item">
               <summary>Qual a diferença entre salário bruto e líquido?</summary>

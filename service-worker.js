@@ -1,7 +1,7 @@
 // Portal Brasil — Service Worker
 // Estratégia: Cache-First para estáticos, Network-First para HTML e JSON
 
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const STATIC_CACHE = `jornadabrasil-static-${CACHE_VERSION}`;
 const HTML_CACHE = `jornadabrasil-html-${CACHE_VERSION}`;
 
@@ -119,4 +119,51 @@ self.addEventListener('message', (event) => {
   if (event.data?.action === 'skipWaiting') {
     self.skipWaiting();
   }
+});
+
+// ============================================================
+// Web Push — recebe a mensagem do servidor e exibe a notificação
+// ============================================================
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: 'Jornada Brasil', body: event.data ? event.data.text() : '' };
+  }
+
+  const title = data.title || 'Jornada Brasil';
+  const options = {
+    body: data.body || '',
+    icon: data.icon || '/assets/img/icons/icon-192x192.png',
+    badge: '/assets/img/icons/icon-96x96.png',
+    image: data.image || undefined,
+    tag: data.tag || 'jb-update',
+    renotify: !!data.tag,
+    data: { url: data.url || '/' },
+    requireInteraction: false,
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Clique na notificação: foca uma aba existente do site ou abre a URL
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+      for (const c of wins) {
+        try {
+          const u = new URL(c.url);
+          if (u.origin === location.origin && 'focus' in c) {
+            c.navigate(targetUrl);
+            return c.focus();
+          }
+        } catch (e) {}
+      }
+      if (clients.openWindow) return clients.openWindow(targetUrl);
+    })
+  );
 });
