@@ -81,3 +81,13 @@
     document.head.appendChild(s);
   } catch (e) {}
 })();
+
+// Carrega o módulo de notificações Web Push — isolado e fail-safe.
+(function () {
+  try {
+    var s = document.createElement('script');
+    s.src = '/assets/js/jb-push.js?v=20260629a';
+    s.defer = true;
+    document.head.appendChild(s);
+  } catch (e) {}
+})();
