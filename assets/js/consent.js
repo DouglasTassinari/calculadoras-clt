@@ -142,11 +142,10 @@ const RC = {
   loadAds: function() {
     if (window._rcAdsLoaded) return;
     window._rcAdsLoaded = true;
-    // Substitua ca-pub-XXXXXXXXXXXXXXXX pelo seu Publisher ID real do AdSense
     const s = document.createElement('script');
     s.async = true;
     s.crossOrigin = 'anonymous';
-    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX';
+    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1417484877629527';
     document.head.appendChild(s);
   }
 };

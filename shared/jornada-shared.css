@@ -136,4 +136,17 @@ body{font-family:var(--jb-font);}
   font-size:.78rem;color:rgba(255,255,255,.65);line-height:1.6;
   border-top:1px solid rgba(255,255,255,.1);}
 
-@media print{ .jb-header,.jb-footer,.jb-cta,.no-print{display:none!important;} }
+/* --- Cookie banner (LGPD) --- */
+.cookie-banner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:var(--jb-surface,#fff);border-top:1px solid var(--jb-border,#E5E7EB);padding:16px 20px;box-shadow:0 -4px 20px rgba(0,0,0,.08);display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.cookie-banner.hidden{display:none;}
+.cookie-banner p{flex:1;font-size:.85rem;color:var(--jb-text,#1F2937);margin:0;min-width:200px;}
+.cookie-banner p a{color:var(--jb-accent-text,#B45309);}
+.cookie-banner-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:10px;font-family:inherit;font-size:.95rem;font-weight:600;padding:14px 24px;cursor:pointer;transition:.15s;text-decoration:none;}
+.btn-primary{background:var(--jb-primary,#F97316);color:#fff;}
+.btn-primary:hover{background:var(--jb-primary-dark,#EA580C);}
+.btn-outline{background:var(--jb-surface,#fff);color:var(--jb-text,#1F2937);border:1px solid var(--jb-border,#E5E7EB);}
+.btn-outline:hover{background:var(--jb-bg,#F9FAFB);}
+.btn-sm{padding:7px 14px;font-size:.85rem;}
+
+@media print{ .jb-header,.jb-footer,.jb-cta,.cookie-banner,.no-print{display:none!important;} }

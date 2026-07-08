@@ -1,23 +1,16 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-MK3XD5ZVE0"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
+  window.dataLayer=window.dataLayer||[];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-MK3XD5ZVE0');
-</script>
-<script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "x7ir0zxu39");
-</script>
+  gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','wait_for_update':500});
+  function _jbLoadAnalytics(){if(window._jbALoaded)return;window._jbALoaded=1;var s=document.createElement('script');s.async=1;s.src='https://www.googletagmanager.com/gtag/js?id=G-MK3XD5ZVE0';document.head.appendChild(s);gtag('js',new Date());gtag('config','G-MK3XD5ZVE0');(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,'clarity','script','x7ir0zxu39');}
+  window._jbLoadAnalytics=_jbLoadAnalytics;
+  ['click','touchstart','keydown','scroll'].forEach(function(e){document.addEventListener(e,function h(){_jbLoadAnalytics();document.removeEventListener(e,h);},{once:true,passive:true});});
+  'requestIdleCallback'in window?requestIdleCallback(function(){setTimeout(_jbLoadAnalytics,1);},{timeout:3000}):setTimeout(_jbLoadAnalytics,3000);
+  </script>
   <meta charset="UTF-8">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1417484877629527" crossorigin="anonymous"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Central de Desenvolvimento — Jornada Brasil</title>
@@ -309,16 +302,25 @@
 
 <script>
 // ==================== AUTH ====================
-const CREDS = { user: 'desenvolvedor', pass: 'Acriflex2025@@!!' };
+const HASHES = {
+  user: 'c1328e50b433648ff789d35509a3de27ac852b1099d217781bc40aa905ff1046',
+  pass: '05f50133737103d1ad57e4cb84ccd13e79580e8451ef27520d30df36ee68be38'
+};
+
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 document.getElementById('login-btn').addEventListener('click', doLogin);
 document.getElementById('inp-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 document.getElementById('inp-user').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('inp-pass').focus(); });
 
-function doLogin() {
+async function doLogin() {
   const u = document.getElementById('inp-user').value.trim();
   const p = document.getElementById('inp-pass').value.trim();
-  if (u === CREDS.user && p === CREDS.pass) {
+  const [uh, ph] = await Promise.all([sha256(u), sha256(p)]);
+  if (uh === HASHES.user && ph === HASHES.pass) {
     sessionStorage.setItem('jb_dev', '1');
     showDashboard();
   } else {

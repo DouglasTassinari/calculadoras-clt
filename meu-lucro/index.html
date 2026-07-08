@@ -70,6 +70,13 @@
   <script defer src="/shared/jb-analytics.js"></script>
 </head>
 <body class="state-loading">
+  <div id="cookie-banner" class="cookie-banner hidden" role="region" aria-label="Aviso de cookies" aria-live="polite">
+    <p>Usamos cookies para melhorar sua experiência e analisar o tráfego. Veja nossa <a href="/cookies/">Política de Cookies</a>.</p>
+    <div class="cookie-banner-btns">
+      <button class="btn btn-sm btn-outline" onclick="RC.acceptEssential()" aria-label="Aceitar apenas cookies essenciais">Apenas essenciais</button>
+      <button class="btn btn-sm btn-primary" onclick="RC.acceptAll()" aria-label="Aceitar todos os cookies">Aceitar todos</button>
+    </div>
+  </div>
 
   <!-- ====================== BARRA DA PLATAFORMA (Jornada Brasil) ====================== -->
   <header class="jb-header no-print" style="position:static">
@@ -538,6 +545,7 @@
   <script defer src="/shared/jb-plano.js"></script>
   <!-- App -->
   <script defer src="script.js"></script>
+  <script src="/assets/js/consent.js" defer></script>
   <script src="/assets/js/nav.js?v=20260628c" defer></script>
 </body>
 </html>

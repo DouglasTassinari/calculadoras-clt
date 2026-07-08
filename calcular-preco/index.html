@@ -223,6 +223,13 @@
   <script defer src="/shared/jb-analytics.js"></script>
 </head>
 <body class="bg-slate-100 text-slate-800">
+  <div id="cookie-banner" class="cookie-banner hidden" role="region" aria-label="Aviso de cookies" aria-live="polite">
+    <p>Usamos cookies para melhorar sua experiência e analisar o tráfego. Veja nossa <a href="/cookies/">Política de Cookies</a>.</p>
+    <div class="cookie-banner-btns">
+      <button class="btn btn-sm btn-outline" onclick="RC.acceptEssential()" aria-label="Aceitar apenas cookies essenciais">Apenas essenciais</button>
+      <button class="btn btn-sm btn-primary" onclick="RC.acceptAll()" aria-label="Aceitar todos os cookies">Aceitar todos</button>
+    </div>
+  </div>
   <header class="jb-header no-print">
     <div class="jb-header__in">
       <a class="jb-brand" href="/" aria-label="Jornada Brasil — Página inicial">
@@ -1327,6 +1334,7 @@
   <script src="/shared/jb-account.js" defer></script>
   <script src="/shared/jb-plano.js" defer></script>
   <script src="persist.js" defer></script>
+  <script src="/assets/js/consent.js" defer></script>
   <script src="/assets/js/nav.js?v=20260628c" defer></script>
 </body>
 </html>
