@@ -243,7 +243,7 @@
     <section class="hero" aria-labelledby="hero-heading">
       <div class="container">
         <h1 id="hero-heading">Ferramentas para decisões de trabalho, carreira e renda</h1>
-        <p class="hero-sub">Compare CLT e PJ, calcule salário líquido, rescisão, férias e outros direitos trabalhistas.</p>
+        <p class="hero-sub">Compare CLT e PJ, calcule salário líquido, rescisão e férias — e faça o dinheiro render com a trilha de saúde financeira.</p>
         <div class="hero-ctas">
           <a href="/pj-vs-clt/" class="btn-hero-primary">Comparar PJ vs CLT →</a>
           <a href="/calculadoras/" class="btn-hero-secondary">Ver todas as calculadoras</a>
@@ -316,6 +316,68 @@
       </div>
     </section>
 
+    <section class="section-band" aria-labelledby="trilha-heading">
+      <div class="container">
+      <h2 class="section-h2" id="trilha-heading">Trilha de saúde financeira</h2>
+      <p class="section-sub">Cinco passos, na ordem certa, para sair do aperto e fazer o salário render o mês inteiro.</p>
+      <div class="calc-cards-grid">
+        <a href="/blog/orcamento-50-30-20/" class="calc-card" onclick="typeof gtag!=='undefined'&&gtag('event','journey_click',{from:'home_trilha',to:'503020'})">
+          <h3>1 · Organize o orçamento</h3>
+          <p>Divida o salário com a regra 50-30-20 e saiba para onde vai cada real.</p>
+          <span class="calc-card-cta">Começar a trilha →</span>
+        </a>
+        <a href="/salario-liquido/" class="calc-card" onclick="typeof gtag!=='undefined'&&gtag('event','journey_click',{from:'home_trilha',to:'liquido'})">
+          <h3>2 · Conheça seu líquido</h3>
+          <p>Calcule o valor exato que cai na conta, com INSS e IRRF de 2026.</p>
+          <span class="calc-card-cta">Calcular →</span>
+        </a>
+        <a href="/blog/como-sair-das-dividas/" class="calc-card" onclick="typeof gtag!=='undefined'&&gtag('event','journey_click',{from:'home_trilha',to:'dividas'})">
+          <h3>3 · Zere as dívidas caras</h3>
+          <p>Bola de neve ou avalanche: escolha o método e saia do vermelho.</p>
+          <span class="calc-card-cta">Ver o método →</span>
+        </a>
+        <a href="/blog/reserva-de-emergencia/" class="calc-card" onclick="typeof gtag!=='undefined'&&gtag('event','journey_click',{from:'home_trilha',to:'reserva'})">
+          <h3>4 · Monte sua reserva</h3>
+          <p>De 3 a 6 meses do custo de vida, com liquidez para imprevistos.</p>
+          <span class="calc-card-cta">Montar reserva →</span>
+        </a>
+        <a href="/blog/planejar-13-e-ferias/" class="calc-card" onclick="typeof gtag!=='undefined'&&gtag('event','journey_click',{from:'home_trilha',to:'13ferias'})">
+          <h3>5 · Use bem os extras</h3>
+          <p>13º e férias como trampolim — sem começar janeiro devendo.</p>
+          <span class="calc-card-cta">Planejar →</span>
+        </a>
+      </div>
+      </div>
+    </section>
+
+    <section class="container" style="margin: 40px 0" aria-labelledby="blog-heading">
+      <h2 class="section-h2" id="blog-heading">Últimos artigos</h2>
+      <p class="section-sub">Conteúdo sobre direitos trabalhistas, legislação e saúde financeira.</p>
+      <!-- Preenchido automaticamente com os 3 posts mais recentes de /blog/ por latest-posts.js.
+           Os cards abaixo são o fallback estático (SEO + 1ª renderização): mantenha-os iguais ao topo do blog. -->
+      <div class="blog-grid" id="home-latest-grid" data-latest-posts style="grid-template-columns: repeat(3,1fr)">
+        <div class="blog-card">
+          <span class="blog-card-tag">Saúde Financeira</span>
+          <h3><a href="/blog/orcamento-50-30-20/">Regra 50-30-20: como organizar seu salário e orçamento em 2026</a></h3>
+          <p class="blog-card-excerpt">50% para necessidades, 30% para desejos e 20% para o futuro. O método simples para o seu salário render o mês inteiro.</p>
+          <span class="blog-card-date"><time datetime="2026-07">Julho/2026</time></span>
+        </div>
+        <div class="blog-card">
+          <span class="blog-card-tag">Salário</span>
+          <h3><a href="/blog/como-calcular-salario-liquido/">Como calcular o salário líquido em 2026: passo a passo com INSS e IRRF</a></h3>
+          <p class="blog-card-excerpt">Do salário bruto ao líquido: INSS progressivo, IRRF com o redutor da Lei 15.270/2025 e os descontos do holerite.</p>
+          <span class="blog-card-date"><time datetime="2026-07">Julho/2026</time></span>
+        </div>
+        <div class="blog-card">
+          <span class="blog-card-tag">Saúde Financeira</span>
+          <h3><a href="/blog/reserva-de-emergencia/">Reserva de emergência: quanto guardar, onde deixar e como começar</a></h3>
+          <p class="blog-card-excerpt">De 3 a 6 meses do seu custo de vida, com liquidez diária. O primeiro passo de qualquer plano financeiro, montado do zero.</p>
+          <span class="blog-card-date"><time datetime="2026-06">Junho/2026</time></span>
+        </div>
+      </div>
+      <a href="/blog/" class="btn btn-outline" style="margin-top: 20px">Ver todos os artigos →</a>
+    </section>
+
     <section class="container" style="margin: 40px 0" aria-labelledby="about-heading">
       <div class="about-section">
         <div>
@@ -355,34 +417,6 @@
           <p style="font-size: .75rem; color: var(--text-3); margin-top: 12px; margin-bottom: 0;">Vigência: janeiro/2026. Fontes: Receita Federal, MPS/MF, CODEFAT.</p>
         </div>
       </div>
-    </section>
-
-    <section class="container" style="margin-bottom: 40px" aria-labelledby="blog-heading">
-      <h2 class="section-h2" id="blog-heading">Últimos artigos</h2>
-      <p class="section-sub">Conteúdo sobre direitos trabalhistas, legislação e dicas financeiras.</p>
-      <!-- Preenchido automaticamente com os 3 posts mais recentes de /blog/ por latest-posts.js.
-           Os cards abaixo são o fallback estático (SEO + 1ª renderização): mantenha-os iguais ao topo do blog. -->
-      <div class="blog-grid" id="home-latest-grid" data-latest-posts style="grid-template-columns: repeat(3,1fr)">
-        <div class="blog-card">
-          <span class="blog-card-tag">Saúde Financeira</span>
-          <h3><a href="/blog/orcamento-50-30-20/">Regra 50-30-20: como organizar seu salário e orçamento em 2026</a></h3>
-          <p class="blog-card-excerpt">50% para necessidades, 30% para desejos e 20% para o futuro. O método simples para o seu salário render o mês inteiro.</p>
-          <span class="blog-card-date"><time datetime="2026-07">Julho/2026</time></span>
-        </div>
-        <div class="blog-card">
-          <span class="blog-card-tag">Saúde Financeira</span>
-          <h3><a href="/blog/reserva-de-emergencia/">Reserva de emergência: quanto guardar, onde deixar e como começar</a></h3>
-          <p class="blog-card-excerpt">De 3 a 6 meses do seu custo de vida, com liquidez diária. O primeiro passo de qualquer plano financeiro, montado do zero.</p>
-          <span class="blog-card-date"><time datetime="2026-07">Julho/2026</time></span>
-        </div>
-        <div class="blog-card">
-          <span class="blog-card-tag">Saúde Financeira</span>
-          <h3><a href="/blog/financas-do-autonomo/">Finanças do autônomo e MEI: separar PJ da PF e se pagar certo</a></h3>
-          <p class="blog-card-excerpt">Separe a conta da empresa da pessoal, defina um pró-labore e enxergue o lucro real. O básico que muda tudo para quem é autônomo.</p>
-          <span class="blog-card-date"><time datetime="2026-07">Julho/2026</time></span>
-        </div>
-      </div>
-      <a href="/blog/" class="btn btn-outline" style="margin-top: 20px">Ver todos os artigos →</a>
     </section>
 
     <div class="container" style="margin-bottom: 40px">
