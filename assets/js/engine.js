@@ -42,8 +42,8 @@ const IRRF_DEP_ANUAL = 2275.08;
 const IRRF_SIMPL_PCT = 0.20;
 const IRRF_SIMPL_TETO = 17640.00;
 
-// Salário-família
-const SF_TETO = 1621.00;
+// Salário-família 2026 (Portaria Interministerial MPS/MF) — teto de renda próprio, não é o salário mínimo
+const SF_TETO = 1980.38;
 const SF_VALOR = 67.54;
 
 function calcINSS(base){
@@ -62,7 +62,7 @@ function irrfTabela(base){
 }
 
 function calcRedutor(rend, imp){
-  // 2026: até R$ 5.000 isento; R$ 5.000,01–R$ 7.350 redução gradual (fórmula Lei 14.848/2024)
+  // 2026: até R$ 5.000 isento; R$ 5.000,01–R$ 7.350 redução gradual (Lei 15.270/2025, base = rendimento bruto)
   if (rend <= IRRF_ISENTAO) return imp; // isenção total
   if (rend >= IRRF_TETO_REDUTOR) return 0; // sem redutor acima de R$ 7.350
   const redutor = r2(Math.max(978.62 - 0.133145 * rend, 0));
