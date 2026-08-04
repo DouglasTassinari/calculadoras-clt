@@ -69,7 +69,7 @@
       const inp = document.createElement('input');
       inp.type = 'checkbox';
       inp.id = 'f_' + campo.id;
-      inp.checked = estado[campo.id] ?? false;
+      inp.checked = estado[campo.id] ?? (campo.def === true);
       inp.addEventListener('change', () => { estado[campo.id] = inp.checked; recalcular(); });
       const sp = document.createElement('span');
       sp.textContent = campo.rot;
@@ -154,7 +154,7 @@
       const raw = estado[campo.id];
       if (campo.tipo === 'moeda') v[campo.id] = parseMoeda(raw);
       else if (campo.tipo === 'numero') v[campo.id] = raw === '' || raw == null ? (campo.def != null ? Number(campo.def) : 0) : Number(raw);
-      else if (campo.tipo === 'check') v[campo.id] = raw ?? false;
+      else if (campo.tipo === 'check') v[campo.id] = raw ?? (campo.def === true);
       else v[campo.id] = raw ?? (campo.def ?? '');
     });
     return v;

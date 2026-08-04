@@ -30,17 +30,25 @@ const IRRF_SIMPLIFICADO = 607.20;
 const IRRF_ISENTAO = 5000.00;
 const IRRF_TETO_REDUTOR = 7350.00;
 
-// Tabela anual IR (declaração 2027, ano-calendário 2026)
+// Tabela anual IR (declaração 2027, ano-calendário 2026) = 12 × a tabela mensal vigente
+// em 2026, que valeu os doze meses do ano. A tabela anterior (isenta até 28.467,20) é a do
+// ano-calendário 2025, que misturava quatro meses da faixa antiga de R$ 2.259,20.
+// Confere com a lei: quem tem 60.000/ano e usa o desconto simplificado de 20% apura
+// 48.000 × 22,5% − 8.105,88 = R$ 2.694,12 — o mesmo valor do redutor anual máximo (2.694,15).
 const IRRF_ANUAL_TAB = [
-  { ate: 28467.20,  aliq: 0,     deduz: 0 },
-  { ate: 33919.80,  aliq: 0.075, deduz: 2135.04 },
-  { ate: 45012.60,  aliq: 0.15,  deduz: 4679.03 },
-  { ate: 55976.16,  aliq: 0.225, deduz: 8054.97 },
-  { ate: Infinity,  aliq: 0.275, deduz: 10853.78 },
+  { ate: 29145.60,  aliq: 0,     deduz: 0 },
+  { ate: 33919.80,  aliq: 0.075, deduz: 2185.92 },
+  { ate: 45012.60,  aliq: 0.15,  deduz: 4729.92 },
+  { ate: 55976.16,  aliq: 0.225, deduz: 8105.88 },
+  { ate: Infinity,  aliq: 0.275, deduz: 10904.76 },
 ];
 const IRRF_DEP_ANUAL = 2275.08;
 const IRRF_SIMPL_PCT = 0.20;
-const IRRF_SIMPL_TETO = 17640.00;
+const IRRF_SIMPL_TETO = 17640.00; // limite do desconto simplificado anual a partir do ano-calendário 2026
+// Redução anual da Lei 15.270/2025 (Anexo II): isenção até R$ 60.000/ano, redutor decrescente até R$ 88.200
+const IRRF_ANUAL_ISENTAO = 60000.00;
+const IRRF_ANUAL_TETO_REDUTOR = 88200.00;
+const IRRF_ANUAL_RED_MAX = 2694.15;
 
 // Salário-família 2026 (Portaria Interministerial MPS/MF) — teto de renda próprio, não é o salário mínimo
 const SF_TETO = 1980.38;
@@ -78,12 +86,26 @@ function calcIRRF(rend, inss, deps=0, pensao=0){
   const base = Math.max(0, Math.min(baseLegal, baseSimpl));
   const t = irrfTabela(base);
   const redutor = r2(calcRedutor(rend, t.imposto));
+  const valor = r2(Math.max(t.imposto - redutor, 0));
   return {
-    base:r2(base), aliq:t.aliq, impostoApurado:t.imposto, redutor,
-    valor:r2(Math.max(t.imposto - redutor, 0)),
+    rend:r2(rend), base:r2(base), aliq:t.aliq, impostoApurado:t.imposto, redutor, valor,
+    // alíquota efetiva sobre o rendimento: a alíquota da tabela (aliq) não representa
+    // a carga real depois do redutor da Lei 15.270/2025
+    aliqEfetiva: rend>0 ? r2((valor/rend)*100) : 0,
+    isentoPeloRedutor: valor===0 && t.imposto>0,
     usouSimplificado, deducaoUsada:r2(usouSimplificado?IRRF_SIMPLIFICADO:dedLegais),
     deps:nz(deps),
   };
+}
+
+function calcRedutorAnual(rendAnual, imp){
+  // Lei 15.270/2025 — ajuste anual: até R$ 60.000 o imposto é zerado (redução máxima
+  // de R$ 2.694,15); de R$ 60.000,01 a R$ 88.200 a redução é decrescente e some acima disso.
+  rendAnual = nz(rendAnual);
+  if (rendAnual <= IRRF_ANUAL_ISENTAO) return r2(Math.min(imp, IRRF_ANUAL_RED_MAX));
+  if (rendAnual > IRRF_ANUAL_TETO_REDUTOR) return 0;
+  const redutor = r2(Math.max(8429.73 - 0.095575 * rendAnual, 0));
+  return r2(Math.min(redutor, imp));
 }
 
 function salarioLiquido({ bruto, deps=0, outrosDescontos=0, pensao=0 }){
@@ -192,7 +214,7 @@ function rescisao({ bruto, admissao, desligamento, motivo, aviso='indenizado', t
   else if(motivo==='sem_justa_causa' && aviso==='indenizado') avisoValor=avisoBase;
   const d13Bruto=devido.d13?r2((bruto/12)*avos13):0;
   const inss13=calcINSS(d13Bruto);
-  const irrf13=d13Bruto>0?calcIRRF(d13Bruto,inss13.valor,deps):{valor:0,base:0,aliq:0,impostoApurado:0,redutor:0,usouSimplificado:false,deducaoUsada:0};
+  const irrf13=d13Bruto>0?calcIRRF(d13Bruto,inss13.valor,deps):{valor:0,base:0,aliq:0,aliqEfetiva:0,rend:0,impostoApurado:0,redutor:0,isentoPeloRedutor:false,usouSimplificado:false,deducaoUsada:0};
   const feriasPropBase=devido.feriasProp?r2((bruto/12)*avosFerias):0;
   const feriasPropTerco=r2(feriasPropBase/3);
   const fv=temFeriasVencidas&&devido.feriasVenc;
@@ -234,16 +256,22 @@ function rescisao({ bruto, admissao, desligamento, motivo, aviso='indenizado', t
 function folhaCompleta({ bruto, deps=0, pensao=0,
   heQtd50=0, heQtd100=0, hJornadaMensal=220,
   adicNoturno=false, horasNoturnas=0,
+  dsr=true, diasUteis=25, domingosFeriados=5,
   insalubridadeGrau='nenhum', periculosidade=false,
   comissoes=0, outros_proventos=0,
   sfFilhos=0,
   desVT=0, desAlimentacao=0, desPrevPriv=0, desPlanoSaude=0, desOutros=0,
 }){
   bruto = nz(bruto);
-  const horaBase = bruto / (nz(hJornadaMensal)||220);
-  const heValor50  = r2(horaBase * 1.50 * nz(heQtd50));
-  const heValor100 = r2(horaBase * 2.00 * nz(heQtd100));
-  const adicNoturnoValor = adicNoturno ? r2(horaBase * (52.5/60) * 0.20 * nz(horasNoturnas)) : 0;
+  // mesmo encadeamento de arredondamento das calculadoras de horas extras e adicional
+  // noturno, para que as três cheguem ao mesmo centavo no mesmo caso
+  const horaBase = r2(bruto / (nz(hJornadaMensal)||220));
+  const heValor50  = r2(r2(horaBase * 1.50) * nz(heQtd50));
+  const heValor100 = r2(r2(horaBase * 2.00) * nz(heQtd100));
+  // hora noturna reduzida (CLT art. 73, § 1º): cada hora real entre 22h e 5h conta
+  // como 60/52,5 = 1,1428 hora, e o adicional de 20% incide sobre as horas computadas
+  const horasNotComputadas = adicNoturno ? r2(nz(horasNoturnas) * (60/52.5)) : 0;
+  const adicNoturnoValor = adicNoturno ? r2(horaBase * 0.20 * horasNotComputadas) : 0;
   let insaVal = 0;
   if(insalubridadeGrau==='min10') insaVal = r2(SALARIO_MINIMO * 0.10);
   else if(insalubridadeGrau==='min20') insaVal = r2(SALARIO_MINIMO * 0.20);
@@ -254,7 +282,14 @@ function folhaCompleta({ bruto, deps=0, pensao=0,
   const perVal = periculosidade ? r2(bruto * 0.30) : 0;
   const sfQualifica = bruto <= SF_TETO;
   const sfValor = sfQualifica ? r2(nz(sfFilhos) * SF_VALOR) : 0;
-  const brutoTrib = r2(bruto + heValor50 + heValor100 + adicNoturnoValor + insaVal + perVal + nz(comissoes) + nz(outros_proventos));
+  // Reflexo no DSR: horas extras e adicional noturno habituais repercutem no descanso
+  // semanal remunerado (Lei 605/1949, art. 7º, § 2º; Súmulas 172 e 60/II do TST).
+  // DSR = (variáveis do mês ÷ dias úteis) × (domingos + feriados).
+  const baseDSR = r2(heValor50 + heValor100 + adicNoturnoValor);
+  const dsrValor = (dsr && baseDSR > 0 && nz(diasUteis) > 0)
+    ? r2((baseDSR / nz(diasUteis)) * nz(domingosFeriados))
+    : 0;
+  const brutoTrib = r2(bruto + heValor50 + heValor100 + adicNoturnoValor + dsrValor + insaVal + perVal + nz(comissoes) + nz(outros_proventos));
   const brutoTotal = r2(brutoTrib + sfValor);
   const inss = calcINSS(brutoTrib);
   const deducaoPrevPriv = nz(desPrevPriv);
@@ -266,6 +301,8 @@ function folhaCompleta({ bruto, deps=0, pensao=0,
   return {
     bruto:r2(bruto), brutoTrib, brutoTotal, sfValor, sfQualifica,
     heValor50, heValor100, adicNoturnoValor, insaVal, perVal,
+    baseDSR, dsrValor, dsr, diasUteis:nz(diasUteis), domingosFeriados:nz(domingosFeriados),
+    valorHora:horaBase, horasNotComputadas,
     comissoes:r2(nz(comissoes)), outros_proventos:r2(nz(outros_proventos)),
     inss, irrf,
     descVT:r2(descVT), maxVT,
@@ -420,10 +457,13 @@ function memIRRF(irrf, rotulo){
   let s = `${rotulo}: base de ${BRL(irrf.base)} após ${ded}.`;
   if(irrf.impostoApurado>0){
     s += ` Imposto pela tabela: ${BRL(irrf.impostoApurado)}.`;
-    if(irrf.redutor>0) s += ` Redutor da Lei 15.270/2025: −${BRL(irrf.redutor)}.`;
-    s += ` Devido: ${BRL(irrf.valor)}.`;
+    if(irrf.redutor>0){
+      s += ` Redutor da Lei 15.270/2025 (rendimento de ${BRL(irrf.rend)}): −${BRL(irrf.redutor)}.`;
+    }
+    s += ` Devido: ${BRL(irrf.valor)}`;
+    s += irrf.valor>0 ? ` (${PCT(irrf.aliqEfetiva)} do rendimento).` : ` — zerado pelo redutor.`;
   } else {
-    s += ` Faixa isenta — sem imposto.`;
+    s += ` Faixa isenta da tabela — sem imposto.`;
   }
   return s;
 }
@@ -431,6 +471,10 @@ function memIRRF(irrf, rotulo){
 /* =====================================================================
    OBJETO CALCS — 11 calculadoras
    ===================================================================== */
+// há parcelas variáveis no mês (horas extras / adicional noturno)? — controla a
+// exibição dos campos do DSR no holerite
+const temVariaveis = (v) => nz(Number(v.heQtd50))>0 || nz(Number(v.heQtd100))>0 || (v.adicNoturno && nz(Number(v.horasNoturnas))>0);
+
 const ic = {
   liquido:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
   rescisao:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M4 13V4a2 2 0 0 1 2-2h9l5 5v4"/><path d="M3 17l4 4M7 17l-4 4"/><path d="M11 17h10"/></svg>',
@@ -449,7 +493,7 @@ const CALCS = {
   liquido:{
     nome:'Salário líquido', icone:ic.liquido,
     titulo:'Salário líquido — holerite completo', demoTit:'Holerite estimado',
-    desc:'Simule o salário líquido com todos os adicionais e descontos: insalubridade, periculosidade, horas extras, vale-transporte, plano de saúde e mais.',
+    desc:'Simule o salário líquido com todos os adicionais e descontos: horas extras e adicional noturno com reflexo no DSR, insalubridade, periculosidade, vale-transporte, plano de saúde e mais.',
     campos:[
       {id:'bruto', tipo:'moeda', rot:'Salário base mensal', def:''},
       {id:'deps', tipo:'numero', rot:'Dependentes p/ IR', def:'0', min:0, max:20, meia:true},
@@ -459,6 +503,9 @@ const CALCS = {
       {id:'heQtd100', tipo:'numero', rot:'Horas extras a 100%', def:'0', min:0, passo:'0.5', meia:true},
       {id:'adicNoturno', tipo:'check', rot:'Tem adicional noturno (20% — horas entre 22h e 5h)'},
       {id:'horasNoturnas', tipo:'numero', rot:'Horas noturnas no mês', def:'0', min:0, showIf:(v)=>v.adicNoturno},
+      {id:'dsr', tipo:'check', rot:'Reflexo no DSR sobre horas extras e adicional noturno', def:true, showIf:(v)=>temVariaveis(v)},
+      {id:'diasUteis', tipo:'numero', rot:'Dias úteis no mês', def:'25', min:1, max:27, meia:true, showIf:(v)=>v.dsr && temVariaveis(v)},
+      {id:'domingosFeriados', tipo:'numero', rot:'Domingos + feriados', def:'5', min:1, max:10, meia:true, showIf:(v)=>v.dsr && temVariaveis(v)},
       {id:'insalubridadeGrau', tipo:'select', rot:'Insalubridade', def:'nenhum', opcoes:[
         {v:'nenhum', t:'Não há'},
         {v:'min10', t:'Mínimo: grau mínimo (10% do SM)'},
@@ -487,6 +534,7 @@ const CALCS = {
       if(r.heValor50>0)       proventos.push({nome:`Horas extras 50% (${v.heQtd50}h)`, valor:r.heValor50});
       if(r.heValor100>0)      proventos.push({nome:`Horas extras 100% (${v.heQtd100}h)`, valor:r.heValor100});
       if(r.adicNoturnoValor>0)proventos.push({nome:`Adicional noturno (${v.horasNoturnas}h × 20%)`, valor:r.adicNoturnoValor});
+      if(r.dsrValor>0)        proventos.push({nome:`DSR sobre horas extras${r.adicNoturnoValor>0?' e adic. noturno':''}`, valor:r.dsrValor});
       if(r.insaVal>0)         proventos.push({nome:'Insalubridade', valor:r.insaVal});
       if(r.perVal>0)          proventos.push({nome:'Periculosidade (30%)', valor:r.perVal});
       if(r.comissoes>0)       proventos.push({nome:'Comissões', valor:r.comissoes});
@@ -494,7 +542,7 @@ const CALCS = {
       if(r.sfValor>0)         proventos.push({nome:`Salário-família (${v.sfFilhos} filho${v.sfFilhos>1?'s':''})`, valor:r.sfValor});
       const descontos=[];
       if(r.inss.valor>0)     descontos.push({nome:`INSS (${PCT(r.inss.aliqEfetiva)} efetivo)`, valor:r.inss.valor});
-      if(r.irrf.valor>0)     descontos.push({nome:`IRRF (${PCT(r.irrf.aliq*100)})`, valor:r.irrf.valor});
+      if(r.irrf.valor>0)     descontos.push({nome:`IRRF (${PCT(r.irrf.aliqEfetiva)} efetivo)`, valor:r.irrf.valor});
       if(r.pensao>0)         descontos.push({nome:'Pensão alimentícia', valor:r.pensao});
       if(r.descVT>0)         descontos.push({nome:`Vale-transporte (desc. de 6%)`, valor:r.descVT});
       if(r.desAlimentacao>0) descontos.push({nome:'Vale-alimentação / refeição', valor:r.desAlimentacao});
@@ -506,12 +554,27 @@ const CALCS = {
         avisos.push({tipo:'warn', txt:`Salário-família não concedido: salário base (${BRL(r.bruto)}) supera o teto de ${BRL(SF_TETO)}.`});
       if(v.desVT>0 && r.descVT < v.desVT)
         avisos.push({tipo:'info', txt:`Desconto de VT limitado a 6% do salário base: ${BRL(r.maxVT)} (custo informado: ${BRL(v.desVT)}).`});
+      if(r.dsrValor>0)
+        avisos.push({tipo:'info', txt:`DSR incluído: horas extras e adicional noturno habituais repercutem no descanso semanal remunerado (Lei 605/1949 e Súmula 172 do TST). O reflexo de ${BRL(r.dsrValor)} é provento tributável e entra na base do INSS e do IRRF.`});
+      else if(!v.dsr && r.baseDSR>0)
+        avisos.push({tipo:'warn', txt:`Reflexo no DSR desativado. Quando as horas extras e o adicional noturno são habituais, o DSR é devido — seriam ${BRL(r2((r.baseDSR/(nz(v.diasUteis)||25))*(nz(v.domingosFeriados)||5)))} a mais no holerite.`});
       if(r.irrf.usouSimplificado)
         avisos.push({tipo:'info', txt:'IRRF: aplicado o desconto simplificado (R$ 607,20) por ser mais vantajoso.'});
-      const memoria=[
-        `Bruto tributável: ${BRL(r.brutoTrib)}${r.sfValor>0?' (salário-família isento e excluído da base)':''}.`,
+      if(r.irrf.redutor>0 && r.irrf.valor===0)
+        avisos.push({tipo:'info', txt:`IRRF zerado pela Lei 15.270/2025: rendimento tributável de até ${BRL(IRRF_ISENTAO)} por mês não paga imposto de renda em 2026. O imposto da tabela (${BRL(r.irrf.impostoApurado)}) foi integralmente cancelado pelo redutor.`});
+      else if(r.irrf.redutor>0)
+        avisos.push({tipo:'info', txt:`Faixa de transição da Lei 15.270/2025 (${BRL(IRRF_ISENTAO)} a ${BRL(IRRF_TETO_REDUTOR)}): o imposto da tabela (${BRL(r.irrf.impostoApurado)}) foi reduzido em ${BRL(r.irrf.redutor)} — restam ${BRL(r.irrf.valor)}. Nessa faixa, cada real a mais de salário aumenta o IR mais rápido, porque o redutor vai diminuindo.`});
+      const memoria=[];
+      if(r.heValor50>0 || r.heValor100>0 || r.adicNoturnoValor>0)
+        memoria.push(`Valor da hora: ${BRL(r.bruto)} ÷ ${v.hJornadaMensal||220}h = ${BRL(r.valorHora)}${r.heValor50>0?` · hora extra 50% = ${BRL(r2(r.valorHora*1.5))}`:''}${r.heValor100>0?` · hora extra 100% = ${BRL(r2(r.valorHora*2))}`:''}.`);
+      if(r.adicNoturnoValor>0)
+        memoria.push(`Adicional noturno: hora noturna reduzida — ${v.horasNoturnas}h reais × 1,143 = ${r.horasNotComputadas.toFixed(2)}h computadas × ${BRL(r.valorHora)} × 20% = ${BRL(r.adicNoturnoValor)}.`);
+      if(r.dsrValor>0)
+        memoria.push(`DSR sobre as variáveis: ${BRL(r.baseDSR)} ÷ ${r.diasUteis} dias úteis × ${r.domingosFeriados} domingos e feriados = ${BRL(r.dsrValor)}.`);
+      memoria.push(
+        `Bruto tributável: ${BRL(r.brutoTrib)}${r.dsrValor>0?' (já com o DSR)':''}${r.sfValor>0?' — salário-família isento e excluído da base':''}.`,
         memINSS(r.brutoTrib, r.inss), memIRRF(r.irrf),
-      ];
+      );
       if(r.insaVal>0) memoria.push(`Insalubridade calculada sobre ${v.insalubridadeGrau.startsWith('min')?`salário mínimo (${BRL(SALARIO_MINIMO)})`:`salário base (${BRL(r.bruto)})`}.`);
       if(r.perVal>0)  memoria.push(`Periculosidade: 30% × ${BRL(r.bruto)} = ${BRL(r.perVal)}.`);
       return { proventos, descontos, destaque:{label:'Salário líquido', sub:'no mês', valor:r.liquido}, memoria, avisos };
@@ -601,7 +664,7 @@ const CALCS = {
       if(r.tercoAbono>0) proventos.push({nome:'1/3 sobre os dias vendidos', valor:r.tercoAbono});
       const descontos=[];
       if(r.inss.valor>0) descontos.push({nome:`INSS (${PCT(r.inss.aliqEfetiva)} efetivo)`, valor:r.inss.valor});
-      if(r.irrf.valor>0) descontos.push({nome:`IRRF (${PCT(r.irrf.aliq*100)})`, valor:r.irrf.valor});
+      if(r.irrf.valor>0) descontos.push({nome:`IRRF (${PCT(r.irrf.aliqEfetiva)} efetivo)`, valor:r.irrf.valor});
       const avisos=[];
       avisos.push({tipo:'info', txt:'Abono pecuniário = venda de até 10 dias das férias. Você descansa menos dias e recebe esses dias em dinheiro. O valor da venda e seu 1/3 são isentos de INSS e IRRF.'});
       const memoria=[
@@ -628,7 +691,7 @@ const CALCS = {
       const proventos=[{nome:`13º bruto (${r.meses}/12)`, valor:r.bruto13}];
       const descontos=[];
       if(r.inss.valor>0) descontos.push({nome:`INSS (${PCT(r.inss.aliqEfetiva)} efetivo)`, valor:r.inss.valor});
-      if(r.irrf.valor>0) descontos.push({nome:`IRRF (${PCT(r.irrf.aliq*100)})`, valor:r.irrf.valor});
+      if(r.irrf.valor>0) descontos.push({nome:`IRRF (${PCT(r.irrf.aliqEfetiva)} efetivo)`, valor:r.irrf.valor});
       const blocos=[{titulo:'Parcelas', linhas:[
         {nome:'1ª parcela (até 30/11, sem desconto)', valor:r.primeira, pos:false},
         {nome:'2ª parcela (até 20/12, com descontos)', valor:r.segunda, pos:false},
@@ -645,7 +708,7 @@ const CALCS = {
   horas:{
     nome:'Horas extras', icone:ic.horas,
     titulo:'Horas extras', demoTit:'Horas extras',
-    desc:'Valor das horas adicionais sobre a jornada, com reflexo opcional no DSR.',
+    desc:'Valor das horas adicionais sobre a jornada, já com o reflexo no DSR (descanso semanal remunerado).',
     campos:[
       {id:'bruto', tipo:'moeda', rot:'Salário bruto mensal', def:''},
       {id:'qtdHoras', tipo:'numero', rot:'Quantidade de horas extras', def:'', min:0, passo:'0.5', meia:true},
@@ -656,7 +719,7 @@ const CALCS = {
         {v:'70', t:'70%'},
       ]},
       {id:'jornadaMensal', tipo:'numero', rot:'Jornada mensal (horas)', def:'220', min:1, max:300, dica:'220h = 44h/semana'},
-      {id:'dsr', tipo:'check', rot:'Incluir reflexo no DSR (descanso semanal)'},
+      {id:'dsr', tipo:'check', rot:'Incluir reflexo no DSR (descanso semanal)', def:true},
       {id:'diasUteis', tipo:'numero', rot:'Dias úteis no mês', def:'25', min:1, max:27, meia:true, showIf:(v)=>v.dsr},
       {id:'domingosFeriados', tipo:'numero', rot:'Domingos + feriados', def:'5', min:1, max:10, meia:true, showIf:(v)=>v.dsr},
     ],
@@ -684,7 +747,7 @@ const CALCS = {
       {id:'bruto', tipo:'moeda', rot:'Salário base mensal', def:''},
       {id:'jornadaMensal', tipo:'numero', rot:'Jornada mensal (horas)', def:'220', min:1, max:300, meia:true},
       {id:'horasNoturnas', tipo:'numero', rot:'Horas noturnas trabalhadas', def:'', min:0, passo:'0.5', meia:true},
-      {id:'dsr', tipo:'check', rot:'Incluir reflexo no DSR'},
+      {id:'dsr', tipo:'check', rot:'Incluir reflexo no DSR', def:true},
       {id:'diasUteis', tipo:'numero', rot:'Dias úteis no mês', def:'25', min:1, max:27, meia:true, showIf:(v)=>v.dsr},
       {id:'domingosFeriados', tipo:'numero', rot:'Domingos + feriados', def:'5', min:1, max:10, meia:true, showIf:(v)=>v.dsr},
     ],
@@ -798,7 +861,7 @@ const CALCS = {
       const blocoA = {titulo:'A) Salário líquido CLT', linhas:[
         {nome:'Salário bruto', valor:r.salarioCLT, pos:false},
         {nome:`INSS empregado (${PCT(r.folha.inss.aliqEfetiva)} efetivo)`, valor:r.inssEmpregado, pos:false},
-        ...(r.folha.irrf.valor>0?[{nome:`IRRF (${PCT(r.folha.irrf.aliq*100)})`, valor:r.folha.irrf.valor, pos:false}]:[]),
+        ...(r.folha.irrf.valor>0?[{nome:`IRRF (${PCT(r.folha.irrf.aliqEfetiva)} efetivo)`, valor:r.folha.irrf.valor, pos:false}]:[]),
         {nome:'Líquido mensal na conta', valor:r.cltLiquido, pos:true},
         {nome:'INSS patronal 20% (custo da empresa — não entra no seu bolso)', valor:r.inssPatronal, pos:false},
       ]};
@@ -940,7 +1003,7 @@ const CALCS = {
       const proventos=[{nome:`Salário integral por ${r.duracao} dias (${r.periodos} meses)`, valor:r.valorMensal}];
       const descontos=[];
       if(r.inss.valor>0) descontos.push({nome:`INSS (${PCT(r.inss.aliqEfetiva)} efetivo)`, valor:r.inss.valor});
-      if(r.irrf.valor>0) descontos.push({nome:`IRRF (${PCT(r.irrf.aliq*100)})`, valor:r.irrf.valor});
+      if(r.irrf.valor>0) descontos.push({nome:`IRRF (${PCT(r.irrf.aliqEfetiva)} efetivo)`, valor:r.irrf.valor});
       const memoria=[
         `Valor mensal integral: ${BRL(r.valorMensal)} (salário CLT mantido durante toda a licença).`,
         `Duração: ${r.duracao} dias = ${r.periodos} parcelas mensais.`,
@@ -975,25 +1038,33 @@ const CALCS = {
       const usouSimpl = baseSimpl < baseCompleta;
       const base = usouSimpl ? baseSimpl : baseCompleta;
       const faixa = IRRF_ANUAL_TAB.find(f=> base <= f.ate);
-      const imposto = r2(Math.max(0, base * faixa.aliq - faixa.deduz));
+      const impostoTabela = r2(Math.max(0, base * faixa.aliq - faixa.deduz));
+      const redutorAnual = calcRedutorAnual(v.rendTrib, impostoTabela);
+      const imposto = r2(Math.max(impostoTabela - redutorAnual, 0));
       const irrfRetido = nz(v.irrfRetidoFonte);
       const diferenca = r2(imposto - irrfRetido);
       const aRestituir = diferenca < 0 ? r2(-diferenca) : 0;
       const aRecolher  = diferenca > 0 ? diferenca : 0;
       const blocos=[
         {titulo:`Forma de declaração: ${usouSimpl?'Simplificada (mais vantajosa)':'Completa (mais vantajosa)'}`, linhas:[
-          {nome:'Desconto simplificado (20%, máx R$ 16.754,34)', valor:simpl, pos:false},
+          {nome:`Desconto simplificado (20%, máx ${BRL(IRRF_SIMPL_TETO)})`, valor:simpl, pos:false},
           {nome:'Deduções legais completas', valor:dedCompleta, pos:false},
           {nome:usouSimpl?'Usando simplificada':'Usando completa', valor:usouSimpl?simpl:dedCompleta, pos:true},
         ]},
         {titulo:'Apuração do imposto', linhas:[
           {nome:'Base de cálculo após deduções', valor:base, pos:false},
-          {nome:`Alíquota ${PCT(faixa.aliq*100)}`, valor:imposto, pos:false},
+          {nome:`Imposto pela tabela (alíquota ${PCT(faixa.aliq*100)})`, valor:impostoTabela, pos:false},
+          ...(redutorAnual>0?[{nome:'Redutor da Lei 15.270/2025 (abate do imposto)', valor:redutorAnual, pos:true}]:[]),
+          {nome:'Imposto devido no ano', valor:imposto, pos:false},
           {nome:'IRRF retido na fonte', valor:irrfRetido, pos:false},
           {nome: diferenca>=0?'Imposto a recolher (DARF)':'Imposto a restituir', valor:Math.abs(diferenca), pos:diferenca<0},
         ]},
       ];
       const avisos=[];
+      if(redutorAnual>0 && imposto===0)
+        avisos.push({tipo:'info', txt:`Imposto zerado pela Lei 15.270/2025: rendimentos tributáveis de até ${BRL(IRRF_ANUAL_ISENTAO)} no ano (${BRL(IRRF_ANUAL_ISENTAO/12)} por mês) não pagam imposto de renda em 2026.`});
+      else if(redutorAnual>0)
+        avisos.push({tipo:'info', txt:`Faixa de transição anual da Lei 15.270/2025 (${BRL(IRRF_ANUAL_ISENTAO)} a ${BRL(IRRF_ANUAL_TETO_REDUTOR)} no ano): o imposto da tabela foi reduzido em ${BRL(redutorAnual)}.`});
       if(aRestituir>0) avisos.push({tipo:'info', txt:`Previsão de restituição: ${BRL(aRestituir)}. Prazo de entrega da declaração geralmente entre março e maio do ano seguinte.`});
       if(aRecolher>0)  avisos.push({tipo:'warn', txt:`Imposto a recolher: ${BRL(aRecolher)}. Pode ser parcelado em até 8 quotas iguais (mínimo R$ 50).`});
       if(!usouSimpl && nz(v.despMed)===0 && nz(v.despEduc)===0)
@@ -1005,7 +1076,10 @@ const CALCS = {
           : `Declaração completa: deduções de ${BRL(dedCompleta)} (mais vantajosa que simplificada de ${BRL(simpl)}).`,
         nz(v.deps)>0?`Dedução por dependentes: ${v.deps} × ${BRL(IRRF_DEP_ANUAL)} = ${BRL(dedDeps)}.`:'',
         nz(v.despEduc)>0?`Educação: limitado a R$ 3.561,50 por pessoa = ${BRL(despEducLim)}.`:'',
-        `Base de cálculo: ${BRL(base)} → ${PCT(faixa.aliq*100)} = imposto de ${BRL(imposto)}.`,
+        `Base de cálculo: ${BRL(base)} → ${PCT(faixa.aliq*100)} = imposto de ${BRL(impostoTabela)} pela tabela.`,
+        redutorAnual>0
+          ? `Redutor anual da Lei 15.270/2025 sobre rendimentos de ${BRL(v.rendTrib)}: −${BRL(redutorAnual)} → imposto devido de ${BRL(imposto)}.`
+          : `Rendimentos acima de ${BRL(IRRF_ANUAL_TETO_REDUTOR)} no ano: sem redutor da Lei 15.270/2025.`,
         `Retido na fonte: ${BRL(irrfRetido)} → ${diferenca>=0?`recolher ${BRL(aRecolher)}`:`restituir ${BRL(aRestituir)}`}.`,
       ].filter(Boolean);
       return { proventos:[], descontos:[], blocos, destaque:{label:diferenca>=0?'A recolher':'A restituir', sub:usouSimpl?'declaração simplificada':'declaração completa', valor:Math.abs(diferenca)}, memoria, avisos };
@@ -1017,7 +1091,7 @@ const ordem = ['liquido','rescisao','ferias','decimo','horas','noturno','seguro'
 
 // Export global namespace
 window.RCEngine = {
-  r2, nz, calcINSS, calcIRRF, calcRedutor, irrfTabela,
+  r2, nz, calcINSS, calcIRRF, calcRedutor, calcRedutorAnual, irrfTabela,
   salarioLiquido, decimoTerceiro, ferias, horasExtras,
   parseDate, diasNoMes, addDays, contarAvos, anosCompletos, ultimoAniversario,
   rescisao, folhaCompleta, seguroDesemprego, pjVsClt, auxilioDoenca, salarioMaternidade,
@@ -1025,6 +1099,8 @@ window.RCEngine = {
   CALCS, ordem,
   SALARIO_MINIMO, INSS_TETO, MEI_DAS,
   INSS_TAB, IRRF_TAB, IRRF_DEPENDENTE, IRRF_SIMPLIFICADO,
+  IRRF_ISENTAO, IRRF_TETO_REDUTOR,
   IRRF_ANUAL_TAB, IRRF_DEP_ANUAL, IRRF_SIMPL_PCT, IRRF_SIMPL_TETO,
+  IRRF_ANUAL_ISENTAO, IRRF_ANUAL_TETO_REDUTOR, IRRF_ANUAL_RED_MAX,
   SF_TETO, SF_VALOR,
 };

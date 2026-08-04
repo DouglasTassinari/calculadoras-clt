@@ -55,10 +55,11 @@
       { "@type": "BreadcrumbList", "itemListElement": [ { "@type": "ListItem", "position": 1, "name": "Início", "item": "https://jornadabrasil.com.br/" }, { "@type": "ListItem", "position": 2, "name": "Salário Líquido", "item": "https://jornadabrasil.com.br/salario-liquido/" } ] },
       { "@type": "FAQPage", "mainEntity": [
         { "@type": "Question", "name": "O que é o INSS e como é calculado?", "acceptedAnswer": { "@type": "Answer", "text": "O INSS (Instituto Nacional do Seguro Social) é o desconto obrigatório para a previdência social. Em 2026, o cálculo é progressivo por faixas: 7,5% até R$ 1.621,00; 9% de R$ 1.621,01 a R$ 2.902,84; 12% de R$ 2.902,85 a R$ 4.354,27; e 14% de R$ 4.354,28 a R$ 8.475,55 (teto)." } },
-        { "@type": "Question", "name": "O que é o IRRF e quem está isento?", "acceptedAnswer": { "@type": "Answer", "text": "O IRRF (Imposto de Renda Retido na Fonte) é descontado mensalmente sobre o salário. Em 2026, quem recebe até R$ 2.428,80 está totalmente isento. Há ainda redução progressiva do imposto para rendimentos entre R$ 2.428,81 e R$ 5.000,00 (Lei 15.270/2025)." } },
+        { "@type": "Question", "name": "O que é o IRRF e quem está isento?", "acceptedAnswer": { "@type": "Answer", "text": "O IRRF (Imposto de Renda Retido na Fonte) é descontado mensalmente sobre o salário. Em 2026, pela Lei 15.270/2025, quem tem rendimento bruto de até R$ 5.000,00 por mês não paga IRRF: um redutor cancela integralmente o imposto apurado na tabela. De R$ 5.000,01 a R$ 7.350,00 a redução é parcial e diminui conforme o salário sobe. Acima de R$ 7.350,00 vale a tabela progressiva cheia, cuja faixa isenta é de R$ 2.428,80 de base de cálculo (salário menos INSS e dependentes)." } },
         { "@type": "Question", "name": "Qual o salário mínimo em 2026?", "acceptedAnswer": { "@type": "Answer", "text": "O salário mínimo em 2026 é de R$ 1.621,00, conforme estabelecido pelo Decreto nº 12.797/2025." } },
         { "@type": "Question", "name": "Como é calculado o salário líquido?", "acceptedAnswer": { "@type": "Answer", "text": "O salário líquido é o salário bruto menos os descontos obrigatórios (INSS e IRRF) e opcionais (vale-transporte, plano de saúde, etc.). A calculadora soma todos os proventos (salário base, adicionais) e subtrai todos os descontos para chegar ao valor final." } },
-        { "@type": "Question", "name": "O que é o desconto simplificado do IR?", "acceptedAnswer": { "@type": "Answer", "text": "O desconto simplificado é uma opção automática de R$ 607,20 que substitui as deduções legais (INSS + dependentes) quando for mais vantajoso. A calculadora compara e aplica automaticamente o que for mais benéfico para o trabalhador." } }
+        { "@type": "Question", "name": "O que é o desconto simplificado do IR?", "acceptedAnswer": { "@type": "Answer", "text": "O desconto simplificado é uma opção automática de R$ 607,20 que substitui as deduções legais (INSS + dependentes) quando for mais vantajoso. A calculadora compara e aplica automaticamente o que for mais benéfico para o trabalhador." } },
+        { "@type": "Question", "name": "Horas extras geram DSR no holerite?", "acceptedAnswer": { "@type": "Answer", "text": "Sim. Quando as horas extras e o adicional noturno são habituais, eles repercutem no descanso semanal remunerado (Lei 605/1949, art. 7º, § 2º, e Súmula 172 do TST). O cálculo é: total das horas extras e do adicional noturno no mês dividido pelos dias úteis, multiplicado pelos domingos e feriados. Esse reflexo é provento tributável e entra na base do INSS e do IRRF. A calculadora aplica o DSR automaticamente e permite ajustar os dias úteis e os domingos/feriados do mês." } }
       ]}
     ]
   }
@@ -100,10 +101,10 @@
       </nav>
 
       <h1 class="calc-titulo">Calculadora de Salário Líquido 2026</h1>
-      <p class="calc-desc-page">Calcule o salário líquido completo com INSS progressivo, IRRF com redutor da Lei 15.270/2025, horas extras, adicional noturno, insalubridade, periculosidade, vale-transporte e outros descontos. Tabelas oficiais 2026.</p>
+      <p class="calc-desc-page">Calcule o salário líquido completo com INSS progressivo, IRRF com redutor da Lei 15.270/2025, horas extras e adicional noturno com reflexo no DSR, insalubridade, periculosidade, vale-transporte e outros descontos. Tabelas oficiais 2026.</p>
 
       <div class="disclaimer-box" style="margin: 16px 0">
-        Os valores calculados são <strong>estimativas</strong> baseadas nas tabelas oficiais de 2026 (INSS teto R$ 8.475,55 · IRRF isento até R$ 2.428,80 · SM R$ 1.621,00). Não substitui orientação profissional.
+        Os valores calculados são <strong>estimativas</strong> baseadas nas tabelas oficiais de 2026 (INSS teto R$ 8.475,55 · IRRF sem imposto até R$ 5.000,00 de rendimento, pela Lei 15.270/2025 · SM R$ 1.621,00). Não substitui orientação profissional.
       </div>
 
       <div class="calc-layout">
@@ -128,8 +129,8 @@
 
       <section style="margin: 32px 0">
         <h2>Como funciona o cálculo do salário líquido</h2>
-        <p>O salário líquido é o valor que o trabalhador efetivamente recebe após os descontos obrigatórios e opcionais. Para calcular, somam-se todos os proventos (salário base, horas extras, adicionais de insalubridade/periculosidade, comissões) para obter o salário bruto tributável. Sobre esse valor, aplica-se o INSS de forma progressiva por faixas e, em seguida, o IRRF sobre a base resultante após as deduções.</p>
-        <p>Em 2026, o INSS utiliza alíquotas progressivas: 7,5% na primeira faixa (até R$ 1.621,00), 9% na segunda, 12% na terceira e 14% na quarta faixa (até o teto de R$ 8.475,55). O IRRF considera a Lei 15.270/2025, que garante isenção total para rendimentos até R$ 2.428,80 e redução progressiva até R$ 5.000,00. O salário-família (R$ 67,54 por filho) é isento de INSS e IRRF para trabalhadores com remuneração de até R$ 1.980,38 em 2026.</p>
+        <p>O salário líquido é o valor que o trabalhador efetivamente recebe após os descontos obrigatórios e opcionais. Para calcular, somam-se todos os proventos (salário base, horas extras, adicional noturno, o reflexo dessas variáveis no descanso semanal remunerado, adicionais de insalubridade/periculosidade e comissões) para obter o salário bruto tributável. Sobre esse valor, aplica-se o INSS de forma progressiva por faixas e, em seguida, o IRRF sobre a base resultante após as deduções.</p>
+        <p>Em 2026, o INSS utiliza alíquotas progressivas: 7,5% na primeira faixa (até R$ 1.621,00), 9% na segunda, 12% na terceira e 14% na quarta faixa (até o teto de R$ 8.475,55). O IRRF considera a Lei 15.270/2025: rendimento bruto de até R$ 5.000,00 por mês fica sem imposto, porque um redutor cancela o valor apurado na tabela; de R$ 5.000,01 a R$ 7.350,00 o redutor é parcial (978,62 − 0,133145 × rendimento) e vai encolhendo até zerar; acima de R$ 7.350,00 vale a tabela cheia, que é isenta até R$ 2.428,80 de base de cálculo. O salário-família (R$ 67,54 por filho) é isento de INSS e IRRF para trabalhadores com remuneração de até R$ 1.980,38 em 2026.</p>
       </section>
 
       <section class="faq-section" style="margin: 32px 0">
@@ -140,7 +141,11 @@
         </details>
         <details class="faq-item">
           <summary>O que é o IRRF e quem está isento?</summary>
-          <div class="faq-answer"><p>O IRRF (Imposto de Renda Retido na Fonte) é descontado mensalmente. Em 2026, quem recebe até R$ 2.428,80 está totalmente isento. A Lei 15.270/2025 criou um redutor progressivo para rendimentos entre R$ 2.428,81 e R$ 5.000,00, tornando essa faixa parcialmente isenta.</p></div>
+          <div class="faq-answer"><p>O IRRF (Imposto de Renda Retido na Fonte) é descontado mensalmente. Em 2026, pela Lei 15.270/2025, <strong>quem tem rendimento bruto de até R$ 5.000,00 por mês não paga nada</strong>: o imposto é calculado pela tabela e depois integralmente cancelado por um redutor. Entre R$ 5.000,01 e R$ 7.350,00 o redutor é parcial — o imposto existe, mas menor — e some acima de R$ 7.350,00, quando passa a valer a tabela progressiva cheia (isenta até R$ 2.428,80 de base de cálculo, ou seja, salário menos INSS e dependentes).</p></div>
+        </details>
+        <details class="faq-item">
+          <summary>Horas extras geram DSR no holerite?</summary>
+          <div class="faq-answer"><p>Sim. Quando as horas extras e o adicional noturno são <strong>habituais</strong>, eles repercutem no <strong>descanso semanal remunerado</strong> (Lei 605/1949, art. 7º, § 2º, e Súmula 172 do TST). A conta é: total das variáveis do mês ÷ dias úteis × (domingos + feriados). Exemplo: R$ 204,60 de horas extras, 25 dias úteis e 5 domingos/feriados = R$ 40,92 de DSR. Esse reflexo é provento tributável e entra na base do INSS e do IRRF. A calculadora já aplica o DSR e deixa você ajustar os dias úteis e os domingos/feriados do mês.</p></div>
         </details>
         <details class="faq-item">
           <summary>Como funciona o desconto simplificado do IR?</summary>
