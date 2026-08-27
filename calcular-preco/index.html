@@ -2,11 +2,13 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <meta name="google-adsense-account" content="ca-pub-1417484877629527">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Calcular Preço — Calculadora de Preço para Prestadores 2026 | Jornada Brasil</title>
   <meta name="description" content="Descubra quanto cobrar pelo seu serviço sem trabalhar no prejuízo. Calculadora gratuita de orçamento e preço para prestadores autônomos, MEI e freelancers." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://jornadabrasil.com.br/calcular-preco/" />
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml" />
   <meta property="og:title" content="Calcular Preço — Calculadora de Preço para Prestadores" />
   <meta property="og:description" content="Calcule o preço mínimo, recomendado e premium do seu serviço e veja quanto você realmente ganha por dia." />
   <meta property="og:type" content="website" />
@@ -255,7 +257,23 @@
     </div>
   </header>
 
-  <div id="root"></div>
+  <section class="no-print" style="max-width:960px;margin:30px auto 16px;padding:0 20px" aria-labelledby="preco-titulo">
+    <h1 id="preco-titulo" style="margin:0;color:#0f172a;font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.15">Calcular preço de serviço</h1>
+    <p style="max-width:720px;margin:10px 0 0;color:#475569;line-height:1.65">Monte um orçamento com mão de obra, materiais, deslocamento, custos indiretos e margem. Compare três faixas de preço e gere uma proposta profissional para o cliente.</p>
+  </section>
+
+  <main id="root"></main>
+
+  <section class="no-print" style="max-width:960px;margin:36px auto;padding:0 20px;color:#334155;line-height:1.7" aria-labelledby="preco-metodo">
+    <h2 id="preco-metodo" style="font-size:1.45rem;color:#0f172a">Como o preço é calculado</h2>
+    <p>Preço não é apenas material mais uma margem. A ferramenta soma mão de obra, ajudante, deslocamento, material e demais custos do serviço. Em seguida, aplica a margem sobre o preço final, evitando o erro comum de calcular lucro apenas sobre o custo.</p>
+    <p style="padding:14px 16px;border-left:4px solid #155e75;background:#ecfeff"><strong>Preço recomendado = custo total ÷ (1 − margem desejada)</strong></p>
+    <p>Uma margem de 30% não significa multiplicar o custo por 1,30. Se o custo for R$ 700,00, o preço que deixa 30% do faturamento como margem é R$ 1.000,00: 700 ÷ 0,70. O resultado também mostra ganho por dia e cenários mínimo, recomendado e premium para você negociar com clareza.</p>
+    <h2 style="font-size:1.3rem;color:#0f172a;margin-top:28px">O que conferir antes de enviar o orçamento</h2>
+    <ul><li>quantidade, unidade, complexidade e prazo do serviço;</li><li>custos indiretos que não aparecem no material, como transporte, ferramentas e retrabalho;</li><li>impostos e taxas da sua atividade;</li><li>validade da proposta, forma de pagamento e o que não está incluído;</li><li>reserva para garantia e imprevistos, quando fizer sentido.</li></ul>
+    <p>O cálculo é uma base comercial, não uma tabela obrigatória. Mercado, especialização, risco, demanda e escopo alteram o preço. Registre as premissas no orçamento para que cliente e prestador comparem a mesma entrega.</p>
+    <p style="font-size:.85rem">Metodologia revisada em 27 de agosto de 2026. Veja a <a href="/metodologia/">metodologia geral</a>, a <a href="/politica-editorial/">política editorial</a> e o guia <a href="/blog/como-precificar-servico/">como precificar um serviço</a>.</p>
+  </section>
 
   <section class="jb-cta no-print" aria-label="Próximo passo na jornada">
     <p class="jb-cta__t"><b>Já definiu seu preço?</b> O próximo passo é o <b>Meu Lucro</b>: acompanhe se esse valor está realmente sobrando no seu bolso a cada dia de trabalho.</p>
@@ -683,7 +701,7 @@
             <header className="mb-4 flex items-center gap-3">
               <button onClick={() => setTelaNegocio(false)}
                 className="rounded-lg border border-slate-300 text-slate-600 px-3 py-1.5 text-sm hover:bg-slate-50">← Voltar</button>
-              <h1 className="text-lg font-bold leading-tight">Configurar Meu Negócio</h1>
+              <h2 className="text-lg font-bold leading-tight">Configurar Meu Negócio</h2>
             </header>
 
             <p className="text-sm text-slate-500 mb-4">
@@ -756,7 +774,7 @@
           <header className="no-print mb-5 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <div>
-                <h1 className="text-xl font-bold leading-tight">Calcular Preço</h1>
+                <h2 className="text-xl font-bold leading-tight">Calcular Preço</h2>
                 <p className="text-xs text-slate-500">Descubra o preço justo do seu serviço sem trabalhar no prejuízo.</p>
               </div>
             </div>

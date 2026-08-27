@@ -34,13 +34,13 @@ const IRRF_TETO_REDUTOR = 7350.00;
 // em 2026, que valeu os doze meses do ano. A tabela anterior (isenta até 28.467,20) é a do
 // ano-calendário 2025, que misturava quatro meses da faixa antiga de R$ 2.259,20.
 // Confere com a lei: quem tem 60.000/ano e usa o desconto simplificado de 20% apura
-// 48.000 × 22,5% − 8.105,88 = R$ 2.694,12 — o mesmo valor do redutor anual máximo (2.694,15).
+// 48.000 × 22,5% − 8.105,85 = R$ 2.694,15 — o mesmo valor do redutor anual máximo (2.694,15).
 const IRRF_ANUAL_TAB = [
   { ate: 29145.60,  aliq: 0,     deduz: 0 },
   { ate: 33919.80,  aliq: 0.075, deduz: 2185.92 },
-  { ate: 45012.60,  aliq: 0.15,  deduz: 4729.92 },
-  { ate: 55976.16,  aliq: 0.225, deduz: 8105.88 },
-  { ate: Infinity,  aliq: 0.275, deduz: 10904.76 },
+  { ate: 45012.60,  aliq: 0.15,  deduz: 4729.91 },
+  { ate: 55976.16,  aliq: 0.225, deduz: 8105.85 },
+  { ate: Infinity,  aliq: 0.275, deduz: 10904.66 },
 ];
 const IRRF_DEP_ANUAL = 2275.08;
 const IRRF_SIMPL_PCT = 0.20;

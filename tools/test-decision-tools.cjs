@@ -1,0 +1,37 @@
+const assert = require('node:assert/strict');
+global.window = {};
+require('../assets/js/engine.js');
+const tools = require('../assets/js/decision-tools.js');
+const engine = global.window.RCEngine;
+const sameJob = { gross: 5000, dependents: 0, monthlyBenefits: 1000, healthBenefit: 300, annualBonus: 5000,
+  monthlyCosts: 0, weeklyHours: 40, officeDays: 2, commuteMinutes: 90, commuteCostPerDay: 30 };
+const equal = tools.compareProposals(sameJob, sameJob, engine);
+assert.equal(equal.error, undefined);
+assert.equal(equal.annualDifference, 0);
+assert.equal(equal.winner, 'tie');
+assert.ok(Math.abs(equal.breakEvenGross - 5000) <= 0.02);
+
+const salary5000 = engine.salarioLiquido({ bruto: 5000 });
+assert.equal(salary5000.inss.valor, 501.51);
+assert.equal(salary5000.irrf.valor, 0);
+assert.equal(salary5000.liquido, 4498.49);
+const salaryAboveCeiling = engine.salarioLiquido({ bruto: 10000 });
+assert.equal(salaryAboveCeiling.inss.valor, 988.09);
+assert.equal(salaryAboveCeiling.inss.teto, true);
+assert.ok(salaryAboveCeiling.irrf.valor > 0);
+const remoteOffer = Object.assign({}, sameJob, { gross: 5400, officeDays: 0, commuteMinutes: 0, commuteCostPerDay: 0 });
+const better = tools.compareProposals(sameJob, remoteOffer, engine);
+assert.equal(better.winner, 'offer');
+assert.ok(better.annualDifference > 0);
+assert.ok(better.commuteDifferenceYear < 0);
+assert.match(better.actions[0], /R\$\s* ?\d/);
+const invalid = tools.compareProposals({ gross: 0 }, remoteOffer, engine);
+assert.match(invalid.error, /salário bruto/i);
+const dismissal = tools.dismissalGuide({ reason: 'without_cause', endDate: '2026-08-27', fgtsMode: 'withdrawal', insuranceRequest: 'first' });
+assert.equal(dismissal.title, 'Dispensa sem justa causa');
+assert.equal(dismissal.timeline[0].date, '2026-09-06');
+assert.equal(dismissal.monthsRequired, 12);
+assert.ok(dismissal.rights.some((item) => item.label.includes('40%') && item.status === 'yes'));
+const resignation = tools.dismissalGuide({ reason: 'resignation' });
+assert.ok(resignation.rights.some((item) => item.label.includes('Seguro') && item.status === 'no'));
+console.log('decision-tools: 20 verificações concluídas');

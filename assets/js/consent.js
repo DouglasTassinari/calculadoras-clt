@@ -8,7 +8,14 @@ const RC = {
   getConsent: function() {
     try {
       const raw = localStorage.getItem(RC_CONSENT_KEY);
-      return raw ? JSON.parse(raw) : null;
+      if (!raw) return null;
+      const prefs = JSON.parse(raw);
+      const oneYear = 365 * 24 * 60 * 60 * 1000;
+      if (!prefs.ts || Date.now() - prefs.ts > oneYear) {
+        localStorage.removeItem(RC_CONSENT_KEY);
+        return null;
+      }
+      return prefs;
     } catch(e) { return null; }
   },
 
