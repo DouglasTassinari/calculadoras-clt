@@ -61,6 +61,10 @@ for (const file of htmlFiles) {
   const wordCount = stripHtml(contentHtml).split(/\s+/).filter(Boolean).length;
   const hasStaticAds = /pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js/i.test(html);
   const hasAdsenseMeta = /name=["']google-adsense-account["']/i.test(html);
+  const isBlogArticle = /^\/blog\/[^/]+\/$/.test(route);
+  const hasArticleTrust = /class=["'][^"']*\barticle-trust\b[^"']*["']/i.test(html)
+    && /data-article-sources/i.test(html)
+    && /article-trust\.js/i.test(html);
 
   if (!title) errors.push(`${route}: title ausente`);
   if (indexable && !description) errors.push(`${route}: description ausente`);
@@ -70,6 +74,8 @@ for (const file of htmlFiles) {
   if (indexable && !hasAdsenseMeta) warnings.push(`${route}: meta de verificação AdSense ausente`);
   if (hasStaticAds) warnings.push(`${route}: script AdSense estático carrega antes do consentimento`);
   if (/em breve|coming soon|category-placeholder/i.test(stripHtml(html))) warnings.push(`${route}: texto de placeholder ou 'em breve'`);
+
+  if (isBlogArticle && !hasArticleTrust) errors.push(route + ': bloco de fontes e revisão editorial ausente');
 
   for (const block of html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
     try { JSON.parse(block[1]); }

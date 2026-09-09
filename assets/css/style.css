@@ -649,6 +649,22 @@ details.memoria[open] summary .chev { transform: rotate(180deg); }
 .article-content p { margin-bottom: 1rem; line-height: 1.7; }
 .article-content ul, .article-content ol { margin: .5rem 0 1rem 1.5rem; }
 .article-content li { margin-bottom: .4rem; line-height: 1.6; }
+.article-trust {
+  margin-top: 2.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+.article-trust__meta { margin: 0; color: var(--text-2); font-size: .9rem; }
+.article-trust__sources { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.article-trust__sources h2 { margin: 0 0 .5rem; font-size: 1.05rem; font-weight: 700; color: var(--text); }
+.article-trust__sources p { margin: 0 0 .65rem; color: var(--text-2); font-size: .88rem; line-height: 1.55; }
+.article-trust__sources ul { margin: 0; padding-left: 1.2rem; }
+.article-trust__sources li { margin: .35rem 0; font-size: .88rem; }
+.article-trust__note { margin-top: .85rem !important; font-size: .82rem !important; }
+@media (max-width: 600px) { .article-trust { padding: 1rem; } }
 .sidebar { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 88px; }
 
 /* ---- FAQ ---- */
